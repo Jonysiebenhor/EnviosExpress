@@ -1,0 +1,41 @@
+﻿using System;
+using System.Collections;
+using System.Collections.Specialized;
+using System.Configuration;
+using System.Data;
+using System.Linq;
+using System.Web;
+using System.Web.DynamicData;
+using System.Web.Security;
+using System.Web.UI;
+using System.Web.UI.HtmlControls;
+using System.Web.UI.WebControls;
+using System.Web.UI.WebControls.WebParts;
+using System.Xml.Linq;
+
+namespace EnviosExpress.DynamicData.FieldTemplates
+{
+    public partial class CuwScannerCode : System.Web.DynamicData.FieldTemplateUserControl
+    {
+        public override Control DataControl
+        {
+            get
+            {
+                return Literal1;
+            }
+        }
+        protected void Page_Load(object sender, EventArgs e)
+        {
+            if (!IsPostBack)
+            {
+                gd1.DataBind();
+            }
+            
+        }
+
+        protected void Button1_Click(object sender, EventArgs e)
+        {
+            Response.Redirect("Prueba2.aspx");
+        }
+    }
+}
