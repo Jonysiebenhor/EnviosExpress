@@ -312,9 +312,6 @@
         
             //"gd1_dpi_" + (i - 1)
         document.getElementById("<%=gd1.ClientID%> tr:has(td)").value = `${decodedText}`, decodedResult
-
-        
-
         /*var valores = "";
 
         // Obtenemos todos los valores contenidos en los <td> de la fila seleccionada
@@ -355,5 +352,4 @@
 
 
     }
-
 </script>
