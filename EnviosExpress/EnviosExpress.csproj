@@ -379,6 +379,7 @@
     <Content Include="css\Central.css" />
     <Content Include="DynamicData\FieldTemplates\CuwScannerCode.ascx" />
     <Content Include="DynamicData\FieldTemplates\CuwScannerCode_Edit.ascx" />
+    <Content Include="DynamicData\FieldTemplates\ScannerHandler.aspx" />
     <Content Include="fontawesome\css\font-awesome.css" />
     <Content Include="fontawesome\css\font-awesome.min.css" />
     <Content Include="fontawesome\fonts\fontawesome-webfont.svg" />
@@ -490,6 +491,10 @@
     </Compile>
     <Compile Include="DynamicData\FieldTemplates\CuwScannerCode_Edit.ascx.designer.cs">
       <DependentUpon>CuwScannerCode_Edit.ascx</DependentUpon>
+    </Compile>
+    <Compile Include="DynamicData\FieldTemplates\ScannerHandler.aspx.cs">
+      <DependentUpon>ScannerHandler.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
     </Compile>
     <Compile Include="GenerarGuiaMasiva.aspx.cs">
       <DependentUpon>GenerarGuiaMasiva.aspx</DependentUpon>

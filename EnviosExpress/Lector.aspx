@@ -6,6 +6,7 @@
 <!DOCTYPE html>
 
 <html xmlns="http://www.w3.org/1999/xhtml">
+
 <head runat="server">
     <meta name="viewport" content="width=device-width, initial-scale=1" /> 
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
@@ -26,8 +27,12 @@
             box-shadow: inset 0px 0px 22px 1px rgba(0,0,0,0.45);
         }
     </style>
+    <!-- SweetAlert2 -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
 
 </head>
+
 <body>
     <form id="form1"  method="get" action="Prueba2.aspx" runat="server">
 

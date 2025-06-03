@@ -12,7 +12,18 @@ namespace EnviosExpress
     {
         protected void Page_Load(object sender, EventArgs e)
         {
-            string rawId = Request.QueryString["CuwScannerCode%24resultado"].ToString();
+            
+            string rawId = Request.QueryString["CuwScannerCode$resultado"];
+
+            if (!string.IsNullOrEmpty(rawId))
+            {
+                TextBox1.Text = rawId;
+            }
+            else
+            {
+                TextBox1.Text = "No se recibió código escaneado.";
+            }
+
 
             TextBox1.Text = rawId;
         }

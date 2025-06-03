@@ -51,13 +51,13 @@ namespace EnviosExpress.DynamicData.FieldTemplates
         protected global::System.Web.UI.WebControls.CheckBox chkOnOff;
 
         /// <summary>
-        /// Control resultado.
+        /// Control txtResultado.
         /// </summary>
         /// <remarks>
         /// Campo generado automáticamente.
         /// Para modificarlo, mueva la declaración del campo del archivo del diseñador al archivo de código subyacente.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.TextBox resultado;
+        protected global::System.Web.UI.WebControls.TextBox txtResultado;
 
         /// <summary>
         /// Control btnDevolver.
