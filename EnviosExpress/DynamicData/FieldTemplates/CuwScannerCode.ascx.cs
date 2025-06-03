@@ -35,7 +35,7 @@ namespace EnviosExpress.DynamicData.FieldTemplates
 
         protected void Button1_Click(object sender, EventArgs e)
         {
-            Response.Redirect("Prueba2.aspx");
+            string x="1";
         }
     }
 }

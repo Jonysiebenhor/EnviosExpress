@@ -294,6 +294,25 @@
 
     // Muestra el código escaneado en la tabla de abajo
     function PintarTabla(decodedText, decodedResult) {
+        document.getElementById("<%=resultado.ClientID%>").value = `${decodedText}`, decodedResult
+        
+        id = id + 1
+       // i = row.parentNode.parentNode.rowIndex
+        templateCarrito.querySelector('th').textContent = id
+        templateCarrito.querySelectorAll('td')[0].textContent = `${decodedText}`, decodedResult
+        const clone = templateCarrito.cloneNode(true)
+        fragment.appendChild(clone)
+        items.appendChild(fragment)
+        pintarFooter()
+        
+            //"gd1_dpi_" + (i - 1)
+        document.getElementById("<%=gd1.ClientID%> tr:has(td)").value = `${decodedText}`, decodedResult
+        /*var valores = "";
+
+        // Obtenemos todos los valores contenidos en los <td> de la fila seleccionada
+        $(this).parents("tr").find("td").each(function () {
+            valores += $(this).html() + "\n";
+        });
         document.getElementById("<%=resultado.ClientID%>").value = `${decodedText}`;
 
         id++;
@@ -331,4 +350,3 @@
     }
 
 </script>
-
