@@ -131,7 +131,6 @@
 
     
     var html5QrCode;
-    const codigosEscaneados = new Set(); // <- Lista para registrar códigos escaneados 1 sola vez
     let lblmensaje = document.getElementById('<%=lblMessage.ClientID %>');
 
     // Variables para manejar la tabla de resultados
@@ -141,6 +140,9 @@
     const items = document.getElementById('items')
     const footer = document.getElementById('footer')
     const templateFooter = document.getElementById('template-footer').content
+    const codigosEscaneados = new Set(); // ya existe
+    const colaCodigosEscaneados = [];    // <-- nueva cola
+
 
     // Reproduce sonido al escanear exitosamente
     function sonido() {
@@ -264,6 +266,8 @@
                     }
 
                     codigosEscaneados.add(decodedText); // Guardar como escaneado
+                    colaCodigosEscaneados.push(decodedText); // Agregar a la cola
+
                     sonido(); // Reproducir sonido
 
                     
@@ -414,19 +418,23 @@
         // Limpiar los códigos escaneados
         codigosEscaneados.clear();
 
+        // Limpiar la cola
+        colaCodigosEscaneados.length = 0;
+
         // Limpiar contenido de la tabla (tbody)
         items.innerHTML = '';
 
         // Reiniciar contador si lo usas para indexar filas
         id = 0;
 
-        // Opcional: también puedes limpiar el campo de resultado
+        // También puedes limpiar el campo de resultado
         document.getElementById("<%=txtResultado.ClientID%>").value = "";
 
         // Ocultar mensajes de advertencia si estaban activos
         lblmensaje.setAttribute('style', 'display:none !important');
         lblmensaje.innerHTML = "";
     }
+
 
 
     // Esta función se llama cuando haces clic en "Vaciar tabla"
@@ -439,6 +447,9 @@
         // Limpiar códigos escaneados
         codigosEscaneados.clear();
 
+        // Limpiar la cola
+        colaCodigosEscaneados.length = 0;
+
         // Reiniciar contador
         id = 0;
 
@@ -449,15 +460,16 @@
         lblmensaje.setAttribute('style', 'display:none !important');
         lblmensaje.innerHTML = "";
 
-        // También puedes volver a pintar el footer limpio si deseas
+        // Volver a pintar el footer limpio si deseas
         footer.innerHTML = '';
 
         // Opcional: mensaje visual
         Swal.fire("Tabla limpiada", "Ahora puedes volver a escanear.", "success");
 
         document.getElementById("txtResultado").value = "";
-
     }
+
+
 
 
     function hola() {
@@ -468,9 +480,11 @@
         });
         console.log("Hola mundo");
     }
+    console.log("Contenido de la cola:", colaCodigosEscaneados);
 
 
-
+    //Contador para ver cuántos registros se han escaneado
+    
 
 
 </script>
