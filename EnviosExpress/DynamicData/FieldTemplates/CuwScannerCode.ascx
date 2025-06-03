@@ -113,64 +113,60 @@
 </div>
 
 
+<!-- Aquí empieza la función del JS -->
 <script type="text/javascript">
 
+    
     var html5QrCode;
-    let lblmensaje = document.getElementById('<%=lblMessage.ClientID %>')
+    const codigosEscaneados = new Set(); // <- Lista para registrar códigos escaneados 1 sola vez
+    let lblmensaje = document.getElementById('<%=lblMessage.ClientID %>');
 
-    //-----------------
+    // Variables para manejar la tabla de resultados
     let id = 0
     const templateCarrito = document.getElementById('template-items').content
     const fragment = document.createDocumentFragment()
     const items = document.getElementById('items')
     const footer = document.getElementById('footer')
     const templateFooter = document.getElementById('template-footer').content
-    //------------------
 
-
-
+    // Reproduce sonido al escanear exitosamente
     function sonido() {
         const audio = new Audio("../Multimedia/Audio/beep.mp3");
         audio.play();
     }
 
+    // Función para abrir el modal del scanner
     async function AbrirModalScanner() {
-
-        document.getElementById("<%=resultado.ClientID%>").value = ""
-
+        document.getElementById("<%=resultado.ClientID%>").value = ""; // Limpiar campo resultado
         lblmensaje.innerHTML = "";
         lblmensaje.setAttribute('style', 'display:none !important');
 
-        $('#CuwScannerCode_ModalScannerCode').modal({ backdrop: 'static', keyboard: false })
+        // Mostrar modal
+        $('#CuwScannerCode_ModalScannerCode').modal({ backdrop: 'static', keyboard: false });
         $('#CuwScannerCode_ModalScannerCode').modal('show');
 
-        //listar camaras
-        ListarCamaras("Camaras")
-        //buscar camara apropiada
+        ListarCamaras("Camaras");
+
+        // Obtener cámara
         const CamaraId = await GetIdCamaraApropiada();
-        //Abrir Camara 
         if (CamaraId.length > 0) {
             $("#Camaras option[value='" + CamaraId + "']").attr("selected", true);
-            AbrirCamara(CamaraId)
+            AbrirCamara(CamaraId); // Iniciar cámara
         }
-
     }
 
+    // Al cerrar el modal: detener cámara, limpiar códigos y campo de texto
     $('#CuwScannerCode_ModalScannerCode').on('hidden.bs.modal', function (e) {
-        StopCamara();
-    })
+        StopCamara(); // Detener cámara
+        codigosEscaneados.clear(); // Limpiar códigos escaneados
+        document.getElementById("<%=resultado.ClientID%>").value = ""; // Limpiar campo de resultado
+    });
 
-
-
+    // Lista todas las cámaras disponibles
     function ListarCamaras(domElement) {
-
-
         html5QrCode = new Html5Qrcode("reader");
         Html5Qrcode.getCameras().then(devices => {
-
-
             var select = document.getElementsByName(domElement)[0];
-
             $("#Camaras").empty();
 
             for (device of devices) {
@@ -182,65 +178,54 @@
                 }
             }
         }).catch(err => {
-            //alert(err)
             lblmensaje.setAttribute('style', 'display:block !important');
             lblmensaje.innerHTML = err;
         });
-
     }
 
+    //Detecta la cámara apropiada
     function GetIdCamaraApropiada() {
-
         return new Promise(resolve => {
             html5QrCode = new Html5Qrcode("reader");
             Html5Qrcode.getCameras().then(devices => {
                 let CamaraEncontrada;
 
                 if (devices.length === 1) {
-
-                    CamaraEncontrada = devices[0].id
+                    CamaraEncontrada = devices[0].id;
                 } else {
                     for (device of devices) {
-                        if (device.label) {
-                            if (device.label.includes("back")) {
-                                CamaraEncontrada = device.id
-                                break;
-                            }
+                        if (device.label && device.label.includes("back")) {
+                            CamaraEncontrada = device.id;
+                            break;
                         }
                     }
                     if (CamaraEncontrada === undefined) {
-                        //resolve({ facingMode: "environment" })
-                        CamaraEncontrada = devices[0].id
+                        CamaraEncontrada = devices[0].id;
                     }
                 }
-                resolve(CamaraEncontrada)
-
-
-            }).catch(err => {
-                //alert(err)
-            });
+                resolve(CamaraEncontrada);
+            }).catch(err => {});
         });
-
     }
 
+    // Controla el botón para iniciar o detener la cámara
     function EstadoBoton(estado) {
         var btn = document.getElementById("Interruptor");
-        var i = btn.querySelector("i")
-        var combo = document.getElementById("Camaras")
+        var i = btn.querySelector("i");
+        var combo = document.getElementById("Camaras");
+
         if (estado === 0) {
             btn.setAttribute("onclick", "AbrirCamara()");
-            i.setAttribute("class", "fa fa-play-circle")
-            combo.disabled = false
-
+            i.setAttribute("class", "fa fa-play-circle");
+            combo.disabled = false;
         } else {
             btn.setAttribute("onclick", "StopCamara()");
-            i.setAttribute("class", "fa fa-stop-circle")
-            combo.disabled = true
-
+            i.setAttribute("class", "fa fa-stop-circle");
+            combo.disabled = true;
         }
     }
 
-
+    // Inicia la cámara y comienza a escanear
     function AbrirCamara(CamaraId) {
         if (CamaraId === undefined) {
             var e = document.getElementById("Camaras");
@@ -248,112 +233,102 @@
         }
 
         html5QrCode = new Html5Qrcode("reader");
-        EstadoBoton(1)
+        EstadoBoton(1); // Cambiar a estado "detener"
+
         try {
             html5QrCode.start(
                 CamaraId,
-                {
-                    fps: 10,
-                    qrbox: 250
-                },
+                { fps: 10, qrbox: 250 }, // Configuración de escaneo
                 (decodedText, decodedResult) => {
-                    //Things you want to do when you match a QR Code
-                    sonido();
+                    // Verificar si el código ya fue escaneado
+                    if (codigosEscaneados.has(decodedText)) {
+                        lblmensaje.setAttribute('style', 'display:block !important');
+                        lblmensaje.innerHTML = `⚠️ El código <strong>${decodedText}</strong> ya ha sido escaneado.`;
+
+                        setTimeout(() => {
+                            lblmensaje.setAttribute('style', 'display:none !important');
+                            lblmensaje.innerHTML = "";
+                        }, 3000);
+                        return;
+                    }
+
+                    codigosEscaneados.add(decodedText); // Guardar como escaneado
+                    sonido(); // Reproducir sonido
+
+                    
                     if ($('#CuwScannerCode_chkOnOff').prop('checked')) {
-                        let lectura = `${decodedText}`, decodedResult;
+                        let lectura = `${decodedText}`;
                         document.getElementById("<%=resultado.ClientID%>").value = lectura;
+
+                     
                         if (lectura.length === 11 && !lectura.includes(".")) {
                             html5QrCode.stop();
                             document.getElementById("CuwScannerCode_btnDevolver").click();
-                        }        
+                        }
                         return;
-
                     } else {
-                        PintarTabla(decodedText, decodedResult)
+                        PintarTabla(decodedText, decodedResult); // Agregar a tabla
                     }
-
                 },
                 errorMessage => {
-                    // parse error, ignore it.
-                })
-                .catch(err => {
-                    // Start failed, handle it.
-                });
+                    // Ignorar errores de escaneo en tiempo real
+                }
+            ).catch(err => {
+                lblmensaje.setAttribute('style', 'display:block !important');
+                lblmensaje.innerHTML = err;
+            });
 
         } catch (error) {
             lblmensaje.setAttribute('style', 'display:block !important');
             lblmensaje.innerHTML = error;
         }
-
-
     }
 
+    // Detiene el escaneo y la cámara
     function StopCamara() {
         try {
             html5QrCode.stop();
-            EstadoBoton(0)
-        } catch (error) {
-            //alert(error)
-        }
-
+            EstadoBoton(0); // Cambiar de estado la cámara
+        } catch (error) {}
     }
 
+    // Muestra el código escaneado en la tabla de abajo
     function PintarTabla(decodedText, decodedResult) {
-        document.getElementById("<%=resultado.ClientID%>").value = `${decodedText}`, decodedResult
-        
-        id = id + 1
-       // i = row.parentNode.parentNode.rowIndex
-        templateCarrito.querySelector('th').textContent = id
-        templateCarrito.querySelectorAll('td')[0].textContent = `${decodedText}`, decodedResult
-        const clone = templateCarrito.cloneNode(true)
-        fragment.appendChild(clone)
-        items.appendChild(fragment)
-        pintarFooter()
-        
-            //"gd1_dpi_" + (i - 1)
-        document.getElementById("<%=gd1.ClientID%> tr:has(td)").value = `${decodedText}`, decodedResult
+        document.getElementById("<%=resultado.ClientID%>").value = `${decodedText}`;
 
-        
-
-        /*var valores = "";
-
-        // Obtenemos todos los valores contenidos en los <td> de la fila seleccionada
-        $(this).parents("tr").find("td").each(function () {
-            valores += $(this).html() + "\n";
-        });
-
-        alert(valores);*/
+        id++;
+        templateCarrito.querySelector('th').textContent = id;
+        templateCarrito.querySelectorAll('td')[0].textContent = `${decodedText}`;
+        const clone = templateCarrito.cloneNode(true);
+        fragment.appendChild(clone);
+        items.appendChild(fragment);
+        pintarFooter();
     }
 
+    // Actualiza el pie de tabla con total y botón de vaciar
     const pintarFooter = () => {
-        footer.innerHTML = ''
-
+        footer.innerHTML = '';
         if (id === 0) {
-            footer.innerHTML = `
-        <th scope="row"></th>
-        `
-            return
+            footer.innerHTML = `<th scope="row"></th>`;
+            return;
         }
 
-        // sumar cantidad 
-        const nCantidad = id
+        const nCantidad = id;
+        templateFooter.querySelector('th').textContent = `Total: ` + nCantidad.toString();
 
-        templateFooter.querySelector('th').textContent = `Total: ` + nCantidad.toString()
+        const clone = templateFooter.cloneNode(true);
+        fragment.appendChild(clone);
+        footer.appendChild(fragment);
 
-        const clone = templateFooter.cloneNode(true)
-        fragment.appendChild(clone)
-
-        footer.appendChild(fragment)
-
+        // Botón para vaciar la tabla
         const boton = document.querySelector('#vaciar-items')
         boton.addEventListener('click', () => {
             id = 0
             items.innerHTML = ''
-
+            codigosEscaneados.clear(); // También limpiar lista al vaciar
             pintarFooter()
         })
-
-
     }
 
 </script>
+

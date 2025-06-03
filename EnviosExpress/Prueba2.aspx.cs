@@ -7,6 +7,7 @@ using System.Web.UI.WebControls;
 
 namespace EnviosExpress
 {
+    //Backend que guarda el resultado del escaneo
     public partial class Prueba2 : System.Web.UI.Page
     {
         protected void Page_Load(object sender, EventArgs e)
