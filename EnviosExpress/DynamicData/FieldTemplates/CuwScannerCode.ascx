@@ -285,7 +285,11 @@
                     }
 
                     codigosEscaneados.add(decodedText); // Guardar como escaneado
-                    colaCodigosEscaneados.push(decodedText); // Agregar a la cola
+                   colaCodigosEscaneados.push({
+    Codigo: decodedText,
+    Fecha: new Date().toISOString()
+});
+ // Agregar a la cola
 
                     sonido(); // Reproducir sonido
 
@@ -468,7 +472,7 @@
         if (colaCodigosEscaneados.length === 0) {
 
             Swal.fire({
-                icon: "Error",
+                icon: "error",
                 title: "Ha ocurrido un error",
                 text: "No ha ingresado ningún valor",
                 footer: 'Ingrese por lo menos 1 registro para poder enviarlo'
@@ -500,7 +504,7 @@
             .catch(error => {
                 console.error("❌ Error al enviar datos:", error);
                 Swal.fire({
-                    icon: "¡ERROR!",
+                    icon: "error",
                     title: "Ha ocurrido un error",
                     text: "No se pudieron enviar los datos",
                     footer: 'Inténtelo nuevamente.'

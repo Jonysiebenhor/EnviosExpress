@@ -5,6 +5,7 @@ using System.Web.Script.Services;
 using System.Web.Services;
 using System.Web.Script.Serialization;
 using System.Data;
+using Newtonsoft.Json;
 
 namespace EnviosExpress
 {
@@ -43,19 +44,27 @@ namespace EnviosExpress
 
         //Código para convertir la cola en un data table
         [WebMethod]
-        public static string EnviarTodosLosCodigos(List<string> codigos)
+        public static string EnviarTodosLosCodigos(List<CodigoQR> codigos)
         {
-            // Simular la conversión a DataTable
-            DataTable tabla = new DataTable();
-            tabla.Columns.Add("Codigo");
+            // Aquí convierte el JSON obtenido en el JS en un Data Table.
+            DataTable dt = new DataTable();
+            dt.Columns.Add("Codigo", typeof(string));
+            dt.Columns.Add("Fecha", typeof(DateTime));
 
-            foreach (string codigo in codigos)
+            foreach (var item in codigos)
             {
-                tabla.Rows.Add(codigo);
+                dt.Rows.Add(item.Codigo, item.Fecha);
             }
 
-            // Aquí podrías guardar en base de datos, procesar, etc.
-            return $"✅ Se recibieron {tabla.Rows.Count} códigos correctamente.";
+            // Aquí se puede guardar el DataTable en la base de datos o hacer lo necesario
+            // De momento, solo devolvemos el número de registros como prueba
+            return $"Se recibieron {dt.Rows.Count} registros.";
+        }
+
+        public class CodigoQR
+        {
+            public string Codigo { get; set; }
+            public DateTime Fecha { get; set; }
         }
 
 
