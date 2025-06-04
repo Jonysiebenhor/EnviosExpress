@@ -1,7 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Web;
+using System.Web.Script.Services;
 using System.Web.Services;
+using System.Web.Script.Serialization;
+using System.Data;
 
 namespace EnviosExpress
 {
@@ -36,6 +39,25 @@ namespace EnviosExpress
         {
             HttpContext.Current.Session["CodigosEscaneados"] = null;
         }
+
+
+        //Código para convertir la cola en un data table
+        [WebMethod]
+        public static string EnviarTodosLosCodigos(List<string> codigos)
+        {
+            // Simular la conversión a DataTable
+            DataTable tabla = new DataTable();
+            tabla.Columns.Add("Codigo");
+
+            foreach (string codigo in codigos)
+            {
+                tabla.Rows.Add(codigo);
+            }
+
+            // Aquí podrías guardar en base de datos, procesar, etc.
+            return $"✅ Se recibieron {tabla.Rows.Count} códigos correctamente.";
+        }
+
 
 
     }

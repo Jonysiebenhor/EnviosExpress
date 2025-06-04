@@ -18,6 +18,8 @@
     <script src="js/jquery-3.3.1.min.js"></script>
     <link rel="stylesheet" href="bootstrap/css/bootstrap.min.css" />
     <script type="text/javascript" src="bootstrap/js/bootstrap.min.js"></script>
+        <!-- SweetAlert2 -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <link href="css/Central.css" rel="stylesheet" />
     <style>
@@ -27,8 +29,6 @@
             box-shadow: inset 0px 0px 22px 1px rgba(0,0,0,0.45);
         }
     </style>
-    <!-- SweetAlert2 -->
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 
 </head>
