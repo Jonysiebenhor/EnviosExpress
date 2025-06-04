@@ -1272,5 +1272,26 @@ namespace EnviosExpress
             return dt;
         }
 
+        public DataTable recolectadoconescanner(String guia, String dpi)
+        {
+            String query = "INSERT INTO estadopaquete" +
+                        "(" +
+                        "idpaquete," +
+                        "fechahora," +
+                        "idusuariomns," +
+                        "estado)" +
+                        "VALUES" +
+                        "('" + guia + "'," +
+                        "GETDATE()," +
+                        "'" + dpi + "' ," +
+                        "'Recolectado' )";
+
+            SqlCommand cmd = new SqlCommand(query, conexion);
+            SqlDataAdapter returnVal = new SqlDataAdapter(query, conexion);
+            DataTable dt = new DataTable();
+            returnVal.Fill(dt);
+            return dt;
+        }
+
     }
 }

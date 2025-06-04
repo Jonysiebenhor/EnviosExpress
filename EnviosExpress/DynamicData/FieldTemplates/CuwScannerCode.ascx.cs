@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Configuration;
 using System.Data;
+using System.Data.SqlClient;
 using System.Linq;
 using System.Web;
 using System.Web.DynamicData;
@@ -19,7 +20,7 @@ namespace EnviosExpress.DynamicData.FieldTemplates
     public partial class CuwScannerCode : System.Web.DynamicData.FieldTemplateUserControl, IPostBackEventHandler
     {
         public override Control DataControl => Literal1;
-
+        Conectar conectado = new Conectar();
         protected override void OnInit(EventArgs e)
         {
             base.OnInit(e);
@@ -89,6 +90,49 @@ namespace EnviosExpress.DynamicData.FieldTemplates
             return codigos ?? new List<string>();
         }
 
+
+
+        DataTable table = new DataTable();
+
+        //int resultado = cargarEnSQL(table);
+
+        public int cargarEnSQL(DataTable tabla)//mandar los datos al proceso almacenado para que se guarden en la Base de Datos
+        {
+            int resultado = 0;
+            //int idpaquete;
+            try
+            {
+                //NOS CONECTAMOS CON LA BASE DE DATOS
+                using (SqlConnection conn = new SqlConnection("workstation id=EnviosExpress.mssql.somee.com;packet size=4096;user id=EnviosExpress;pwd=Envios3228@;data source=EnviosExpress.mssql.somee.com;persist security info=False;initial catalog=EnviosExpress;TrustServerCertificate=True"))
+                //using (SqlConnection conn = new SqlConnection("Data Source=DESKTOP-KNTJ3BG\\SQLEXPRESS;DATABASE=EnviosExpress;Integrated security=true"))
+                {
+                    SqlCommand cmd = new SqlCommand("usp_cargarInformacionInsertEscaner", conn);
+                    cmd.Parameters.Add("EstructuraCargaInsertEscaner", SqlDbType.Structured).Value = tabla;
+                    cmd.Parameters.Add("Resultado", SqlDbType.Int).Direction = ParameterDirection.Output;
+                    // cmd.Parameters.Add("idpaquete", SqlDbType.Int).Direction = ParameterDirection.Output;
+                    cmd.CommandType = CommandType.StoredProcedure;
+
+                    conn.Open();
+                    cmd.ExecuteNonQuery();
+                    // idpaquete = Convert.ToInt32(cmd.Parameters["idpaquete"].Value);
+                    resultado = Convert.ToInt32(cmd.Parameters["Resultado"].Value);
+                    conectado.conectar();
+
+                    //String idpaquete1= Convert.ToString(idpaquete);
+                    //GridView3.DataSource = conectado.ultim(idpaquete1);//obtener datos de la guia
+                    //GridView3.DataBind();
+                }
+            }
+
+            catch (Exception ex)
+            {
+
+                string mensaje = ex.Message.ToString();
+                resultado = 0;
+            }
+
+            return resultado;
+        }
 
 
     }
