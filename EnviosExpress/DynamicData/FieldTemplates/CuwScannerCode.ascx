@@ -2,9 +2,18 @@
 
 <asp:Literal runat="server" ID="Literal1" Text="<%# FieldValueString %>" />
 
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 <script src="https://unpkg.com/html5-qrcode"></script>
 <link rel="stylesheet" href="https://cdn.datatables.net/2.1.8/css/dataTables.dataTables.css" />
+<!-- jQuery -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+<!-- Bootstrap 4 (CSS y JS necesarios para modales) -->
+<link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet" />
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.bundle.min.js"></script>
+
+
 
 <!--Código temporal-->
 <script type="text/javascript">
@@ -65,41 +74,44 @@
 
                 <asp:Label ID="lblMessage" runat="server" class="alert alert-danger d-block" />
 
+                
+                                <!--Para mostrar los códigos escaneados:-->
+               <div class="text-right mb-2">
+  <h2><span class="badge badge-primary">Códigos escaneados: <span id="contadorCodigos">0</span></span></h2>
+</div>
+
+                <!--Tabla-->
                 <table class="table" id="tablaQr">
                    <thead>
     <tr>
         <th scope="col">#</th>
         <th scope="col">Código</th>
-        <th scope="col">Formato</th>
         <th scope="col">Fecha y Hora</th>
     </tr>
 </thead>
 
-                    </thead>
-                    <tbody id="items">
-                        <template id="template-items">
-                            <tr>
-                                <th scope="row">0</th>
-                                <td ><input name="entrada[0]">
-                                </td>
-                            </tr>
-                        </template>
-                    </tbody>
-                    <template id="template-footer">
+                   <tbody id="items">
+</tbody>
+
+<!-- Mueve el template aquí afuera -->
+<template id="template-items">
+    <tr>
+        <th scope="row">0</th>
+        <td><input name="entrada[0]"></td>
+    </tr>
+</template>
+
+
+<tfoot>
+    <tr id="footer"></tr>
+</tfoot>
+<template id="template-footer-content">
     <th scope="row">Total</th>
     <td>
-        
-        <button class="btn btn-danger btn-sm" id="llenar-items" type="button">
-        llenar
-    </button>
+        <button class="btn btn-danger btn-sm" id="vaciar-items" type="button">Vaciar</button>
         <asp:Button ID="Button1" runat="server" Text="Button" OnClick="Button1_Click" />
     </td>
 </template>
-                    <tfoot>
-                        <tr id="footer">
-                            
-                        </tr>
-                    </tfoot>
                 </table>
                 <asp:TextBox ID="TextBox1" runat="server"></asp:TextBox>
                 <asp:GridView ID="gd1" runat="server">
@@ -118,7 +130,7 @@
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-danger" onclick="limpiarTablaYMemoria()">Vaciar tabla</button>
-                <button type="button" class="btn btn-success" onclick="hola()">Enviar datos</button>
+                <button type="button" id="btnEnviarDatos" runat="server" class="btn btn-success" onclick="hola()">Enviar datos</button>
                  <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
             </div>
         </div>
@@ -131,7 +143,6 @@
 
     
     var html5QrCode;
-    const codigosEscaneados = new Set(); // <- Lista para registrar códigos escaneados 1 sola vez
     let lblmensaje = document.getElementById('<%=lblMessage.ClientID %>');
 
     // Variables para manejar la tabla de resultados
@@ -140,7 +151,10 @@
     const fragment = document.createDocumentFragment()
     const items = document.getElementById('items')
     const footer = document.getElementById('footer')
-    const templateFooter = document.getElementById('template-footer').content
+    const templateFooter = document.getElementById('template-footer-content').content;
+    const codigosEscaneados = new Set(); // ya existe
+    const colaCodigosEscaneados = [];    // <-- nueva cola
+
 
     // Reproduce sonido al escanear exitosamente
     function sonido() {
@@ -150,6 +164,13 @@
 
     // Función para abrir el modal del scanner
     async function AbrirModalScanner() {
+
+        // Reiniciar variables al abrir modal
+        colaCodigosEscaneados.length = 0;
+        codigosEscaneados.clear();
+        document.getElementById("items").innerHTML = "";
+        id = 0;
+
         document.getElementById("<%=txtResultado.ClientID%>").value = ""; // Limpiar campo resultado
         lblmensaje.innerHTML = "";
         lblmensaje.setAttribute('style', 'display:none !important');
@@ -264,24 +285,31 @@
                     }
 
                     codigosEscaneados.add(decodedText); // Guardar como escaneado
+                   colaCodigosEscaneados.push({
+    Codigo: decodedText,
+    Fecha: new Date().toISOString()
+});
+ // Agregar a la cola
+
                     sonido(); // Reproducir sonido
 
-                    
-                    if ($('#CuwScannerCode_chkOnOff').prop('checked')) {
+                    // Mostrar siempre el código en la tabla y en el contador
+                    PintarTabla(decodedText, decodedResult);
+
+                    // Lógica para enviar o no al backend
+                    if (!$('#CuwScannerCode_chkOnOff').prop('checked')) {
+                        EnviarCodigoAlServidor(decodedText);
+                    } else {
                         let lectura = `${decodedText}`;
                         document.getElementById("<%=txtResultado.ClientID%>").value = lectura;
 
-                     
                         if (lectura.length === 11 && !lectura.includes(".")) {
                             html5QrCode.stop();
                             document.getElementById("CuwScannerCode_btnDevolver").click();
                         }
-                        return;
-                    } else {
-                        EnviarCodigoAlServidor(decodedText); // Enviar al backend
-                      
                     }
-                    PintarTabla(decodedText, decodedResult); //seguir mostrando en tabla
+
+                  
                 },
                 errorMessage => {
                     // Ignorar errores de escaneo en tiempo real
@@ -306,9 +334,7 @@
     }
 
     // Muestra el código escaneado en la tabla de abajo
-    function PintarTabla(decodedText, decodedResult) {
-        console.log("Llamando a PintarTabla con:", decodedText);
-
+    function PintarTabla(decodedText) {
         const tbody = document.getElementById("items");
         const row = document.createElement("tr");
 
@@ -319,23 +345,27 @@
         const cellCode = document.createElement("td");
         cellCode.textContent = decodedText;
 
-        const cellFormat = document.createElement("td");
-        cellFormat.textContent = decodedResult.result.format.formatName;
-
         const cellTimestamp = document.createElement("td");
         cellTimestamp.textContent = new Date().toLocaleString();
 
         row.appendChild(cellIndex);
         row.appendChild(cellCode);
-        row.appendChild(cellFormat);
         row.appendChild(cellTimestamp);
-
         tbody.appendChild(row);
 
-        // ✅ Mostrar resultado en el TextBox ASP.NET
-        document.getElementById('<%= txtResultado.ClientID %>').value = decodedText;
-    }
+        // ✅ Actualiza el TextBox
+        document.getElementById('<%=txtResultado.ClientID %>').value = decodedText;
 
+        // ✅ Actualiza el contador visual
+        document.getElementById("contadorCodigos").innerText = tbody.rows.length;
+
+        // ✅ Recalcula footer
+        pintarFooter();
+
+        console.log("✅ Fila añadida:", decodedText);
+        console.log("Total filas:", document.querySelectorAll("#items tr").length);
+
+    }
 
 
 
@@ -364,33 +394,6 @@
         })
     }
 
-    function EnviarCodigoAlServidor(decodedText) {
-        fetch('/tu-endpoint', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ codigo: decodedText })
-        })
-            .then(response => {
-                // Validamos si el contenido es JSON
-                const contentType = response.headers.get('content-type');
-                if (contentType && contentType.includes('application/json')) {
-                    return response.json();
-                } else {
-                    return response.text(); // Para debug
-                }
-            })
-            .then(data => {
-                console.log('Respuesta del servidor:', data);
-                // Aquí se maneja la respuesta necesaria del servidor
-            })
-            .catch(error => {
-                console.error('Error en la petición:', error);
-            });
-    }
-
-
     function actualizarTabla() {
         fetch('ScannerHandler.aspx/ObtenerCodigos', {
             method: 'POST',
@@ -414,13 +417,16 @@
         // Limpiar los códigos escaneados
         codigosEscaneados.clear();
 
+        // Limpiar la cola
+        colaCodigosEscaneados.length = 0;
+
         // Limpiar contenido de la tabla (tbody)
         items.innerHTML = '';
 
         // Reiniciar contador si lo usas para indexar filas
         id = 0;
 
-        // Opcional: también puedes limpiar el campo de resultado
+        // También puedes limpiar el campo de resultado
         document.getElementById("<%=txtResultado.ClientID%>").value = "";
 
         // Ocultar mensajes de advertencia si estaban activos
@@ -428,49 +434,86 @@
         lblmensaje.innerHTML = "";
     }
 
-
     // Esta función se llama cuando haces clic en "Vaciar tabla"
     function limpiarTablaYMemoria() {
         // Limpiar la tabla de la interfaz
-        const tabla = document.getElementById('tablaQr');
         const tbody = document.getElementById('items');
         tbody.innerHTML = ''; // Limpia las filas de la tabla
 
         // Limpiar códigos escaneados
         codigosEscaneados.clear();
 
+        // Limpiar la cola
+        colaCodigosEscaneados.length = 0;
+
         // Reiniciar contador
         id = 0;
 
         // Limpiar campo de resultado
-        document.getElementById("<%=txtResultado.ClientID%>").value = "";
+        document.getElementById('<%=txtResultado.ClientID%>').value = "";
 
         // Ocultar mensaje
         lblmensaje.setAttribute('style', 'display:none !important');
         lblmensaje.innerHTML = "";
 
-        // También puedes volver a pintar el footer limpio si deseas
+        // Limpiar pie de tabla
         footer.innerHTML = '';
+
+        // Reiniciar contador visual
+        document.getElementById("contadorCodigos").innerText = "0";
 
         // Opcional: mensaje visual
         Swal.fire("Tabla limpiada", "Ahora puedes volver a escanear.", "success");
-
-        document.getElementById("txtResultado").value = "";
-
     }
 
 
     function hola() {
-        Swal.fire({
-            title: "Hola!",
-            text: "Datos enviados correctamente",
-            icon: "success"
-        });
-        console.log("Hola mundo");
+
+        if (colaCodigosEscaneados.length === 0) {
+
+            Swal.fire({
+                icon: "error",
+                title: "Ha ocurrido un error",
+                text: "No ha ingresado ningún valor",
+                footer: 'Ingrese por lo menos 1 registro para poder enviarlo'
+            });
+
+            return;
+        }
+
+        console.log("📦 Códigos a enviar:", colaCodigosEscaneados); // 👈 Esto muestra la cola
+
+        fetch("DynamicData/FieldTemplates/ScannerHandler.aspx/EnviarTodosLosCodigos", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({ codigos: colaCodigosEscaneados })
+        })
+            .then(response => response.json())
+            .then(data => {
+                console.log("✅ Respuesta del servidor:", data);
+                Swal.fire({
+                    title: "Registro exitoso!",
+                    text: "Se ha registrado correctamente",
+                    icon: "success"
+                }); // Mostrar mensaje recibido desde el backend
+                limpiarTablaQr(); // Limpiar interfaz después de enviar         
+                document.getElementById("contadorCodigos").innerText = "0"; //Limpia el contador de códigos escaneados.
+            })
+            .catch(error => {
+                console.error("❌ Error al enviar datos:", error);
+                Swal.fire({
+                    icon: "error",
+                    title: "Ha ocurrido un error",
+                    text: "No se pudieron enviar los datos",
+                    footer: 'Inténtelo nuevamente.'
+
+                });
+            });
+
     }
 
-
-
-
+    //Contador para ver cuántos registros se han escaneado
 
 </script>

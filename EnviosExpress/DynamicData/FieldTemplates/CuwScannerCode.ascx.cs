@@ -90,6 +90,20 @@ namespace EnviosExpress.DynamicData.FieldTemplates
             return codigos ?? new List<string>();
         }
 
+        private DataTable ConvertirListaACodigoDataTable(List<string> codigos)
+        {
+            DataTable dt = new DataTable();
+            dt.Columns.Add("CodigoQR", typeof(string)); // Pueden cambiar el nombre de columna si tu tabla en BD tiene otro
+
+            foreach (var codigo in codigos)
+            {
+                dt.Rows.Add(codigo);
+            }
+
+            return dt;
+        }
+
+
 
 
         DataTable table = new DataTable();
