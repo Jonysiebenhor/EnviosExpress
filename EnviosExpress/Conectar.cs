@@ -1,11 +1,14 @@
 ﻿using iTextSharp.text.pdf.codec.wmf;
+using NPOI.POIFS.Crypt.Dsig;
 using NPOI.SS.Formula.Functions;
+using Org.BouncyCastle.Bcpg;
 using System;
 using System.Data;
 using System.Data.SqlClient;
 using System.Security.Policy;
 using System.Windows.Controls.Primitives;
 using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
+using static NPOI.SS.Formula.PTG.ArrayPtg;
 using static QRCoder.PayloadGenerator.SwissQrCode;
 
 namespace EnviosExpress
@@ -15,14 +18,15 @@ namespace EnviosExpress
         SqlConnection conexion = new SqlConnection();
 
         //Esta cadena de conexión la cambié por la de mi máquina local, esta se debe cambiar después por la cadena de conexión del servidor.
-        String conexionString = "Data Source=PC-ERICK\\SQLEXPRESS;Initial Catalog=db_prueba;User ID=(Usuario de la BD);Password=(Contraseña de la BD);TrustServerCertificate=True;";
+        //String conexionString = "Data Source=PC-ERICK\\SQLEXPRESS;Initial Catalog=db_prueba;User ID=(Usuario de la BD);Password=(Contraseña de la BD);TrustServerCertificate=True;";
 
         //¡OJO! LEER EL COMENTARIO DE ARRIBA!!
 
 
 
         //String conexionString = "Data Source=DESKTOP-QTSGBLO;DATABASE=EnviosExpress;Integrated security=true";pasada
-        //String conexionString = "Data Source=DESKTOP-KNTJ3BG\\SQLEXPRESS;DATABASE=EnviosExpress;Integrated security=true";  
+        //String conexionString = "Data Source=DESKTOP-KNTJ3BG\\SQLEXPRESS;DATABASE=EnviosExpress;Integrated security=true";
+        String conexionString = "workstation id = EnviosExpress.mssql.somee.com; packet size = 4096; user id = EnviosExpress; pwd=Envios3228@;data source = EnviosExpress.mssql.somee.com;";
         public void conectar()
         {
             try
