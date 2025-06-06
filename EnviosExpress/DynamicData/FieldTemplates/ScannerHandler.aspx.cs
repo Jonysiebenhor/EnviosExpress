@@ -6,6 +6,7 @@ using System.Web.Services;
 using System.Web.Script.Serialization;
 using System.Data;
 using Newtonsoft.Json;
+using System.Data.SqlClient;
 
 namespace EnviosExpress
 {
@@ -42,24 +43,83 @@ namespace EnviosExpress
         }
 
 
-        //Código para convertir la cola en un data table
-        [WebMethod]
-        public static string EnviarTodosLosCodigos(List<CodigoQR> codigos)
+        //Código para convertir la cola en un data table e insertar los datos en la base de datos
+        //Este código ejecuta un procedimiento almacenado con validaciones.
+        public class ResultadoCodigo
         {
-            // Aquí convierte el JSON obtenido en el JS en un Data Table.
+            public string Codigo { get; set; }
+            public bool Exito { get; set; }
+            public string Mensaje { get; set; }
+        }
+
+        [WebMethod]
+        public static List<ResultadoCodigo> EnviarTodosLosCodigos(List<CodigoQR> codigos)
+        {
             DataTable dt = new DataTable();
-            dt.Columns.Add("Codigo", typeof(string));
-            dt.Columns.Add("Fecha", typeof(DateTime));
+            dt.Columns.Add("idpaquete", typeof(string));
+            dt.Columns.Add("fechahora", typeof(DateTime));
+            dt.Columns.Add("estado", typeof(string));
+            dt.Columns.Add("descripcion", typeof(string));
+            dt.Columns.Add("idusuario", typeof(long));
+            dt.Columns.Add("idusuariomns", typeof(long));
+            dt.Columns.Add("intentoentrega", typeof(string));
 
             foreach (var item in codigos)
             {
-                dt.Rows.Add(item.Codigo, item.Fecha);
+                dt.Rows.Add(
+                    item.Codigo,
+                    item.Fecha,
+                    "pendiente de entregar",
+                    "-",
+                    1L,
+                    1L,
+                    "Intento exitoso"
+                );
             }
 
-            // Aquí se puede guardar el DataTable en la base de datos o hacer lo necesario
-            // De momento, solo devolvemos el número de registros como prueba
-            return $"Se recibieron {dt.Rows.Count} registros.";
+            var resultados = new List<ResultadoCodigo>();
+
+            try
+            {
+                using (SqlConnection conn = new SqlConnection("Data Source=PC-ERICK\\SQLEXPRESS;Initial Catalog=db_prueba;User ID=sa;Password=Roserade;TrustServerCertificate=True;"))
+                {
+                    using (SqlCommand cmd = new SqlCommand("sp_insertarpaquete", conn))
+                    {
+                        cmd.CommandType = CommandType.StoredProcedure;
+                        SqlParameter tvpParam = cmd.Parameters.AddWithValue("@codigos", dt);
+                        tvpParam.SqlDbType = SqlDbType.Structured;
+
+                        conn.Open();
+
+                        // Leer los resultados del SP
+                        using (SqlDataReader reader = cmd.ExecuteReader())
+                        {
+                            while (reader.Read())
+                            {
+                                resultados.Add(new ResultadoCodigo
+                                {
+                                    Codigo = reader["Codigo"].ToString(),
+                                    Exito = Convert.ToBoolean(reader["Exito"]),
+                                    Mensaje = reader["Mensaje"].ToString()
+                                });
+                            }
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                resultados.Add(new ResultadoCodigo
+                {
+                    Codigo = "ERROR GENERAL",
+                    Exito = false,
+                    Mensaje = ex.Message
+                });
+            }
+
+            return resultados;
         }
+
 
         public class CodigoQR
         {

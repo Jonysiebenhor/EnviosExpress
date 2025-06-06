@@ -269,10 +269,29 @@
         html5QrCode = new Html5Qrcode("reader");
         EstadoBoton(1); // Cambiar a estado "detener"
 
+        //Esta parte sirve para que pueda escanear tanto códigos QR como códigos de barra.
+        //Esta constante muestra todos los tipos de códigos que acepta.
+        const config = {
+            fps: 10,
+            qrbox: 250,
+            formatsToSupport: [
+                Html5QrcodeSupportedFormats.QR_CODE, //Formato de códigos QR
+                Html5QrcodeSupportedFormats.CODE_128,  //Tipo de códigos de barra
+                Html5QrcodeSupportedFormats.CODE_39,  //Tipo de códigos de barra
+                Html5QrcodeSupportedFormats.EAN_13,  //Tipo de códigos de barra.
+                Html5QrcodeSupportedFormats.AZTEC,      //Tipo de códigos de barra
+                Html5QrcodeSupportedFormats.CODABAR,    //TIpo de códigos de barra
+                Html5QrcodeSupportedFormats.DATA_MATRIX,    //Tipo de códigos de barra
+                Html5QrcodeSupportedFormats.MAXICODE,   //Tipo de códigos de barra
+                Html5QrcodeSupportedFormats.ITF,        //Tipo de códigos de barra
+            ]
+        };
+
+
         try {
             html5QrCode.start(
                 CamaraId,
-                { fps: 10, qrbox: 250 },
+                config,
                 (decodedText, decodedResult) => {
                     if (codigosEscaneados.has(decodedText)) {
                         lblmensaje.setAttribute('style', 'display:block !important');
@@ -514,6 +533,6 @@
 
     }
 
-    //Contador para ver cuántos registros se han escaneado
+   
 
 </script>
