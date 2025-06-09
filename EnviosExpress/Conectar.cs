@@ -15,7 +15,8 @@ namespace EnviosExpress
         SqlConnection conexion = new SqlConnection();
 
         //Esta cadena de conexión la cambié por la de mi máquina local, esta se debe cambiar después por la cadena de conexión del servidor.
-        String conexionString = "Data Source=PC-ERICK\\SQLEXPRESS;Initial Catalog=db_prueba;User ID=(Usuario de la BD);Password=(Contraseña de la BD);TrustServerCertificate=True;";
+        String conexionString = "Data Source=PC-ERICK\\SQLEXPRESS;Initial Catalog=db_prueba;User ID=(usuario de la bd);Password=(contraseña de la bd);TrustServerCertificate=True;";
+
 
         //¡OJO! LEER EL COMENTARIO DE ARRIBA!!
 

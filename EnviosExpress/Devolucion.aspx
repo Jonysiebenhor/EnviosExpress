@@ -17,7 +17,8 @@
 <br /><br />
      
         <div class="container text-center" id="reader" style ="width:300px; height:250px">
-            <p>
+           
+ <p>
             Numero de Guia:
         <asp:TextBox ID="txtcodigoo" runat="server" Width="187px"></asp:TextBox>
             </p>
