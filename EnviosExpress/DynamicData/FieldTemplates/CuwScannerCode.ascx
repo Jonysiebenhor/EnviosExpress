@@ -6,26 +6,21 @@
 
 <script src="https://unpkg.com/html5-qrcode"></script>
 <link rel="stylesheet" href="https://cdn.datatables.net/2.1.8/css/dataTables.dataTables.css" />
-<!-- jQuery -->
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
 <!-- Bootstrap 4 (CSS y JS necesarios para modales) -->
 <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet" />
+
+
+<!-- jQuery -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+<!--Bootstrap JS-->
 <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.bundle.min.js"></script>
 
 
 
-<!--Código temporal-->
-<script type="text/javascript">
-    $(document).ready(function () {
-        $('#ModalLectura').on('hidden.bs.modal', function () {
-            limpiarTablaYMemoria();
-        });
-    });
-</script>
-<!--Fin código temporal-->
 <!-- Modal Scanner Code-->
-<div class="modal fade" runat="server" id="ModalScannerCode" tabindex="-1" role="dialog" aria-labelledby="ModalScannerCodeLabel" aria-hidden="true">
+<div class="modal" id="ModalScannerCode" tabindex="-1" role="dialog" aria-labelledby="ModalScannerCodeLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg modal-dialog-centered " role="document">
         <div class="modal-content">
             <div class="modal-header P-2">
@@ -131,7 +126,8 @@
             <div class="modal-footer">
                 <button type="button" class="btn btn-danger" onclick="limpiarTablaYMemoria()">Vaciar tabla</button>
                 <button type="button" id="btnEnviarDatos" runat="server" class="btn btn-success" onclick="hola()">Enviar datos</button>
-                 <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
+                 <button type="button" class="btn btn-secondary" onclick="$('#ModalScannerCode').modal('hide')">Cerrar</button>
+
             </div>
         </div>
     </div>
@@ -164,34 +160,44 @@
 
     // Función para abrir el modal del scanner
     async function AbrirModalScanner() {
+        try {
+            // Resetear variables
+            colaCodigosEscaneados.length = 0;
+            codigosEscaneados.clear();
+            document.getElementById("items").innerHTML = "";
+            id = 0;
+            document.getElementById("<%=txtResultado.ClientID%>").value = "";
+            lblmensaje.innerHTML = "";
+            lblmensaje.setAttribute('style', 'display:none !important');
 
-        // Reiniciar variables al abrir modal
-        colaCodigosEscaneados.length = 0;
-        codigosEscaneados.clear();
-        document.getElementById("items").innerHTML = "";
-        id = 0;
+            // Resetear manualmente estado del modal (por si quedó "incompleto")
+            const modal = document.getElementById("ModalScannerCode");
+            modal.classList.remove("show");
+            modal.style.display = "none";
+            modal.setAttribute("aria-hidden", "true");
 
-        document.getElementById("<%=txtResultado.ClientID%>").value = ""; // Limpiar campo resultado
-        lblmensaje.innerHTML = "";
-        lblmensaje.setAttribute('style', 'display:none !important');
+            // MOSTRAR modal correctamente
+            $('#ModalScannerCode').modal({
+                backdrop: 'static',
+                keyboard: false
+            });
 
-        // Mostrar modal
-        $('#<%= ModalScannerCode.ClientID %>').modal({ backdrop: 'static', keyboard: false });
-        $('#<%= ModalScannerCode.ClientID %>').modal('show');
+            // Cargar cámaras
+            ListarCamaras("Camaras");
 
-
-        ListarCamaras("Camaras");
-
-        // Obtener cámara
-        const CamaraId = await GetIdCamaraApropiada();
-        if (CamaraId.length > 0) {
-            $("#Camaras option[value='" + CamaraId + "']").attr("selected", true);
-            AbrirCamara(CamaraId); // Iniciar cámara
+            const CamaraId = await GetIdCamaraApropiada();
+            if (CamaraId.length > 0) {
+                $("#Camaras option[value='" + CamaraId + "']").attr("selected", true);
+                AbrirCamara(CamaraId); // Iniciar cámara
+            }
+        } catch (err) {
+            console.error("❌ Error al abrir el modal del scanner:", err);
+            Swal.fire("Error", "No se pudo abrir el escáner correctamente.", "error");
         }
     }
 
     // Al cerrar el modal: detener cámara, limpiar códigos y campo de texto
-    $('#<%= ModalScannerCode.ClientID %>').on('hidden.bs.modal', function (e) {
+    $('#ModalScannerCode').on('hidden.bs.modal', function (e) {
         StopCamara(); // Detener cámara
         codigosEscaneados.clear(); // Limpiar códigos escaneados
         document.getElementById("<%=txtResultado.ClientID%>").value = ""; // Limpiar campo de resultado

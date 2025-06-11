@@ -3,7 +3,32 @@
 <asp:Content ID="Content1" ContentPlaceHolderID="title" runat="server">
     Envios Express
 </asp:Content>
+
 <asp:Content ID="Content2" ContentPlaceHolderID="head" runat="server">
+
+     <style>
+     
+        /*#ModalScannerCode {
+        display: block !important;
+        opacity: 1 !important;
+        z-index: 9999 !important;
+      }
+
+      .modal-backdrop {
+        z-index: 9998 !important;
+      }
+
+      .modal-dialog {
+        transform: translate(0, 0) !important;
+      }*/
+        <style>
+  #ModalScannerCode.modal {
+    z-index: 1055;
+  }
+</style>
+
+    </style>
+
 </asp:Content>
 <asp:Content ID="Content3" ContentPlaceHolderID="body" runat="server">
 
