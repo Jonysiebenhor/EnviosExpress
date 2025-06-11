@@ -1,4 +1,5 @@
 ﻿<%@ Page Title="" Language="C#" MasterPageFile="~/PaginaMaestra.Master" AutoEventWireup="true" CodeBehind="Recoleccion.aspx.cs" Inherits="EnviosExpress.Recoleccion" %>
+<%@ Register Src="~/DynamicData/FieldTemplates/CuwScannerCode.ascx" TagPrefix="uc1" TagName="ScannerControl" %>
 <asp:Content ID="Content1" ContentPlaceHolderID="title" runat="server">
     Envios Express
 </asp:Content>
@@ -6,13 +7,19 @@
 </asp:Content>
 <asp:Content ID="Content3" ContentPlaceHolderID="body" runat="server">
 
+<!-- Donde quieres mostrar el escáner -->
+<uc1:ScannerControl ID="ScannerControl1" runat="server" />
+   
+    <asp:Button ID="btnAbrirScanner" runat="server" Text="📷 Escanear códigos" CssClass="btn btn-primary" OnClientClick="AbrirModalScanner(); return false;" />
+
+
 
         <div class="container text-center" style="background-color:#2d2d30; height:100%; width:100%;">
              <br />
             <br />
             <asp:Label ID="Label1" runat="server" Text="Recolección" Font-Bold="True" Font-Size="XX-Large" ForeColor="White"></asp:Label>
             <br /><br />
-           <div class="container text-center""row" style="background-color:#f5f5f5; ">
+           <div class="container text-center row" style="background-color:#f5f5f5; ">
 
 
 <br /><br />
@@ -44,17 +51,9 @@
         <br/><br/>
             </div>
  
-   <!--script>
-        $(document).ready(function () {
-            $('#reader').html5_qrcode(function (data) {
-                $('#<!--%=txtcodigoo.ClientID%>').val(data);
-            },
-                function (error) {
-                    $('#read_error').html(error);
-                }, function (videoError) {
-                    alert("No hay Cámara")
-                }
-            );
-        });
-    </script--> 
+ 
+    
+    
+    
+     
     </asp:Content>

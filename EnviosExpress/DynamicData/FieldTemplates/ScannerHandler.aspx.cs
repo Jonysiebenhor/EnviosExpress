@@ -47,7 +47,7 @@ namespace EnviosExpress
         //Este código ejecuta un procedimiento almacenado con validaciones.
         public class ResultadoCodigo
         {
-            public string Codigo { get; set; }
+            public int Codigo { get; set; }
             public bool Exito { get; set; }
             public string Mensaje { get; set; }
         }
@@ -56,7 +56,7 @@ namespace EnviosExpress
         public static List<ResultadoCodigo> EnviarTodosLosCodigos(List<CodigoQR> codigos)
         {
             DataTable dt = new DataTable();
-            dt.Columns.Add("idpaquete", typeof(string));
+            dt.Columns.Add("idpaquete", typeof(int));
             dt.Columns.Add("fechahora", typeof(DateTime));
             dt.Columns.Add("estado", typeof(string));
             dt.Columns.Add("descripcion", typeof(string));
@@ -83,7 +83,8 @@ namespace EnviosExpress
             {
                 using (SqlConnection conn = new SqlConnection("Data Source=PC-ERICK\\SQLEXPRESS;Initial Catalog=db_prueba;User ID=sa;Password=Roserade;TrustServerCertificate=True;"))
                 {
-                    using (SqlCommand cmd = new SqlCommand("sp_insertarpaquete", conn))
+                    using (SqlCommand cmd = new SqlCommand("sp_recolectarpaquete", conn))
+
                     {
                         cmd.CommandType = CommandType.StoredProcedure;
                         SqlParameter tvpParam = cmd.Parameters.AddWithValue("@codigos", dt);
@@ -98,9 +99,9 @@ namespace EnviosExpress
                             {
                                 resultados.Add(new ResultadoCodigo
                                 {
-                                    Codigo = reader["Codigo"].ToString(),
-                                    Exito = Convert.ToBoolean(reader["Exito"]),
-                                    Mensaje = reader["Mensaje"].ToString()
+                                    Codigo = Convert.ToInt32(reader["idpaquete"]),
+                                    Exito = false, // porque vienen de @errores en el SP
+                                    Mensaje = reader["mensaje"].ToString()
                                 });
                             }
                         }
@@ -111,7 +112,7 @@ namespace EnviosExpress
             {
                 resultados.Add(new ResultadoCodigo
                 {
-                    Codigo = "ERROR GENERAL",
+                    Codigo = -1, // ← Indica error general
                     Exito = false,
                     Mensaje = ex.Message
                 });
@@ -123,7 +124,7 @@ namespace EnviosExpress
 
         public class CodigoQR
         {
-            public string Codigo { get; set; }
+            public int Codigo { get; set; }
             public DateTime Fecha { get; set; }
         }
 

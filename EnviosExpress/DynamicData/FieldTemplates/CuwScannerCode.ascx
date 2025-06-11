@@ -29,7 +29,7 @@
     <div class="modal-dialog modal-lg modal-dialog-centered " role="document">
         <div class="modal-content">
             <div class="modal-header P-2">
-                <h6 class="modal-title" id="lblTitulo" runat="server"><strong>Devolver</strong> </h6>
+                <h6 class="modal-title" id="lblTitulo" runat="server"><strong>Recolectar paquetes</strong></h6>
                 <label class="switch ml-2">
                     <asp:CheckBox ID="chkOnOff" runat="server" Enabled="false" Visible="false" Checked="false" />
                     <span class="slider round"></span>
@@ -176,8 +176,9 @@
         lblmensaje.setAttribute('style', 'display:none !important');
 
         // Mostrar modal
-        $('#CuwScannerCode_ModalScannerCode').modal({ backdrop: 'static', keyboard: false });
-        $('#CuwScannerCode_ModalScannerCode').modal('show');
+        $('#<%= ModalScannerCode.ClientID %>').modal({ backdrop: 'static', keyboard: false });
+        $('#<%= ModalScannerCode.ClientID %>').modal('show');
+
 
         ListarCamaras("Camaras");
 
@@ -190,7 +191,7 @@
     }
 
     // Al cerrar el modal: detener cámara, limpiar códigos y campo de texto
-    $('#CuwScannerCode_ModalScannerCode').on('hidden.bs.modal', function (e) {
+    $('#<%= ModalScannerCode.ClientID %>').on('hidden.bs.modal', function (e) {
         StopCamara(); // Detener cámara
         codigosEscaneados.clear(); // Limpiar códigos escaneados
         document.getElementById("<%=txtResultado.ClientID%>").value = ""; // Limpiar campo de resultado
