@@ -300,40 +300,57 @@
                 CamaraId,
                 config,
                 (decodedText, decodedResult) => {
-                    if (codigosEscaneados.has(decodedText)) {
-                        lblmensaje.setAttribute('style', 'display:block !important');
-                        lblmensaje.innerHTML = `⚠️ El código <strong>${decodedText}</strong> ya ha sido escaneado.`;
-                        setTimeout(() => {
-                            lblmensaje.setAttribute('style', 'display:none !important');
-                            lblmensaje.innerHTML = "";
-                        }, 3000);
-                        return;
-                    }
+    const codigoInt = parseInt(decodedText, 10);
 
-                    codigosEscaneados.add(decodedText); // Guardar como escaneado
-                   colaCodigosEscaneados.push({
-    Codigo: decodedText,
-    Fecha: new Date().toISOString()
-});
- // Agregar a la cola
+    // Validar si es un número entero válido
+    if (isNaN(codigoInt)) {
+        Swal.fire({
+            icon: "error",
+            title: "Código inválido",
+            html: `🚫 El código escaneado <strong>${decodedText}</strong> no es un número válido.`,
+            confirmButtonText: "Entendido"
+        });
+        return;
+    }
 
-                    sonido(); // Reproducir sonido
+    // Validar si ya fue escaneado antes (evitar duplicados)
+    if (codigosEscaneados.has(codigoInt)) {
+        Swal.fire({
+            icon: "warning",
+            title: "Código duplicado",
+            html: `⚠️ El código <strong>${codigoInt}</strong> ya fue escaneado.`,
+            confirmButtonText: "OK"
+        });
+        return;
+    }
 
-                    // Mostrar siempre el código en la tabla y en el contador
-                    PintarTabla(decodedText, decodedResult);
+    // Agregar a estructuras
+    codigosEscaneados.add(codigoInt);
+    colaCodigosEscaneados.push({
+        Codigo: codigoInt,
+        Fecha: new Date().toISOString()
+    });
 
-                    // Lógica para enviar o no al backend
-                    if (!$('#CuwScannerCode_chkOnOff').prop('checked')) {
-                        EnviarCodigoAlServidor(decodedText);
-                    } else {
-                        let lectura = `${decodedText}`;
-                        document.getElementById("<%=txtResultado.ClientID%>").value = lectura;
+    // Mostrar en la tabla
+    PintarTabla(codigoInt);
 
-                        if (lectura.length === 11 && !lectura.includes(".")) {
-                            html5QrCode.stop();
-                            document.getElementById("CuwScannerCode_btnDevolver").click();
-                        }
-                    }
+    // Reproducir sonido
+    sonido();
+
+    // Lógica para enviar o no al backend
+    if (!$('#CuwScannerCode_chkOnOff').prop('checked')) {
+        EnviarCodigoAlServidor(codigoInt);
+    } else {
+        let lectura = `${codigoInt}`;
+        document.getElementById("<%=txtResultado.ClientID%>").value = lectura;
+
+        if (lectura.length === 11 && !lectura.includes(".")) {
+            html5QrCode.stop();
+            document.getElementById("CuwScannerCode_btnDevolver").click();
+        }
+    }
+
+                    
 
                   
                 },
@@ -398,12 +415,13 @@
     // Actualiza el pie de tabla con total y botón de vaciar
     const pintarFooter = () => {
         footer.innerHTML = '';
-        if (id === 0) {
-            footer.innerHTML = `<th scope="row"></th>`;
-            return;
-        }
+        if (items.rows.length === 0) {
+    footer.innerHTML = `<th scope="row"></th>`;
+    return;
+}
 
-        const nCantidad = id;
+
+        const nCantidad = items.rows.length;
         templateFooter.querySelector('th').textContent = `Total: ` + nCantidad.toString();
 
         const clone = templateFooter.cloneNode(true);
@@ -417,7 +435,7 @@
             items.innerHTML = ''
             codigosEscaneados.clear(); // También limpiar lista al vaciar
             pintarFooter()
-        })
+        });
     }
 
     function actualizarTabla() {
@@ -494,20 +512,17 @@
 
 
     function hola() {
-
         if (colaCodigosEscaneados.length === 0) {
-
             Swal.fire({
                 icon: "error",
                 title: "Ha ocurrido un error",
                 text: "No ha ingresado ningún valor",
                 footer: 'Ingrese por lo menos 1 registro para poder enviarlo'
             });
-
             return;
         }
 
-        console.log("📦 Códigos a enviar:", colaCodigosEscaneados); // 👈 Esto muestra la cola
+        console.log("📦 Códigos a enviar:", colaCodigosEscaneados);
 
         fetch("DynamicData/FieldTemplates/ScannerHandler.aspx/EnviarTodosLosCodigos", {
             method: "POST",
@@ -519,13 +534,27 @@
             .then(response => response.json())
             .then(data => {
                 console.log("✅ Respuesta del servidor:", data);
-                Swal.fire({
-                    title: "Registro exitoso!",
-                    text: "Se ha registrado correctamente",
-                    icon: "success"
-                }); // Mostrar mensaje recibido desde el backend
-                limpiarTablaQr(); // Limpiar interfaz después de enviar         
-                document.getElementById("contadorCodigos").innerText = "0"; //Limpia el contador de códigos escaneados.
+
+                const errores = data.d;
+
+                if (errores.length === 0) {
+                    Swal.fire({
+                        icon: "success",
+                        title: "Registro exitoso",
+                        text: "Todos los códigos fueron registrados correctamente."
+                    });
+                } else {
+                    const mensajes = errores.map(e => `Código ${e.Codigo}: ${e.Mensaje}`).join('<br>');
+                    Swal.fire({
+                        icon: "warning",
+                        title: "Algunos códigos no se registraron",
+                        html: mensajes
+                    });
+                }
+
+                // Limpiar tabla y contador sin importar si hubo errores
+                limpiarTablaQr();
+                document.getElementById("contadorCodigos").innerText = "0";
             })
             .catch(error => {
                 console.error("❌ Error al enviar datos:", error);
@@ -534,11 +563,10 @@
                     title: "Ha ocurrido un error",
                     text: "No se pudieron enviar los datos",
                     footer: 'Inténtelo nuevamente.'
-
                 });
             });
-
     }
+
 
    
 

@@ -21,13 +21,13 @@
       .modal-dialog {
         transform: translate(0, 0) !important;
       }*/
-        <style>
+        
   #ModalScannerCode.modal {
     z-index: 1055;
   }
 </style>
 
-    </style>
+    
 
 </asp:Content>
 <asp:Content ID="Content3" ContentPlaceHolderID="body" runat="server">

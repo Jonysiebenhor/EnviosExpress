@@ -81,7 +81,7 @@ namespace EnviosExpress
 
             try
             {
-                using (SqlConnection conn = new SqlConnection("Data Source=PC-ERICK\\SQLEXPRESS;Initial Catalog=db_prueba;User ID=sa;Password=Roserade;TrustServerCertificate=True;"))
+                using (SqlConnection conn = new SqlConnection("workstation id = EnviosExpress.mssql.somee.com; packet size = 4096; user id = EnviosExpress; pwd=Envios3228@;data source = EnviosExpress.mssql.somee.com;"))
                 {
                     using (SqlCommand cmd = new SqlCommand("sp_recolectarpaquete", conn))
 
@@ -97,13 +97,17 @@ namespace EnviosExpress
                         {
                             while (reader.Read())
                             {
+                                var id = Convert.ToInt32(reader["idpaquete"]);
+                                var msg = reader["mensaje"].ToString();
+
                                 resultados.Add(new ResultadoCodigo
                                 {
-                                    Codigo = Convert.ToInt32(reader["idpaquete"]),
-                                    Exito = false, // porque vienen de @errores en el SP
-                                    Mensaje = reader["mensaje"].ToString()
+                                    Codigo = id,
+                                    Exito = msg.Contains("exitosamente"), // <- marcamos como éxito si lo dice
+                                    Mensaje = msg
                                 });
                             }
+
                         }
                     }
                 }
