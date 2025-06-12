@@ -24,15 +24,6 @@ namespace EnviosExpress
         protected global::EnviosExpress.DynamicData.FieldTemplates.CuwScannerCode ScannerControl1;
 
         /// <summary>
-        /// Control btnAbrirScanner.
-        /// </summary>
-        /// <remarks>
-        /// Campo generado automáticamente.
-        /// Para modificarlo, mueva la declaración del campo del archivo del diseñador al archivo de código subyacente.
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.Button btnAbrirScanner;
-
-        /// <summary>
         /// Control Label1.
         /// </summary>
         /// <remarks>
@@ -58,6 +49,15 @@ namespace EnviosExpress
         /// Para modificarlo, mueva la declaración del campo del archivo del diseñador al archivo de código subyacente.
         /// </remarks>
         protected global::System.Web.UI.WebControls.CheckBox CheckBox3;
+
+        /// <summary>
+        /// Control btnAbrirScanner.
+        /// </summary>
+        /// <remarks>
+        /// Campo generado automáticamente.
+        /// Para modificarlo, mueva la declaración del campo del archivo del diseñador al archivo de código subyacente.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Button btnAbrirScanner;
 
         /// <summary>
         /// Control Label11.

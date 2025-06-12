@@ -1,4 +1,4 @@
-﻿<%@ Control Language="C#" CodeBehind="CuwScannerCode.ascx.cs" Inherits="EnviosExpress.DynamicData.FieldTemplates.CuwScannerCode" %>
+﻿    <%@ Control Language="C#" CodeBehind="CuwScannerCode.ascx.cs" Inherits="EnviosExpress.DynamicData.FieldTemplates.CuwScannerCode" %>
 
 <asp:Literal runat="server" ID="Literal1" Text="<%# FieldValueString %>" />
 
@@ -24,7 +24,8 @@
     <div class="modal-dialog modal-lg modal-dialog-centered " role="document">
         <div class="modal-content">
             <div class="modal-header P-2">
-                <h6 class="modal-title" id="lblTitulo" runat="server"><strong>Recolectar paquetes</strong></h6>
+                <input type="hidden" id="modoOperacion" value="recolectar" />
+                <h6 class="modal-title" id="lblTitulo" ><strong>Recolectar paquetes</strong></h6>
                 <label class="switch ml-2">
                     <asp:CheckBox ID="chkOnOff" runat="server" Enabled="false" Visible="false" Checked="false" />
                     <span class="slider round"></span>
@@ -125,7 +126,7 @@
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-danger" onclick="limpiarTablaYMemoria()">Vaciar tabla</button>
-                <button type="button" id="btnEnviarDatos" runat="server" class="btn btn-success" onclick="hola()">Enviar datos</button>
+                <button type="button" class="btn btn-success" onclick="EnviarSegunModo()">Enviar datos</button>
                  <button type="button" class="btn btn-secondary" onclick="$('#ModalScannerCode').modal('hide')">Cerrar</button>
 
             </div>
@@ -159,24 +160,46 @@
     }
 
     // Función para abrir el modal del scanner
-    async function AbrirModalScanner() {
+    async function AbrirModalScanner(modo = "recolectar") {
+        // Establecer modo
+        document.getElementById("modoOperacion").value = modo;
+
+        // Establecer título dinámico
+        const titulo = (modo === "enrutar") ? "Enrutar paquetes" : "Recolectar paquetes";
+        const tituloLabel = document.getElementById("lblTitulo");
+
+        if (tituloLabel) {
+            tituloLabel.innerHTML = `<strong>${titulo}</strong>`;
+        } else {
+            console.warn("⚠️ lblTitulo no encontrado en el DOM.");
+        }
+
         try {
-            // Resetear variables
+            // Resetear variables internas
             colaCodigosEscaneados.length = 0;
             codigosEscaneados.clear();
             document.getElementById("items").innerHTML = "";
             id = 0;
-            document.getElementById("<%=txtResultado.ClientID%>").value = "";
-            lblmensaje.innerHTML = "";
-            lblmensaje.setAttribute('style', 'display:none !important');
 
-            // Resetear manualmente estado del modal (por si quedó "incompleto")
+            // Limpiar TextBox (ID dinámico generado por ASP.NET)
+            const txtResultado = document.querySelector('[id$="_txtResultado"]');
+            if (txtResultado) txtResultado.value = "";
+
+            // Limpiar mensaje
+            if (typeof lblmensaje !== "undefined") {
+                lblmensaje.innerHTML = "";
+                lblmensaje.setAttribute('style', 'display:none !important');
+            }
+
+            // Resetear manualmente estado del modal
             const modal = document.getElementById("ModalScannerCode");
-            modal.classList.remove("show");
-            modal.style.display = "none";
-            modal.setAttribute("aria-hidden", "true");
+            if (modal) {
+                modal.classList.remove("show");
+                modal.style.display = "none";
+                modal.setAttribute("aria-hidden", "true");
+            }
 
-            // MOSTRAR modal correctamente
+            // Mostrar modal
             $('#ModalScannerCode').modal({
                 backdrop: 'static',
                 keyboard: false
@@ -188,13 +211,16 @@
             const CamaraId = await GetIdCamaraApropiada();
             if (CamaraId.length > 0) {
                 $("#Camaras option[value='" + CamaraId + "']").attr("selected", true);
-                AbrirCamara(CamaraId); // Iniciar cámara
+                AbrirCamara(CamaraId);
             }
+
         } catch (err) {
             console.error("❌ Error al abrir el modal del scanner:", err);
             Swal.fire("Error", "No se pudo abrir el escáner correctamente.", "error");
         }
     }
+
+
 
     // Al cerrar el modal: detener cámara, limpiar códigos y campo de texto
     $('#ModalScannerCode').on('hidden.bs.modal', function (e) {
@@ -510,6 +536,17 @@
         Swal.fire("Tabla limpiada", "Ahora puedes volver a escanear.", "success");
     }
 
+    //Función para enviar los datos según el modo:
+    function EnviarSegunModo() {
+        const modo = document.getElementById("modoOperacion").value;
+
+        if (modo === "enrutar") {
+            holaEnrutar(); // función específica para enrutar
+        } else {
+            hola(); // función original para recolectar
+        }
+    }
+
 
     function hola() {
         if (colaCodigosEscaneados.length === 0) {
@@ -562,6 +599,58 @@
                     icon: "error",
                     title: "Ha ocurrido un error",
                     text: "No se pudieron enviar los datos",
+                    footer: 'Inténtelo nuevamente.'
+                });
+            });
+    }
+
+
+    //Función para enviar paquetes en ruta:
+    function holaEnrutar() {
+        if (colaCodigosEscaneados.length === 0) {
+            Swal.fire({
+                icon: "error",
+                title: "Ha ocurrido un error",
+                text: "No ha ingresado ningún valor",
+                footer: 'Ingrese al menos un registro para poder enviarlo'
+            });
+            return;
+        }
+
+        fetch("DynamicData/FieldTemplates/ScannerHandler.aspx/EnviarPaquetesRuta", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ codigos: colaCodigosEscaneados })
+        })
+            .then(res => res.json())
+            .then(data => {
+                console.log("✅ Respuesta enrutar:", data);
+                const errores = data.d;
+
+                if (errores.length === 0) {
+                    Swal.fire({
+                        icon: "success",
+                        title: "Paquetes en ruta",
+                        text: "Todos los paquetes fueron puestos en ruta exitosamente."
+                    });
+                } else {
+                    const mensajes = errores.map(e => `Código ${e.Codigo}: ${e.Mensaje}`).join('<br>');
+                    Swal.fire({
+                        icon: "warning",
+                        title: "Algunos paquetes no se enrutarán",
+                        html: mensajes
+                    });
+                }
+
+                limpiarTablaQr();
+                document.getElementById("contadorCodigos").innerText = "0";
+            })
+            .catch(error => {
+                console.error("❌ Error al enrutar:", error);
+                Swal.fire({
+                    icon: "error",
+                    title: "Ha ocurrido un error",
+                    text: "No se pudieron enrutar los paquetes",
                     footer: 'Inténtelo nuevamente.'
                 });
             });

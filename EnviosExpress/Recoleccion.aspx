@@ -35,8 +35,7 @@
 <!-- Donde quieres mostrar el escáner -->
 <uc1:ScannerControl ID="ScannerControl1" runat="server" />
    
-    <asp:Button ID="btnAbrirScanner" runat="server" Text="📷 Escanear códigos" CssClass="btn btn-primary" OnClientClick="AbrirModalScanner(); return false;" />
-
+    
 
 
         <div class="container text-center" style="background-color:#2d2d30; height:100%; width:100%;">
@@ -46,7 +45,7 @@
             <br /><br />
            <div class="container text-center row" style="background-color:#f5f5f5; ">
 
-
+               
 <br /><br />
      
         <div class="container text-center" id="reader" style ="width:300px; height:250px">
@@ -57,6 +56,12 @@
             </p>
             <asp:CheckBox ID="CheckBox3" Text="Marcar paquete en Ruta" runat="server" />
             <br />
+            <br />
+            <br />
+            <br />
+            <asp:Button ID="btnAbrirScanner" runat="server" Text="📷 Escanear códigos de paquetes" CssClass="btn btn-primary" OnClientClick="AbrirModalScanner(); return false;" />
+            <h6>Nota: Al escanear los códigos de los paquetes, luego debe ponerlos en ruta.</h6>
+
         </div>
                <asp:Label ID="Label11" runat="server"></asp:Label>
                <br /><br />

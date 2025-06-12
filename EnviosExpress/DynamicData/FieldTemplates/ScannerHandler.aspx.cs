@@ -125,6 +125,62 @@ namespace EnviosExpress
             return resultados;
         }
 
+        [WebMethod]
+        public static List<ResultadoCodigo> EnviarPaquetesRuta(List<CodigoQR> codigos)
+        {
+            DataTable dt = new DataTable();
+            dt.Columns.Add("idpaquete", typeof(int));
+            dt.Columns.Add("fechahora", typeof(DateTime));
+            dt.Columns.Add("descripcion", typeof(string));
+            dt.Columns.Add("idusuario", typeof(long));
+            dt.Columns.Add("idusuariomns", typeof(long));
+            dt.Columns.Add("intentoentrega", typeof(string));
+
+            foreach (var item in codigos)
+            {
+                dt.Rows.Add(item.Codigo, item.Fecha, "-", 1L, 1L, "Intento exitoso");
+            }
+
+            var resultados = new List<ResultadoCodigo>();
+
+            try
+            {
+                using (SqlConnection conn = new SqlConnection("workstation id = EnviosExpress.mssql.somee.com; packet size = 4096; user id = EnviosExpress; pwd=Envios3228@;data source = EnviosExpress.mssql.somee.com;"))
+                {
+                    using (SqlCommand cmd = new SqlCommand("sp_enrutarpaquete", conn))
+                    {
+                        cmd.CommandType = CommandType.StoredProcedure;
+                        SqlParameter tvpParam = cmd.Parameters.AddWithValue("@codigos", dt);
+                        tvpParam.SqlDbType = SqlDbType.Structured;
+
+                        conn.Open();
+                        using (SqlDataReader reader = cmd.ExecuteReader())
+                        {
+                            while (reader.Read())
+                            {
+                                resultados.Add(new ResultadoCodigo
+                                {
+                                    Codigo = Convert.ToInt32(reader["idpaquete"]),
+                                    Exito = false,
+                                    Mensaje = reader["mensaje"].ToString()
+                                });
+                            }
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                resultados.Add(new ResultadoCodigo
+                {
+                    Codigo = -1,
+                    Exito = false,
+                    Mensaje = ex.Message
+                });
+            }
+
+            return resultados;
+        }
 
         public class CodigoQR
         {
