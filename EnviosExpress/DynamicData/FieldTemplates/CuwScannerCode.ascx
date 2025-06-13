@@ -25,7 +25,7 @@
         <div class="modal-content">
             <div class="modal-header P-2">
                 <input type="hidden" id="modoOperacion" value="recolectar" />
-                <h6 class="modal-title" id="lblTitulo" ><strong>Recolectar paquetes</strong></h6>
+                <h6 class="modal-title" id="lblTitulo" ><strong>Escanear paquetes</strong></h6>
                 <label class="switch ml-2">
                     <asp:CheckBox ID="chkOnOff" runat="server" Enabled="false" Visible="false" Checked="false" />
                     <span class="slider round"></span>
@@ -102,14 +102,10 @@
     <tr id="footer"></tr>
 </tfoot>
 <template id="template-footer-content">
-    <th scope="row">Total</th>
-    <td>
-        <button class="btn btn-danger btn-sm" id="vaciar-items" type="button">Vaciar</button>
-        <asp:Button ID="Button1" runat="server" Text="Button" OnClick="Button1_Click" />
-    </td>
+    
+    
 </template>
                 </table>
-                <asp:TextBox ID="TextBox1" runat="server"></asp:TextBox>
                 <asp:GridView ID="gd1" runat="server">
                                        <Columns>
          <asp:BoundField DataField="id" HeaderText="ID"></asp:BoundField>
@@ -123,8 +119,12 @@
                 </asp:GridView>
                 
                 <!--Checkbox para pedir si desea enviarlos a ruta de una vez-->
-                <input type="checkbox" class="form-check-input" id="chkRutaDirecta">
-<label class="form-check-label" for="chkRutaDirecta">¿Enviar paquete a ruta directamente?</label>
+                <div class="form-check" id="grupoRutaDirecta">
+  <input type="checkbox" class="form-check-input" id="chkRutaDirecta">
+  <label class="form-check-label" for="chkRutaDirecta" style="margin-left:17px;">
+    ¿Enviar paquete a ruta directamente?
+  </label>
+</div>
 
 
                 <!--***************************************************-->
@@ -177,6 +177,12 @@
             tituloLabel.innerHTML = `<strong>${titulo}</strong>`;
         } else {
             console.warn("⚠️ lblTitulo no encontrado en el DOM.");
+        }
+
+        // 👉 Mostrar/ocultar checkbox según el modo
+        const grupoRuta = document.getElementById("grupoRutaDirecta");
+        if (grupoRuta) {
+            grupoRuta.style.display = (modo === "recolectar") ? "block" : "none";
         }
 
         try {
@@ -572,10 +578,10 @@
             .then(data => {
                 const errores = data.d;
                 if (errores.length === 0) {
-                    Swal.fire("✔️ Éxito", "Todos los estados se registraron correctamente.", "success");
+                    Swal.fire("✔️ Éxito", "Todos los paquetes se registraron correctamente.", "success");
                 } else {
                     const mensajes = errores.map(e => `Código ${e.Codigo}: ${e.Mensaje}`).join('<br>');
-                    Swal.fire("⚠️ Algunos errores", mensajes, "warning");
+                    Swal.fire("⚠️ Algunos errores en los paquetes", mensajes, "warning");
                 }
                 limpiarTablaQr();
                 document.getElementById("contadorCodigos").innerText = "0";
