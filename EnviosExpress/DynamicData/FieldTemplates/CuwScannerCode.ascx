@@ -122,6 +122,11 @@
 </Columns>
                 </asp:GridView>
                 
+                <!--Checkbox para pedir si desea enviarlos a ruta de una vez-->
+                <input type="checkbox" class="form-check-input" id="chkRutaDirecta">
+<label class="form-check-label" for="chkRutaDirecta">¿Enviar paquete a ruta directamente?</label>
+
+
                 <!--***************************************************-->
             </div>
             <div class="modal-footer">
@@ -539,122 +544,50 @@
     //Función para enviar los datos según el modo:
     function EnviarSegunModo() {
         const modo = document.getElementById("modoOperacion").value;
+        const enviarARuta = document.getElementById("chkRutaDirecta").checked;
 
-        if (modo === "enrutar") {
-            holaEnrutar(); // función específica para enrutar
-        } else {
-            hola(); // función original para recolectar
+        let estado = "recolectado";
+
+        if (modo === "recolectar") {
+            estado = enviarARuta ? "recolectado + ruta de entrega" : "recolectado";
+        } else if (modo === "enrutar") {
+            estado = "Ruta de entrega";
         }
-    }
 
-
-    function hola() {
         if (colaCodigosEscaneados.length === 0) {
             Swal.fire({
                 icon: "error",
-                title: "Ha ocurrido un error",
-                text: "No ha ingresado ningún valor",
-                footer: 'Ingrese por lo menos 1 registro para poder enviarlo'
+                title: "Error",
+                text: "No hay códigos para procesar."
             });
             return;
         }
 
-        console.log("📦 Códigos a enviar:", colaCodigosEscaneados);
-
-        fetch("DynamicData/FieldTemplates/ScannerHandler.aspx/EnviarTodosLosCodigos", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify({ codigos: colaCodigosEscaneados })
-        })
-            .then(response => response.json())
-            .then(data => {
-                console.log("✅ Respuesta del servidor:", data);
-
-                const errores = data.d;
-
-                if (errores.length === 0) {
-                    Swal.fire({
-                        icon: "success",
-                        title: "Registro exitoso",
-                        text: "Todos los códigos fueron registrados correctamente."
-                    });
-                } else {
-                    const mensajes = errores.map(e => `Código ${e.Codigo}: ${e.Mensaje}`).join('<br>');
-                    Swal.fire({
-                        icon: "warning",
-                        title: "Algunos códigos no se registraron",
-                        html: mensajes
-                    });
-                }
-
-                // Limpiar tabla y contador sin importar si hubo errores
-                limpiarTablaQr();
-                document.getElementById("contadorCodigos").innerText = "0";
-            })
-            .catch(error => {
-                console.error("❌ Error al enviar datos:", error);
-                Swal.fire({
-                    icon: "error",
-                    title: "Ha ocurrido un error",
-                    text: "No se pudieron enviar los datos",
-                    footer: 'Inténtelo nuevamente.'
-                });
-            });
-    }
-
-
-    //Función para enviar paquetes en ruta:
-    function holaEnrutar() {
-        if (colaCodigosEscaneados.length === 0) {
-            Swal.fire({
-                icon: "error",
-                title: "Ha ocurrido un error",
-                text: "No ha ingresado ningún valor",
-                footer: 'Ingrese al menos un registro para poder enviarlo'
-            });
-            return;
-        }
-
-        fetch("DynamicData/FieldTemplates/ScannerHandler.aspx/EnviarPaquetesRuta", {
+        fetch("DynamicData/FieldTemplates/ScannerHandler.aspx/RegistrarEstadoPaquetes", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ codigos: colaCodigosEscaneados })
+            body: JSON.stringify({ codigos: colaCodigosEscaneados, estado: estado })
         })
             .then(res => res.json())
             .then(data => {
-                console.log("✅ Respuesta enrutar:", data);
                 const errores = data.d;
-
                 if (errores.length === 0) {
-                    Swal.fire({
-                        icon: "success",
-                        title: "Paquetes en ruta",
-                        text: "Todos los paquetes fueron puestos en ruta exitosamente."
-                    });
+                    Swal.fire("✔️ Éxito", "Todos los estados se registraron correctamente.", "success");
                 } else {
                     const mensajes = errores.map(e => `Código ${e.Codigo}: ${e.Mensaje}`).join('<br>');
-                    Swal.fire({
-                        icon: "warning",
-                        title: "Algunos paquetes no se enrutarán",
-                        html: mensajes
-                    });
+                    Swal.fire("⚠️ Algunos errores", mensajes, "warning");
                 }
-
                 limpiarTablaQr();
                 document.getElementById("contadorCodigos").innerText = "0";
             })
-            .catch(error => {
-                console.error("❌ Error al enrutar:", error);
-                Swal.fire({
-                    icon: "error",
-                    title: "Ha ocurrido un error",
-                    text: "No se pudieron enrutar los paquetes",
-                    footer: 'Inténtelo nuevamente.'
-                });
+            .catch(err => {
+                console.error("Error:", err);
+                Swal.fire("❌ Error", "No se pudo enviar la información al servidor.", "error");
             });
     }
+
+
+
 
 
    
