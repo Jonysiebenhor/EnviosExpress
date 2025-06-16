@@ -57,6 +57,7 @@ namespace EnviosExpress
 
         //WebMethod para que al escanear los códigos, se registren con un estado dependiendo el módulo en el que está.
 
+
         [WebMethod]
         public static List<ResultadoCodigo> RegistrarEstadoPaquetes(List<CodigoQR> codigos, string estado)
         {
@@ -64,11 +65,16 @@ namespace EnviosExpress
             {
                 return RegistrarEntregas(codigos);
             }
+            else if (estado == "intento de entrega")
+            {
+                return RegistrarIntentosEntrega(codigos);
+            }
             else
             {
                 return RegistrarRecoleccionRuta(codigos, estado);
             }
         }
+
 
         private static List<ResultadoCodigo> RegistrarRecoleccionRuta(List<CodigoQR> codigos, string estado)
         {
@@ -159,6 +165,65 @@ namespace EnviosExpress
 
                     conn.Open();
 
+                    using (SqlDataReader reader = cmd.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            resultados.Add(new ResultadoCodigo
+                            {
+                                Codigo = Convert.ToInt32(reader["idpaquete"]),
+                                Exito = false,
+                                Mensaje = reader["mensaje"].ToString()
+                            });
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                resultados.Add(new ResultadoCodigo
+                {
+                    Codigo = -1,
+                    Exito = false,
+                    Mensaje = ex.Message
+                });
+            }
+
+            return resultados;
+        }
+
+
+        private static List<ResultadoCodigo> RegistrarIntentosEntrega(List<CodigoQR> codigos)
+        {
+            var resultados = new List<ResultadoCodigo>();
+
+            DataTable dt = new DataTable();
+            dt.Columns.Add("idpaquete", typeof(int));
+            dt.Columns.Add("fechahora", typeof(DateTime));
+            dt.Columns.Add("estado", typeof(string)); // El motivo va aquí
+            dt.Columns.Add("descripcion", typeof(string));
+            dt.Columns.Add("idusuario", typeof(long));
+            dt.Columns.Add("idusuariomns", typeof(long));
+            dt.Columns.Add("intentoentrega", typeof(string)); // <- Será null
+
+            string motivo = HttpContext.Current.Request.Params["motivo"];
+            if (string.IsNullOrEmpty(motivo)) motivo = "Intento de entrega fallido";
+
+            foreach (var item in codigos)
+            {
+                dt.Rows.Add(item.Codigo, item.Fecha, motivo, "-", 1L, 1L, DBNull.Value); // <== importante
+            }
+
+            try
+            {
+                using (SqlConnection conn = new SqlConnection("workstation id=EnviosExpress.mssql.somee.com;packet size=4096;user id=EnviosExpress;pwd=Envios3228@;data source=EnviosExpress.mssql.somee.com;"))
+                using (SqlCommand cmd = new SqlCommand("sp_intento_entrega_paquete", conn))
+                {
+                    cmd.CommandType = CommandType.StoredProcedure;
+                    SqlParameter tvpParam = cmd.Parameters.AddWithValue("@codigos", dt);
+                    tvpParam.SqlDbType = SqlDbType.Structured;
+
+                    conn.Open();
                     using (SqlDataReader reader = cmd.ExecuteReader())
                     {
                         while (reader.Read())

@@ -117,6 +117,26 @@
 
 </Columns>
                 </asp:GridView>
+
+                <!-- SOLO visible en modo intento -->
+<div id="bloqueMotivoIntento" class="form-group" style="display:none;">
+  <label for="motivoIntentoEntrega">Motivo del intento fallido:</label>
+  <select id="motivoIntentoEntrega" class="form-control">
+    <option value="--Seleccionar">--Seleccionar</option>
+    <option>No Quizo Recibir</option>
+    <option>No Contesta LLamadas</option>
+    <option>No Llego a Punto de Encuentro</option>
+    <option>No esta de Acuerdo Con el Precio</option>
+    <option>No Recibe Fines de Semana</option>
+    <option>Ya No Lo Desea</option>
+    <option>Nadie En Casa</option>
+    <option>Direccion Incorrecta</option>
+    <option>Lugar Muy Retirado</option>
+    <option>Desperfectos Mecanicos</option>
+    <option>Bloqueos, Derrumbes, Manifestaciones</option>
+  </select>
+</div>
+
                 
                 <!--Checkbox para pedir si desea enviarlos a ruta de una vez-->
                 <div class="form-check" id="grupoRutaDirecta">
@@ -168,6 +188,14 @@
     async function AbrirModalScanner(modo = "recolectar") {
         // Establecer modo
         document.getElementById("modoOperacion").value = modo;
+
+
+        const bloqueMotivo = document.getElementById("bloqueMotivoIntento");
+        if (bloqueMotivo) {
+            bloqueMotivo.style.display = (modo === "intento") ? "block" : "none";
+        }
+
+
 
         // Establecer título dinámico
         let titulo = "Escanear paquetes";
@@ -561,16 +589,25 @@
 
     function EnviarSegunModo() {
         const modo = document.getElementById("modoOperacion").value;
-        const enviarARuta = document.getElementById("chkRutaDirecta")?.checked ?? false;
+        const enviarARuta = document.getElementById("chkRutaDirecta")?.checked || false;
+        const motivo = document.getElementById("motivoIntentoEntrega")?.value || "";
 
         let estado = "recolectado";
 
-        if (modo === "recolectar") {
-            estado = enviarARuta ? "recolectado + ruta de entrega" : "recolectado";
-        } else if (modo === "enrutar") {
-            estado = "Ruta de entrega";
-        } else if (modo === "entregar") {
-            estado = "entregado"; // nuevo estado para entrega
+        // Determinar el estado según el modo
+        switch (modo) {
+            case "recolectar":
+                estado = enviarARuta ? "recolectado + ruta de entrega" : "recolectado";
+                break;
+            case "enrutar":
+                estado = "Ruta de entrega";
+                break;
+            case "entregar":
+                estado = "entregado";
+                break;
+            case "intento":
+                estado = "intento de entrega";
+                break;
         }
 
         if (colaCodigosEscaneados.length === 0) {
@@ -582,10 +619,39 @@
             return;
         }
 
+        // Validar motivo en caso de intento de entrega
+        if (modo === "intento") {
+            if (!motivo || motivo === "--Seleccionar") {
+                Swal.fire("⚠️", "Debes seleccionar un motivo de intento fallido.", "warning");
+                return;
+            }
+        }
+
+        if (modo === "intento") {
+            
+            if (!motivo || motivo === "--Seleccionar") {
+                Swal.fire("⚠️", "Debes seleccionar un motivo para el intento fallido.", "warning");
+                return;
+            }
+            estado = motivo; // se usa como estado
+        }
+
+
+        // Armar el payload (se agrega 'motivo' solo si aplica)
+        let payload = {
+            codigos: colaCodigosEscaneados,
+            estado: estado
+        };
+
+        if (modo === "intento") {
+            payload.motivo = motivo;
+        }
+
+        // Enviar datos
         fetch("DynamicData/FieldTemplates/ScannerHandler.aspx/RegistrarEstadoPaquetes", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ codigos: colaCodigosEscaneados, estado: estado })
+            body: JSON.stringify(payload)
         })
             .then(res => res.json())
             .then(data => {
@@ -604,6 +670,7 @@
                 Swal.fire("❌ Error", "No se pudo enviar la información al servidor.", "error");
             });
     }
+
 
 
 
