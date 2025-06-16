@@ -52,142 +52,25 @@ namespace EnviosExpress
             public string Mensaje { get; set; }
         }
 
-      /*  [WebMethod]
-        public static List<ResultadoCodigo> EnviarTodosLosCodigos(List<CodigoQR> codigos)
-        {
-            DataTable dt = new DataTable();
-            dt.Columns.Add("idpaquete", typeof(int));
-            dt.Columns.Add("fechahora", typeof(DateTime));
-            dt.Columns.Add("estado", typeof(string));
-            dt.Columns.Add("descripcion", typeof(string));
-            dt.Columns.Add("idusuario", typeof(long));
-            dt.Columns.Add("idusuariomns", typeof(long));
-            dt.Columns.Add("intentoentrega", typeof(string));
 
-            foreach (var item in codigos)
-            {
-                dt.Rows.Add(
-                    item.Codigo,
-                    item.Fecha,
-                    "pendiente de entregar",
-                    "-",
-                    1L,
-                    1L,
-                    "Intento exitoso"
-                );
-            }
 
-            var resultados = new List<ResultadoCodigo>();
 
-            try
-            {
-                using (SqlConnection conn = new SqlConnection("workstation id = EnviosExpress.mssql.somee.com; packet size = 4096; user id = EnviosExpress; pwd=Envios3228@;data source = EnviosExpress.mssql.somee.com;"))
-                {
-                    using (SqlCommand cmd = new SqlCommand("sp_recolectarpaquete", conn))
-
-                    {
-                        cmd.CommandType = CommandType.StoredProcedure;
-                        SqlParameter tvpParam = cmd.Parameters.AddWithValue("@codigos", dt);
-                        tvpParam.SqlDbType = SqlDbType.Structured;
-
-                        conn.Open();
-
-                        // Leer los resultados del SP
-                        using (SqlDataReader reader = cmd.ExecuteReader())
-                        {
-                            while (reader.Read())
-                            {
-                                var id = Convert.ToInt32(reader["idpaquete"]);
-                                var msg = reader["mensaje"].ToString();
-
-                                resultados.Add(new ResultadoCodigo
-                                {
-                                    Codigo = id,
-                                    Exito = msg.Contains("exitosamente"), // <- marcamos como éxito si lo dice
-                                    Mensaje = msg
-                                });
-                            }
-
-                        }
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                resultados.Add(new ResultadoCodigo
-                {
-                    Codigo = -1, // ← Indica error general
-                    Exito = false,
-                    Mensaje = ex.Message
-                });
-            }
-
-            return resultados;
-        }
-
-        [WebMethod]
-        public static List<ResultadoCodigo> EnviarPaquetesRuta(List<CodigoQR> codigos)
-        {
-            DataTable dt = new DataTable();
-            dt.Columns.Add("idpaquete", typeof(int));
-            dt.Columns.Add("fechahora", typeof(DateTime));
-            dt.Columns.Add("descripcion", typeof(string));
-            dt.Columns.Add("idusuario", typeof(long));
-            dt.Columns.Add("idusuariomns", typeof(long));
-            dt.Columns.Add("intentoentrega", typeof(string));
-
-            foreach (var item in codigos)
-            {
-                dt.Rows.Add(item.Codigo, item.Fecha, "-", 1L, 1L, "Intento exitoso");
-            }
-
-            var resultados = new List<ResultadoCodigo>();
-
-            try
-            {
-                using (SqlConnection conn = new SqlConnection("workstation id = EnviosExpress.mssql.somee.com; packet size = 4096; user id = EnviosExpress; pwd=Envios3228@;data source = EnviosExpress.mssql.somee.com;"))
-                {
-                    using (SqlCommand cmd = new SqlCommand("sp_enrutarpaquete", conn))
-                    {
-                        cmd.CommandType = CommandType.StoredProcedure;
-                        SqlParameter tvpParam = cmd.Parameters.AddWithValue("@codigos", dt);
-                        tvpParam.SqlDbType = SqlDbType.Structured;
-
-                        conn.Open();
-                        using (SqlDataReader reader = cmd.ExecuteReader())
-                        {
-                            while (reader.Read())
-                            {
-                                resultados.Add(new ResultadoCodigo
-                                {
-                                    Codigo = Convert.ToInt32(reader["idpaquete"]),
-                                    Exito = false,
-                                    Mensaje = reader["mensaje"].ToString()
-                                });
-                            }
-                        }
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                resultados.Add(new ResultadoCodigo
-                {
-                    Codigo = -1,
-                    Exito = false,
-                    Mensaje = ex.Message
-                });
-            }
-
-            return resultados;
-        }
-        */
-        
-
-        //WebMethod para que al escanear los códigos, se registren con estado "Ruta de entrega" en vez de "Recolectado.
+        //WebMethod para que al escanear los códigos, se registren con un estado dependiendo el módulo en el que está.
 
         [WebMethod]
         public static List<ResultadoCodigo> RegistrarEstadoPaquetes(List<CodigoQR> codigos, string estado)
+        {
+            if (estado == "entregado")
+            {
+                return RegistrarEntregas(codigos);
+            }
+            else
+            {
+                return RegistrarRecoleccionRuta(codigos, estado);
+            }
+        }
+
+        private static List<ResultadoCodigo> RegistrarRecoleccionRuta(List<CodigoQR> codigos, string estado)
         {
             var resultados = new List<ResultadoCodigo>();
 
@@ -211,7 +94,6 @@ namespace EnviosExpress
                 using (SqlCommand cmd = new SqlCommand("sp_registrar_estado_paquete", conn))
                 {
                     cmd.CommandType = CommandType.StoredProcedure;
-
                     SqlParameter tvpParam = cmd.Parameters.AddWithValue("@codigos", dt);
                     tvpParam.SqlDbType = SqlDbType.Structured;
 
@@ -242,7 +124,70 @@ namespace EnviosExpress
 
             return resultados;
         }
-        
+
+        private static List<ResultadoCodigo> RegistrarEntregas(List<CodigoQR> codigos)
+        {
+            var resultados = new List<ResultadoCodigo>();
+
+            // Asegurarse de que las columnas coincidan EXACTAMENTE con TipoEntregaPaquete
+            DataTable dt = new DataTable();
+            dt.Columns.Add("idpaquete", typeof(int));
+            dt.Columns.Add("fechahora", typeof(DateTime));
+            dt.Columns.Add("descripcion", typeof(string));
+            dt.Columns.Add("idusuario", typeof(long));
+            dt.Columns.Add("idusuariomns", typeof(long));
+            dt.Columns.Add("intentoentrega", typeof(string));
+
+            foreach (var item in codigos)
+            {
+                dt.Rows.Add(item.Codigo, item.Fecha, "-", 1L, 1L, "Intento exitoso");
+            }
+
+            try
+            {
+                // Cadena de conexión correcta (misma que usás en otros métodos)
+                string cadenaConexion = "workstation id=EnviosExpress.mssql.somee.com;packet size=4096;user id=EnviosExpress;pwd=Envios3228@;data source=EnviosExpress.mssql.somee.com;";
+
+                using (SqlConnection conn = new SqlConnection(cadenaConexion))
+                using (SqlCommand cmd = new SqlCommand("sp_entregar_paquete", conn))
+                {
+                    cmd.CommandType = CommandType.StoredProcedure;
+
+                    // Parámetro tipo tabla
+                    SqlParameter tvpParam = cmd.Parameters.AddWithValue("@codigos", dt);
+                    tvpParam.SqlDbType = SqlDbType.Structured;
+
+                    conn.Open();
+
+                    using (SqlDataReader reader = cmd.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            resultados.Add(new ResultadoCodigo
+                            {
+                                Codigo = Convert.ToInt32(reader["idpaquete"]),
+                                Exito = false,
+                                Mensaje = reader["mensaje"].ToString()
+                            });
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                resultados.Add(new ResultadoCodigo
+                {
+                    Codigo = -1,
+                    Exito = false,
+                    Mensaje = ex.Message
+                });
+            }
+
+            return resultados;
+        }
+
+
+
 
         public class CodigoQR
         {

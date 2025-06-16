@@ -38,7 +38,11 @@
 
 
     <div class="input-group-append">
-         <button type="button" id="lkbScanner" class="btn btn-sm btn-info rounded-right" onclick="AbrirModalScanner(); return false;"><i class="fa fa-barcode" aria-hidden="true"></i></button>
+         <button type="button" id="lkbScanner" class="btn btn-sm btn-info" onclick="AbrirModalScanner('entregar'); return false;">
+    <i class="fa fa-barcode" aria-hidden="true"></i> Escanear paquetes para entrega
+</button>
+
+
     </div>
     <uc2:CuwScannerCode runat="server" ID="CuwScannerCode" />
     <asp:Button ID="Button2" runat="server" Text="Button" CssClass="Ocultar" />
@@ -76,7 +80,7 @@
         <asp:Button ID="btnrecolectar" runat="server" OnClick="btnrecolectar_Click" Text="Entregar" BackColor="#339933" ForeColor="White" />
         
         <br/><br/></div>
- 
+    
    <!--script>
         $(document).ready(function () {
             $('#reader').html5_qrcode(function (data) {

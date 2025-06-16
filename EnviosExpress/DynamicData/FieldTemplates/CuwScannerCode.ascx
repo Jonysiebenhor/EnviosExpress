@@ -170,7 +170,12 @@
         document.getElementById("modoOperacion").value = modo;
 
         // Establecer título dinámico
-        const titulo = (modo === "enrutar") ? "Enrutar paquetes" : "Recolectar paquetes";
+        let titulo = "Escanear paquetes";
+
+        if (modo === "recolectar") titulo = "Recolectar paquetes";
+        else if (modo === "enrutar") titulo = "Enrutar paquetes";
+        else if (modo === "entregar") titulo = "Entrega de paquetes";
+
         const tituloLabel = document.getElementById("lblTitulo");
 
         if (tituloLabel) {
@@ -229,6 +234,11 @@
             console.error("❌ Error al abrir el modal del scanner:", err);
             Swal.fire("Error", "No se pudo abrir el escáner correctamente.", "error");
         }
+
+        console.log("🧭 Modo actual:", modo);
+        console.log("📦 Estado se definirá en EnviarSegunModo()");
+
+
     }
 
 
@@ -547,10 +557,11 @@
         Swal.fire("Tabla limpiada", "Ahora puedes volver a escanear.", "success");
     }
 
-    //Función para enviar los datos según el modo:
+    //Función para enviar los códigos a la base de datos
+
     function EnviarSegunModo() {
         const modo = document.getElementById("modoOperacion").value;
-        const enviarARuta = document.getElementById("chkRutaDirecta").checked;
+        const enviarARuta = document.getElementById("chkRutaDirecta")?.checked ?? false;
 
         let estado = "recolectado";
 
@@ -558,6 +569,8 @@
             estado = enviarARuta ? "recolectado + ruta de entrega" : "recolectado";
         } else if (modo === "enrutar") {
             estado = "Ruta de entrega";
+        } else if (modo === "entregar") {
+            estado = "entregado"; // nuevo estado para entrega
         }
 
         if (colaCodigosEscaneados.length === 0) {
@@ -593,9 +606,5 @@
     }
 
 
-
-
-
-   
 
 </script>
