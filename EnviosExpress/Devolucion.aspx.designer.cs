@@ -15,6 +15,15 @@ namespace EnviosExpress
     {
 
         /// <summary>
+        /// Control CuwScannerCode.
+        /// </summary>
+        /// <remarks>
+        /// Campo generado automáticamente.
+        /// Para modificarlo, mueva la declaración del campo del archivo del diseñador al archivo de código subyacente.
+        /// </remarks>
+        protected global::EnviosExpress.DynamicData.FieldTemplates.CuwScannerCode CuwScannerCode;
+
+        /// <summary>
         /// Control Label1.
         /// </summary>
         /// <remarks>
@@ -33,24 +42,6 @@ namespace EnviosExpress
         protected global::System.Web.UI.WebControls.TextBox txtcodigoo;
 
         /// <summary>
-        /// Control Label12.
-        /// </summary>
-        /// <remarks>
-        /// Campo generado automáticamente.
-        /// Para modificarlo, mueva la declaración del campo del archivo del diseñador al archivo de código subyacente.
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.Label Label12;
-
-        /// <summary>
-        /// Control txtrecibido.
-        /// </summary>
-        /// <remarks>
-        /// Campo generado automáticamente.
-        /// Para modificarlo, mueva la declaración del campo del archivo del diseñador al archivo de código subyacente.
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.TextBox txtrecibido;
-
-        /// <summary>
         /// Control DropDownList1.
         /// </summary>
         /// <remarks>
@@ -58,15 +49,6 @@ namespace EnviosExpress
         /// Para modificarlo, mueva la declaración del campo del archivo del diseñador al archivo de código subyacente.
         /// </remarks>
         protected global::System.Web.UI.WebControls.DropDownList DropDownList1;
-
-        /// <summary>
-        /// Control Label11.
-        /// </summary>
-        /// <remarks>
-        /// Campo generado automáticamente.
-        /// Para modificarlo, mueva la declaración del campo del archivo del diseñador al archivo de código subyacente.
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.Label Label11;
 
         /// <summary>
         /// Control btnrecolectar.

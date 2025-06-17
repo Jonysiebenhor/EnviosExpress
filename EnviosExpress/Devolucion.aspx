@@ -1,78 +1,64 @@
 ﻿<%@ Page Title="" Language="C#" MasterPageFile="~/PaginaMaestra.Master" AutoEventWireup="true" CodeBehind="Devolucion.aspx.cs" Inherits="EnviosExpress.Devolucion" %>
+<%@ Register Src="~/DynamicData/FieldTemplates/CuwScannerCode.ascx" TagPrefix="uc" TagName="CuwScannerCode" %>
+
 <asp:Content ID="Content1" ContentPlaceHolderID="title" runat="server">
     Envios Express
 </asp:Content>
 <asp:Content ID="Content2" ContentPlaceHolderID="head" runat="server">
 </asp:Content>
 <asp:Content ID="Content3" ContentPlaceHolderID="body" runat="server">
+    <uc:CuwScannerCode runat="server" ID="CuwScannerCode" />
 
-        <div class="container text-center" style="background-color:#2d2d30; height:100%; width:100%;">
-             <br />
-            <br />
-            <asp:Label ID="Label1" runat="server" Text="Devolución" Font-Bold="True" Font-Size="XX-Large" ForeColor="White"></asp:Label>
-            <br /><br />
-           <div class="container text-center""row" style="background-color:#f5f5f5; ">
-
-
-<br /><br />
-     
-        <div class="container text-center" id="reader" style ="width:300px; height:250px">
-           
- <p>
-            Numero de Guia:
-        <asp:TextBox ID="txtcodigoo" runat="server" Width="187px"></asp:TextBox>
-            </p>
-           
-            <p>
-                <asp:Label ID="Label12" runat="server" Text="Recibido por:" Visible="False"></asp:Label>
-            </p>
-            <p>
-        <asp:TextBox ID="txtrecibido" runat="server" Width="187px" Visible="False"></asp:TextBox>
-            </p>
-            <br />
-        </div>
-               <br />
-               Dellar Motivo de Devolución:
-               <br />
-               <asp:DropDownList ID="DropDownList1" runat="server" AutoPostBack="True" OnSelectedIndexChanged="DropDownList1_SelectedIndexChanged">
-                   <asp:ListItem Value="--Seleccionar">--Seleccionar</asp:ListItem>
-                   <asp:ListItem>Entregado</asp:ListItem>
-                   <asp:ListItem Value="No Quizo Recibir">No Quizo Recibir</asp:ListItem>
-                   <asp:ListItem>Remitente lo Solicito</asp:ListItem>
-                   <asp:ListItem Value="No Contesta LLamadas">No Contesta LLamadas</asp:ListItem>
-                   <asp:ListItem>No Llego a Punto de Encuentro</asp:ListItem>
-                   <asp:ListItem>No esta de Acuerdo Con el Precio</asp:ListItem>
-                   <asp:ListItem>No Recibe Fines de Semana</asp:ListItem>
-                   <asp:ListItem>Ya No Lo Desea</asp:ListItem>
-                   <asp:ListItem>Nadie En Casa</asp:ListItem>
-                   <asp:ListItem>Dirección Incorrecta</asp:ListItem>
-                   <asp:ListItem>Lugar Muy Retirado</asp:ListItem>
-                   <asp:ListItem>Desperfectos Mecanicos</asp:ListItem>
-                   <asp:ListItem>Bloqueos, Derrumbes, Manifestaciones</asp:ListItem>
-               </asp:DropDownList>
-               <br />
-               <asp:Label ID="Label11" runat="server"></asp:Label>
-               <br /><br />
-     </div>
+    <div class="container" style="background-color:#2d2d30; height:100%; width:100%;">
         <br />
-     
+        <asp:Label ID="Label1" runat="server" Text="Devolución" Font-Bold="True" Font-Size="XX-Large" ForeColor="White"></asp:Label>
+        <br /><br />
 
-     
+        <div class="container py-4" style="background-color:#f5f5f5; border-radius:8px;">
 
-        <asp:Button ID="btnrecolectar" runat="server" OnClick="btnrecolectar_Click" Text="Devolución" BackColor="#339933" ForeColor="White" />
-        
-        &nbsp;&nbsp;&nbsp;&nbsp;
-     
+            <!-- Número de guía + botón escanear -->
+            <div class="form-group row justify-content-center align-items-center">
+                <label for="txtcodigoo" class="col-auto col-form-label font-weight-bold">Número de Guía:</label>
+                <div class="col-auto">
+                    <asp:TextBox ID="txtcodigoo" runat="server" CssClass="form-control" Width="200px"></asp:TextBox>
+                </div>
+                <div class="col-auto">
+                    <button type="button" class="btn btn-info" onclick="AbrirModalScanner('devolucion'); return false;">
+                        <i class="fa fa-barcode"></i> Escanear
+                    </button>
+                </div>
+            </div>
 
-     
+            <!-- Motivo de devolución -->
+            <div class="form-group row justify-content-center align-items-center mt-3">
+                <label for="DropDownList1" class="col-auto col-form-label font-weight-bold">Motivo de Devolución:</label>
+                <div class="col-auto">
+                    <asp:DropDownList ID="DropDownList1" runat="server" CssClass="form-control" Width="250px" AutoPostBack="True" OnSelectedIndexChanged="DropDownList1_SelectedIndexChanged">
+                        <asp:ListItem Value="--Seleccionar">--Seleccionar</asp:ListItem>
+                        <asp:ListItem>Entregado</asp:ListItem>
+                        <asp:ListItem>No Quizo Recibir</asp:ListItem>
+                        <asp:ListItem>Remitente lo Solicito</asp:ListItem>
+                        <asp:ListItem>No Contesta LLamadas</asp:ListItem>
+                        <asp:ListItem>No Llego a Punto de Encuentro</asp:ListItem>
+                        <asp:ListItem>No esta de Acuerdo Con el Precio</asp:ListItem>
+                        <asp:ListItem>No Recibe Fines de Semana</asp:ListItem>
+                        <asp:ListItem>Ya No Lo Desea</asp:ListItem>
+                        <asp:ListItem>Nadie En Casa</asp:ListItem>
+                        <asp:ListItem>Dirección Incorrecta</asp:ListItem>
+                        <asp:ListItem>Lugar Muy Retirado</asp:ListItem>
+                        <asp:ListItem>Desperfectos Mecanicos</asp:ListItem>
+                        <asp:ListItem>Bloqueos, Derrumbes, Manifestaciones</asp:ListItem>
+                    </asp:DropDownList>
+                </div>
+            </div>
 
-        <asp:Button ID="btnrecolectar0" runat="server" OnClick="regresar_Click" Text="&lt; Regresar" BackColor="#FF3300" ForeColor="White" />
-        
-        &nbsp;&nbsp;&nbsp;&nbsp;
-     
+            <!-- Botones -->
+            <div class="text-center mt-4">
+                <asp:Button ID="btnrecolectar" runat="server" OnClick="btnrecolectar_Click" Text="Registrar Devolución" BackColor="#339933" ForeColor="White" CssClass="btn btn-success mr-2" />
+                <asp:Button ID="btnrecolectar0" runat="server" OnClick="regresar_Click" Text="&lt; Regresar" BackColor="#FF3300" ForeColor="White" CssClass="btn btn-danger" />
+            </div>
 
-        <br/><br/>
         </div>
-    </asp:Content>
-
-
+        <br />
+    </div>
+</asp:Content>

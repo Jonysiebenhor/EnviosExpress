@@ -118,7 +118,7 @@
 </Columns>
                 </asp:GridView>
 
-                <!-- SOLO visible en modo intento -->
+                <!-- SOLO visible en modo intento de entrega -->
 <div id="bloqueMotivoIntento" class="form-group" style="display:none;">
   <label for="motivoIntentoEntrega">Motivo del intento fallido:</label>
   <select id="motivoIntentoEntrega" class="form-control">
@@ -192,7 +192,8 @@
 
         const bloqueMotivo = document.getElementById("bloqueMotivoIntento");
         if (bloqueMotivo) {
-            bloqueMotivo.style.display = (modo === "intento") ? "block" : "none";
+            bloqueMotivo.style.display = (modo === "intento" || modo === "devolucion") ? "block" : "none";
+
         }
 
 
@@ -608,6 +609,15 @@
             case "intento":
                 estado = "intento de entrega";
                 break;
+            case "devolucion":
+                const motivoCombo = document.getElementById("motivoIntentoEntrega")?.value || "";
+                if (!motivoCombo || motivoCombo === "--Seleccionar") {
+                    Swal.fire("⚠️", "Debes seleccionar un motivo de devolución.", "warning");
+                    return;
+                }
+                estado = "Devolución " + motivoCombo;
+                break;
+
         }
 
         if (colaCodigosEscaneados.length === 0) {
