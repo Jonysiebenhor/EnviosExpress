@@ -7,7 +7,7 @@
 <asp:Content ID="Content2" ContentPlaceHolderID="head" runat="server">
 </asp:Content>
 <asp:Content ID="Content3" ContentPlaceHolderID="body" runat="server">
-    <uc:CuwScannerCode runat="server" ID="CuwScannerCode" />
+    <uc:CuwScannerCode runat="server" ID="CuwScannerCode" /> 
 
     <div class="container" style="background-color:#2d2d30; height:100%; width:100%;">
         <br />
