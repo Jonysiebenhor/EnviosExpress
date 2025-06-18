@@ -58,30 +58,37 @@ namespace EnviosExpress
         //WebMethod para que al escanear los códigos, se registren con un estado dependiendo el módulo en el que está.
 
 
-        [WebMethod]
+        [WebMethod(EnableSession = true)]
         public static List<ResultadoCodigo> RegistrarEstadoPaquetes(List<CodigoQR> codigos, string estado)
         {
+            // Obtener el ID del usuario logueado desde la sesión
+            int idUsuarioMns = 0;
+            if (HttpContext.Current.Session["id"] != null)
+            {
+                int.TryParse(HttpContext.Current.Session["id"].ToString(), out idUsuarioMns);
+            }
+
             if (estado == "entregado")
             {
-                return RegistrarEntregas(codigos);
+                return RegistrarEntregas(codigos, idUsuarioMns);
             }
             else if (estado == "intento de entrega")
             {
-                return RegistrarIntentosEntrega(codigos);
+                return RegistrarIntentosEntrega(codigos, idUsuarioMns);
             }
             else if (estado.StartsWith("Devolución "))
             {
-                return RegistrarDevoluciones(codigos, estado);
+                return RegistrarDevoluciones(codigos, estado, idUsuarioMns);
             }
             else
             {
-                return RegistrarRecoleccionRuta(codigos, estado);
+                return RegistrarRecoleccionRuta(codigos, estado, idUsuarioMns);
             }
-
         }
 
 
-        private static List<ResultadoCodigo> RegistrarRecoleccionRuta(List<CodigoQR> codigos, string estado)
+
+        private static List<ResultadoCodigo> RegistrarRecoleccionRuta(List<CodigoQR> codigos, string estado, int idUsuarioMns)
         {
             var resultados = new List<ResultadoCodigo>();
 
@@ -96,7 +103,7 @@ namespace EnviosExpress
 
             foreach (var item in codigos)
             {
-                dt.Rows.Add(item.Codigo, item.Fecha, estado, "-", 1L, 1L, "Intento exitoso");
+                dt.Rows.Add(item.Codigo, item.Fecha, estado, "-", 1L, idUsuarioMns, DBNull.Value);
             }
 
             try
@@ -136,11 +143,13 @@ namespace EnviosExpress
             return resultados;
         }
 
-        private static List<ResultadoCodigo> RegistrarEntregas(List<CodigoQR> codigos)
+
+        //Para registrar entregas:
+
+        private static List<ResultadoCodigo> RegistrarEntregas(List<CodigoQR> codigos, int idUsuarioMns)
         {
             var resultados = new List<ResultadoCodigo>();
 
-            // Asegurarse de que las columnas coincidan EXACTAMENTE con TipoEntregaPaquete
             DataTable dt = new DataTable();
             dt.Columns.Add("idpaquete", typeof(int));
             dt.Columns.Add("fechahora", typeof(DateTime));
@@ -151,25 +160,20 @@ namespace EnviosExpress
 
             foreach (var item in codigos)
             {
-                dt.Rows.Add(item.Codigo, item.Fecha, "-", 1L, 1L, "Intento exitoso");
+                dt.Rows.Add(item.Codigo, item.Fecha, "-", 1L, idUsuarioMns, "Intento exitoso");
             }
 
             try
             {
-                // Cadena de conexión correcta (misma que usás en otros métodos)
-                string cadenaConexion = "workstation id=EnviosExpress.mssql.somee.com;packet size=4096;user id=EnviosExpress;pwd=Envios3228@;data source=EnviosExpress.mssql.somee.com;";
-
-                using (SqlConnection conn = new SqlConnection(cadenaConexion))
+                using (SqlConnection conn = new SqlConnection("workstation id=EnviosExpress.mssql.somee.com;packet size=4096;user id=EnviosExpress;pwd=Envios3228@;data source=EnviosExpress.mssql.somee.com;"))
                 using (SqlCommand cmd = new SqlCommand("sp_entregar_paquete", conn))
                 {
                     cmd.CommandType = CommandType.StoredProcedure;
 
-                    // Parámetro tipo tabla
                     SqlParameter tvpParam = cmd.Parameters.AddWithValue("@codigos", dt);
                     tvpParam.SqlDbType = SqlDbType.Structured;
 
                     conn.Open();
-
                     using (SqlDataReader reader = cmd.ExecuteReader())
                     {
                         while (reader.Read())
@@ -198,25 +202,27 @@ namespace EnviosExpress
         }
 
 
-        private static List<ResultadoCodigo> RegistrarIntentosEntrega(List<CodigoQR> codigos)
+        //Intento de entrega: 
+
+        private static List<ResultadoCodigo> RegistrarIntentosEntrega(List<CodigoQR> codigos, int idUsuarioMns)
         {
             var resultados = new List<ResultadoCodigo>();
 
             DataTable dt = new DataTable();
             dt.Columns.Add("idpaquete", typeof(int));
             dt.Columns.Add("fechahora", typeof(DateTime));
-            dt.Columns.Add("estado", typeof(string)); // El motivo va aquí
+            dt.Columns.Add("estado", typeof(string));
             dt.Columns.Add("descripcion", typeof(string));
             dt.Columns.Add("idusuario", typeof(long));
             dt.Columns.Add("idusuariomns", typeof(long));
-            dt.Columns.Add("intentoentrega", typeof(string)); // <- Será null
+            dt.Columns.Add("intentoentrega", typeof(string));
 
             string motivo = HttpContext.Current.Request.Params["motivo"];
             if (string.IsNullOrEmpty(motivo)) motivo = "Intento de entrega fallido";
 
             foreach (var item in codigos)
             {
-                dt.Rows.Add(item.Codigo, item.Fecha, motivo, "-", 1L, 1L, DBNull.Value); // <== importante
+                dt.Rows.Add(item.Codigo, item.Fecha, motivo, "-", 1L, idUsuarioMns, DBNull.Value);
             }
 
             try
@@ -257,7 +263,10 @@ namespace EnviosExpress
         }
 
 
-        private static List<ResultadoCodigo> RegistrarDevoluciones(List<CodigoQR> codigos, string estadoCompleto)
+        //Devoluciones: 
+
+
+        private static List<ResultadoCodigo> RegistrarDevoluciones(List<CodigoQR> codigos, string estadoCompleto, int idUsuarioMns)
         {
             var resultados = new List<ResultadoCodigo>();
 
@@ -273,7 +282,7 @@ namespace EnviosExpress
 
             foreach (var item in codigos)
             {
-                dt.Rows.Add(item.Codigo, item.Fecha, motivo, "-", 1L, 1L);
+                dt.Rows.Add(item.Codigo, item.Fecha, motivo, "-", 1L, idUsuarioMns); //idUsuarioMns Es el usuario que se logeó
             }
 
             try
@@ -312,6 +321,7 @@ namespace EnviosExpress
 
             return resultados;
         }
+
 
 
 

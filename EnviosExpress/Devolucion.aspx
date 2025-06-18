@@ -4,10 +4,12 @@
 <asp:Content ID="Content1" ContentPlaceHolderID="title" runat="server">
     Envios Express
 </asp:Content>
+
 <asp:Content ID="Content2" ContentPlaceHolderID="head" runat="server">
 </asp:Content>
+
 <asp:Content ID="Content3" ContentPlaceHolderID="body" runat="server">
-    <uc:CuwScannerCode runat="server" ID="CuwScannerCode" /> 
+    <uc:CuwScannerCode runat="server" ID="CuwScannerCode" />
 
     <div class="container" style="background-color:#2d2d30; height:100%; width:100%;">
         <br />
@@ -50,6 +52,19 @@
                         <asp:ListItem>Bloqueos, Derrumbes, Manifestaciones</asp:ListItem>
                     </asp:DropDownList>
                 </div>
+            </div>
+
+            <!-- Campo "Recibido por" (solo si se selecciona Entregado) -->
+            <div class="form-group row justify-content-center align-items-center" id="grupoRecibido">
+                <asp:Label ID="Label12" runat="server" Text="¿Quién recibió el paquete?" CssClass="col-auto col-form-label font-weight-bold" />
+                <div class="col-auto">
+                    <asp:TextBox ID="txtrecibido" runat="server" CssClass="form-control" Width="250px" />
+                </div>
+            </div>
+
+            <!-- Mensaje de error dinámico -->
+            <div class="form-group row justify-content-center">
+                <asp:Label ID="Label11" runat="server" CssClass="text-danger" Font-Bold="true" />
             </div>
 
             <!-- Botones -->
