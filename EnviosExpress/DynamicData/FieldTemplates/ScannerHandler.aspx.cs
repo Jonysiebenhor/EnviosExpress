@@ -59,9 +59,8 @@ namespace EnviosExpress
 
 
         [WebMethod(EnableSession = true)]
-        public static List<ResultadoCodigo> RegistrarEstadoPaquetes(List<CodigoQR> codigos, string estado)
+        public static List<ResultadoCodigo> RegistrarEstadoPaquetes(List<CodigoQR> codigos, string estado, string motivo, bool visitaDestinatario = false)
         {
-            // Obtener el ID del usuario logueado desde la sesión
             int idUsuarioMns = 0;
             if (HttpContext.Current.Session["id"] != null)
             {
@@ -74,7 +73,7 @@ namespace EnviosExpress
             }
             else if (estado == "intento de entrega")
             {
-                return RegistrarIntentosEntrega(codigos, idUsuarioMns);
+                return RegistrarIntentosEntrega(codigos, idUsuarioMns, motivo, visitaDestinatario); // <- 🔧 AQUÍ
             }
             else if (estado.StartsWith("Devolución "))
             {
@@ -85,6 +84,8 @@ namespace EnviosExpress
                 return RegistrarRecoleccionRuta(codigos, estado, idUsuarioMns);
             }
         }
+
+
 
 
 
@@ -204,30 +205,62 @@ namespace EnviosExpress
 
         //Intento de entrega: 
 
-        private static List<ResultadoCodigo> RegistrarIntentosEntrega(List<CodigoQR> codigos, int idUsuarioMns)
+        private static List<ResultadoCodigo> RegistrarIntentosEntrega(List<CodigoQR> codigos, int idUsuarioMns, string motivo, bool visitaDestinatario)
+
         {
             var resultados = new List<ResultadoCodigo>();
 
             DataTable dt = new DataTable();
             dt.Columns.Add("idpaquete", typeof(int));
             dt.Columns.Add("fechahora", typeof(DateTime));
-            dt.Columns.Add("estado", typeof(string));
             dt.Columns.Add("descripcion", typeof(string));
             dt.Columns.Add("idusuario", typeof(long));
             dt.Columns.Add("idusuariomns", typeof(long));
             dt.Columns.Add("intentoentrega", typeof(string));
 
-            string motivo = HttpContext.Current.Request.Params["motivo"];
             if (string.IsNullOrEmpty(motivo)) motivo = "Intento de entrega fallido";
 
             foreach (var item in codigos)
             {
-                dt.Rows.Add(item.Codigo, item.Fecha, motivo, "-", 1L, idUsuarioMns, DBNull.Value);
+                string motivoFinal = visitaDestinatario ? "VISITA" : motivo;
+
+                // Si se visitó al destinatario, actualizamos valores directamente
+                if (visitaDestinatario)
+                {
+                    using (SqlConnection conn = new SqlConnection("workstation id=EnviosExpress.mssql.somee.com; packet size=4096; user id=EnviosExpress; pwd=Envios3228@; data source=EnviosExpress.mssql.somee.com;"))
+                    {
+                        conn.Open();
+                        string updateSql = @"
+UPDATE paquete
+SET 
+    valorvisita = ISNULL(valorvisita, 0) + ISNULL(valorenvio, 0)
+WHERE idpaquete = @id;
+
+UPDATE paquete
+SET 
+    cantidadadepositar = 
+        CASE 
+            WHEN monto IS NOT NULL AND valorenvio IS NOT NULL AND valorvisita IS NOT NULL
+            THEN monto - valorenvio - valorvisita
+            ELSE NULL
+        END
+WHERE idpaquete = @id;";
+
+                        using (SqlCommand cmd = new SqlCommand(updateSql, conn))
+                        {
+                            cmd.Parameters.AddWithValue("@id", item.Codigo);
+                            cmd.ExecuteNonQuery();
+                        }
+                    }
+                }
+
+                // Añadir fila al TVP
+                dt.Rows.Add(item.Codigo, item.Fecha, "-", 1L, idUsuarioMns, motivoFinal);
             }
 
             try
             {
-                using (SqlConnection conn = new SqlConnection("workstation id=EnviosExpress.mssql.somee.com;packet size=4096;user id=EnviosExpress;pwd=Envios3228@;data source=EnviosExpress.mssql.somee.com;"))
+                using (SqlConnection conn = new SqlConnection("workstation id=EnviosExpress.mssql.somee.com; packet size=4096; user id=EnviosExpress; pwd=Envios3228@; data source=EnviosExpress.mssql.somee.com;"))
                 using (SqlCommand cmd = new SqlCommand("sp_intento_entrega_paquete", conn))
                 {
                     cmd.CommandType = CommandType.StoredProcedure;
@@ -261,6 +294,10 @@ namespace EnviosExpress
 
             return resultados;
         }
+
+
+
+
 
 
         //Devoluciones: 

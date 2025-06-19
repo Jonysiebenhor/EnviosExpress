@@ -137,6 +137,15 @@
   </select>
 </div>
 
+<!-- NUEVO checkbox visible solo en modo intento -->
+<div id="bloqueVisitaDestinatario" class="form-group" style="display: none; margin-top:10px;">
+  <div class="form-check">
+    <input type="checkbox" class="form-check-input" id="chkVisitaDestinatario">
+    <label class="form-check-label" for="chkVisitaDestinatario" style="margin-left:17px;">Se visitó al destinatario</label>
+  </div>
+</div>
+
+
                 
                 <!--Checkbox para pedir si desea enviarlos a ruta de una vez-->
                 <div class="form-check" id="grupoRutaDirecta">
@@ -194,6 +203,11 @@
         if (bloqueMotivo) {
             bloqueMotivo.style.display = (modo === "intento" || modo === "devolucion") ? "block" : "none";
 
+        }
+
+        const bloqueVisita = document.getElementById("bloqueVisitaDestinatario");
+        if (bloqueVisita) {
+            bloqueVisita.style.display = (modo === "intento") ? "block" : "none";
         }
 
 
@@ -592,10 +606,10 @@
         const modo = document.getElementById("modoOperacion").value;
         const enviarARuta = document.getElementById("chkRutaDirecta")?.checked || false;
         const motivo = document.getElementById("motivoIntentoEntrega")?.value || "";
+        const visitaDestinatario = document.getElementById("chkVisitaDestinatario")?.checked || false;
 
         let estado = "recolectado";
 
-        // Determinar el estado según el modo
         switch (modo) {
             case "recolectar":
                 estado = enviarARuta ? "recolectado + ruta de entrega" : "recolectado";
@@ -607,17 +621,11 @@
                 estado = "entregado";
                 break;
             case "intento":
-                estado = "intento de entrega";
+                estado = "intento de entrega";  // se corrige para no enviar el motivo como estado
                 break;
             case "devolucion":
-                const motivoCombo = document.getElementById("motivoIntentoEntrega")?.value || "";
-                if (!motivoCombo || motivoCombo === "--Seleccionar") {
-                    Swal.fire("⚠️", "Debes seleccionar un motivo de devolución.", "warning");
-                    return;
-                }
-                estado = "Devolución " + motivoCombo;
+                estado = "Devolución " + motivo;
                 break;
-
         }
 
         if (colaCodigosEscaneados.length === 0) {
@@ -629,35 +637,19 @@
             return;
         }
 
-        // Validar motivo en caso de intento de entrega
-        if (modo === "intento") {
-            if (!motivo || motivo === "--Seleccionar") {
-                Swal.fire("⚠️", "Debes seleccionar un motivo de intento fallido.", "warning");
-                return;
-            }
+        if (modo === "intento" && (!motivo || motivo === "--Seleccionar")) {
+            Swal.fire("⚠️", "Debes seleccionar un motivo para el intento fallido.", "warning");
+            return;
         }
 
-        if (modo === "intento") {
-            
-            if (!motivo || motivo === "--Seleccionar") {
-                Swal.fire("⚠️", "Debes seleccionar un motivo para el intento fallido.", "warning");
-                return;
-            }
-            estado = motivo; // se usa como estado
-        }
-
-
-        // Armar el payload (se agrega 'motivo' solo si aplica)
-        let payload = {
+        const payload = {
             codigos: colaCodigosEscaneados,
-            estado: estado
+            estado: estado,
+            motivo: motivo,
+            visitaDestinatario: modo === "intento" ? visitaDestinatario : false
         };
 
-        if (modo === "intento") {
-            payload.motivo = motivo;
-        }
 
-        // Enviar datos
         fetch("DynamicData/FieldTemplates/ScannerHandler.aspx/RegistrarEstadoPaquetes", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
@@ -665,6 +657,10 @@
         })
             .then(res => res.json())
             .then(data => {
+                if (!data || !data.d || !Array.isArray(data.d)) {
+                    throw new Error("⚠️ Respuesta inesperada del servidor.");
+                }
+
                 const errores = data.d;
                 if (errores.length === 0) {
                     Swal.fire("✔️ Éxito", "Todos los paquetes se registraron correctamente.", "success");
@@ -676,10 +672,13 @@
                 document.getElementById("contadorCodigos").innerText = "0";
             })
             .catch(err => {
-                console.error("Error:", err);
+                console.error("❌ Error:", err);
                 Swal.fire("❌ Error", "No se pudo enviar la información al servidor.", "error");
             });
     }
+
+
+    
 
 
 

@@ -41,7 +41,7 @@
 
             <asp:CheckBox ID="CheckBox3" Text="Se visito al Destinatario" runat="server" />
                <br />
-               Dellar Intento de Entrega Fallido:
+               Detallar Intento de Entrega Fallido:
                <br />
                <asp:DropDownList ID="DropDownList1" runat="server">
                    <asp:ListItem Value="--Seleccionar">--Seleccionar</asp:ListItem>
