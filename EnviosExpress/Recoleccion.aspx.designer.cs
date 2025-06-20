@@ -33,6 +33,15 @@ namespace EnviosExpress
         protected global::System.Web.UI.WebControls.Label Label1;
 
         /// <summary>
+        /// Control btnAbrirScanner.
+        /// </summary>
+        /// <remarks>
+        /// Campo generado automáticamente.
+        /// Para modificarlo, mueva la declaración del campo del archivo del diseñador al archivo de código subyacente.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Button btnAbrirScanner;
+
+        /// <summary>
         /// Control txtcodigoo.
         /// </summary>
         /// <remarks>
@@ -40,6 +49,15 @@ namespace EnviosExpress
         /// Para modificarlo, mueva la declaración del campo del archivo del diseñador al archivo de código subyacente.
         /// </remarks>
         protected global::System.Web.UI.WebControls.TextBox txtcodigoo;
+
+        /// <summary>
+        /// Control Button2.
+        /// </summary>
+        /// <remarks>
+        /// Campo generado automáticamente.
+        /// Para modificarlo, mueva la declaración del campo del archivo del diseñador al archivo de código subyacente.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Button Button2;
 
         /// <summary>
         /// Control CheckBox3.
@@ -51,15 +69,6 @@ namespace EnviosExpress
         protected global::System.Web.UI.WebControls.CheckBox CheckBox3;
 
         /// <summary>
-        /// Control btnAbrirScanner.
-        /// </summary>
-        /// <remarks>
-        /// Campo generado automáticamente.
-        /// Para modificarlo, mueva la declaración del campo del archivo del diseñador al archivo de código subyacente.
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.Button btnAbrirScanner;
-
-        /// <summary>
         /// Control Label11.
         /// </summary>
         /// <remarks>
@@ -67,15 +76,6 @@ namespace EnviosExpress
         /// Para modificarlo, mueva la declaración del campo del archivo del diseñador al archivo de código subyacente.
         /// </remarks>
         protected global::System.Web.UI.WebControls.Label Label11;
-
-        /// <summary>
-        /// Control Button2.
-        /// </summary>
-        /// <remarks>
-        /// Campo generado automáticamente.
-        /// Para modificarlo, mueva la declaración del campo del archivo del diseñador al archivo de código subyacente.
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.Button Button2;
 
         /// <summary>
         /// Control btnrecolectar0.

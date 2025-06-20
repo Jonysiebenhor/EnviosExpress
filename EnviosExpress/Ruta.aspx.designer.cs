@@ -33,6 +33,15 @@ namespace EnviosExpress
         protected global::System.Web.UI.WebControls.Label Label1;
 
         /// <summary>
+        /// Control btnAbrirScannerRuta.
+        /// </summary>
+        /// <remarks>
+        /// Campo generado automáticamente.
+        /// Para modificarlo, mueva la declaración del campo del archivo del diseñador al archivo de código subyacente.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Button btnAbrirScannerRuta;
+
+        /// <summary>
         /// Control txtcodigoo.
         /// </summary>
         /// <remarks>
@@ -42,13 +51,13 @@ namespace EnviosExpress
         protected global::System.Web.UI.WebControls.TextBox txtcodigoo;
 
         /// <summary>
-        /// Control btnAbrirScannerRuta.
+        /// Control btnrecolectar.
         /// </summary>
         /// <remarks>
         /// Campo generado automáticamente.
         /// Para modificarlo, mueva la declaración del campo del archivo del diseñador al archivo de código subyacente.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.Button btnAbrirScannerRuta;
+        protected global::System.Web.UI.WebControls.Button btnrecolectar;
 
         /// <summary>
         /// Control Label11.

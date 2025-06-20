@@ -266,7 +266,6 @@ namespace EnviosExpress
         //Intento de entrega: 
 
         private static List<ResultadoCodigo> RegistrarIntentosEntrega(List<CodigoQR> codigos, int idUsuarioMns, string motivo, bool visitaDestinatario)
-
         {
             var resultados = new List<ResultadoCodigo>();
 
@@ -276,15 +275,16 @@ namespace EnviosExpress
             dt.Columns.Add("descripcion", typeof(string));
             dt.Columns.Add("idusuario", typeof(long));
             dt.Columns.Add("idusuariomns", typeof(long));
-            dt.Columns.Add("intentoentrega", typeof(string));
+            dt.Columns.Add("estado", typeof(string));
 
-            if (string.IsNullOrEmpty(motivo)) motivo = "Intento de entrega fallido";
+            if (string.IsNullOrEmpty(motivo))
+                motivo = "Intento de entrega fallido";
 
             foreach (var item in codigos)
             {
                 string motivoFinal = visitaDestinatario ? "VISITA" : motivo;
 
-                // Si se visitó al destinatario, actualizamos valores directamente
+                // Si visitó al destinatario, actualizar datos directamente
                 if (visitaDestinatario)
                 {
                     using (SqlConnection conn = new SqlConnection("workstation id=EnviosExpress.mssql.somee.com; packet size=4096; user id=EnviosExpress; pwd=Envios3228@; data source=EnviosExpress.mssql.somee.com;"))
@@ -293,17 +293,12 @@ namespace EnviosExpress
                         string updateSql = @"
 UPDATE paquete
 SET 
-    valorvisita = ISNULL(valorvisita, 0) + ISNULL(valorenvio, 0)
-WHERE idpaquete = @id;
-
-UPDATE paquete
-SET 
-    cantidadadepositar = 
-        CASE 
-            WHEN monto IS NOT NULL AND valorenvio IS NOT NULL AND valorvisita IS NOT NULL
-            THEN monto - valorenvio - valorvisita
-            ELSE NULL
-        END
+    valorvisita = ISNULL(valorvisita, 0) + ISNULL(valorenvio, 0),
+    cantidadadepositar = CASE 
+        WHEN monto IS NOT NULL AND valorenvio IS NOT NULL AND valorvisita IS NOT NULL
+        THEN monto - valorenvio - valorvisita
+        ELSE NULL
+    END
 WHERE idpaquete = @id;";
 
                         using (SqlCommand cmd = new SqlCommand(updateSql, conn))
@@ -324,12 +319,14 @@ WHERE idpaquete = @id;";
                 using (SqlCommand cmd = new SqlCommand("sp_intento_entrega_paquete", conn))
                 {
                     cmd.CommandType = CommandType.StoredProcedure;
+
                     SqlParameter tvpParam = cmd.Parameters.AddWithValue("@codigos", dt);
                     tvpParam.SqlDbType = SqlDbType.Structured;
 
                     conn.Open();
                     using (SqlDataReader reader = cmd.ExecuteReader())
                     {
+                        // Leer errores
                         while (reader.Read())
                         {
                             resultados.Add(new ResultadoCodigo
@@ -338,6 +335,20 @@ WHERE idpaquete = @id;";
                                 Exito = false,
                                 Mensaje = reader["mensaje"].ToString()
                             });
+                        }
+
+                        // Leer éxitos
+                        if (reader.NextResult())
+                        {
+                            while (reader.Read())
+                            {
+                                resultados.Add(new ResultadoCodigo
+                                {
+                                    Codigo = Convert.ToInt32(reader["idpaquete"]),
+                                    Exito = true,
+                                    Mensaje = reader["mensaje"].ToString()
+                                });
+                            }
                         }
                     }
                 }
@@ -354,6 +365,7 @@ WHERE idpaquete = @id;";
 
             return resultados;
         }
+
 
 
 

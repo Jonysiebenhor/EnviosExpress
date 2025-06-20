@@ -11,30 +11,30 @@
 <asp:Content ID="Content3" ContentPlaceHolderID="body" runat="server">
     <uc:CuwScannerCode runat="server" ID="CuwScannerCode" />
 
-    <div class="container" style="background-color:#2d2d30; height:100%; width:100%;">
+    <div class="container text-center" style="background-color:#2d2d30; min-height:100vh; width:100%;">
         <br />
         <asp:Label ID="Label1" runat="server" Text="Devolución" Font-Bold="True" Font-Size="XX-Large" ForeColor="White"></asp:Label>
         <br /><br />
 
-        <div class="container py-4" style="background-color:#f5f5f5; border-radius:8px;">
+        <div class="container" style="background-color:#f5f5f5; border-radius:8px; padding:30px; max-width:700px; margin:auto;">
 
-            <!-- Número de guía + botón escanear -->
-            <div class="form-group row justify-content-center align-items-center">
-                <label for="txtcodigoo" class="col-auto col-form-label font-weight-bold">Número de Guía:</label>
-                <div class="col-auto">
-                    <asp:TextBox ID="txtcodigoo" runat="server" CssClass="form-control" Width="200px"></asp:TextBox>
-                </div>
-                <div class="col-auto">
-                    <button type="button" class="btn btn-info" onclick="AbrirModalScanner('devolucion'); return false;">
-                        <i class="fa fa-barcode"></i> Escanear
-                    </button>
-                </div>
+            <!-- Botón escanear -->
+            <div class="mb-4">
+                <button type="button" class="btn btn-info" onclick="AbrirModalScanner('devolucion'); return false;">
+                    <i class="fa fa-barcode"></i> Escanear
+                </button>
             </div>
 
-            <!-- Motivo de devolución -->
-            <div class="form-group row justify-content-center align-items-center mt-3">
-                <label for="DropDownList1" class="col-auto col-form-label font-weight-bold">Motivo de Devolución:</label>
-                <div class="col-auto">
+            <!-- Número de guía -->
+            <div class="form-group d-flex justify-content-center align-items-center mb-4" style="flex-wrap: wrap;">
+                <label for="txtcodigoo" class="mr-2 font-weight-bold">Número de Guía:</label>
+                <asp:TextBox ID="txtcodigoo" runat="server" CssClass="form-control" Width="200px"></asp:TextBox>
+            </div>
+
+            <!-- Motivo de devolución centrado -->
+            <div class="mb-3">
+                <label class="font-weight-bold">Motivo de Devolución:</label><br />
+                <div class="d-flex justify-content-center">
                     <asp:DropDownList ID="DropDownList1" runat="server" CssClass="form-control" Width="250px" AutoPostBack="True" OnSelectedIndexChanged="DropDownList1_SelectedIndexChanged">
                         <asp:ListItem Value="--Seleccionar">--Seleccionar</asp:ListItem>
                         <asp:ListItem>Entregado</asp:ListItem>
@@ -54,7 +54,7 @@
                 </div>
             </div>
 
-            <!-- Campo "Recibido por" (solo si se selecciona Entregado) -->
+            <!-- Campo "Recibido por" -->
             <div class="form-group row justify-content-center align-items-center" id="grupoRecibido">
                 <asp:Label ID="Label12" runat="server" Text="¿Quién recibió el paquete?" CssClass="col-auto col-form-label font-weight-bold" />
                 <div class="col-auto">
@@ -62,7 +62,7 @@
                 </div>
             </div>
 
-            <!-- Mensaje de error dinámico -->
+            <!-- Mensaje de error -->
             <div class="form-group row justify-content-center">
                 <asp:Label ID="Label11" runat="server" CssClass="text-danger" Font-Bold="true" />
             </div>
@@ -72,7 +72,6 @@
                 <asp:Button ID="btnrecolectar" runat="server" OnClick="btnrecolectar_Click" Text="Registrar Devolución" BackColor="#339933" ForeColor="White" CssClass="btn btn-success mr-2" />
                 <asp:Button ID="btnrecolectar0" runat="server" OnClick="regresar_Click" Text="&lt; Regresar" BackColor="#FF3300" ForeColor="White" CssClass="btn btn-danger" />
             </div>
-
         </div>
         <br />
     </div>

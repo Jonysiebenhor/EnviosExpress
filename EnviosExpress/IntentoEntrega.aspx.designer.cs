@@ -42,6 +42,15 @@ namespace EnviosExpress
         protected global::System.Web.UI.WebControls.TextBox txtcodigoo;
 
         /// <summary>
+        /// Control btnrecolectar.
+        /// </summary>
+        /// <remarks>
+        /// Campo generado automáticamente.
+        /// Para modificarlo, mueva la declaración del campo del archivo del diseñador al archivo de código subyacente.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Button btnrecolectar;
+
+        /// <summary>
         /// Control CheckBox3.
         /// </summary>
         /// <remarks>
@@ -76,14 +85,5 @@ namespace EnviosExpress
         /// Para modificarlo, mueva la declaración del campo del archivo del diseñador al archivo de código subyacente.
         /// </remarks>
         protected global::System.Web.UI.WebControls.Button btnrecolectar0;
-
-        /// <summary>
-        /// Control btnrecolectar.
-        /// </summary>
-        /// <remarks>
-        /// Campo generado automáticamente.
-        /// Para modificarlo, mueva la declaración del campo del archivo del diseñador al archivo de código subyacente.
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.Button btnrecolectar;
     }
 }
