@@ -60,7 +60,7 @@
             <br />
             <br />
             <asp:Button ID="btnAbrirScanner" runat="server" Text="📷 Escanear códigos de paquetes" CssClass="btn btn-primary" OnClientClick="AbrirModalScanner(); return false;" />
-            <h6>Nota: Al escanear los códigos de los paquetes, luego debe ponerlos en ruta.</h6>
+            <h6>Nota: Al escanear los códigos de los paquetes, puede ponerlos en ruta directamente.</h6>
 
         </div>
                <asp:Label ID="Label11" runat="server"></asp:Label>

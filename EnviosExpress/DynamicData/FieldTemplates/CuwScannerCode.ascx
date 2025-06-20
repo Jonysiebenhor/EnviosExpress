@@ -137,7 +137,7 @@
   </select>
 </div>
 
-<!-- NUEVO checkbox visible solo en modo intento -->
+<!-- NUEVO checkbox visible solo en intento -->
 <div id="bloqueVisitaDestinatario" class="form-group" style="display: none; margin-top:10px;">
   <div class="form-check">
     <input type="checkbox" class="form-check-input" id="chkVisitaDestinatario">
@@ -608,26 +608,6 @@
         const motivo = document.getElementById("motivoIntentoEntrega")?.value || "";
         const visitaDestinatario = document.getElementById("chkVisitaDestinatario")?.checked || false;
 
-        let estado = "recolectado";
-
-        switch (modo) {
-            case "recolectar":
-                estado = enviarARuta ? "recolectado + ruta de entrega" : "recolectado";
-                break;
-            case "enrutar":
-                estado = "Ruta de entrega";
-                break;
-            case "entregar":
-                estado = "entregado";
-                break;
-            case "intento":
-                estado = "intento de entrega";  // se corrige para no enviar el motivo como estado
-                break;
-            case "devolucion":
-                estado = "Devolución " + motivo;
-                break;
-        }
-
         if (colaCodigosEscaneados.length === 0) {
             Swal.fire({
                 icon: "error",
@@ -642,21 +622,119 @@
             return;
         }
 
-        const payload = {
-            codigos: colaCodigosEscaneados,
-            estado: estado,
-            motivo: motivo,
-            visitaDestinatario: modo === "intento" ? visitaDestinatario : false
-        };
+        let payload;
 
+        // ✅ CORRECCIÓN: Manejo específico para recolección con ruta directa
+        if (modo === "recolectar" && enviarARuta) {
+            // Crear array con doble entrada para cada código
+            const codigosConDobleEstado = [];
 
+            colaCodigosEscaneados.forEach(c => {
+                // Primer estado: recolectado
+                codigosConDobleEstado.push({
+                    Codigo: c.Codigo,
+                    Fecha: c.Fecha,
+                    Estado: "recolectado"
+                });
+
+                // Segundo estado: Ruta de entrega
+                codigosConDobleEstado.push({
+                    Codigo: c.Codigo,
+                    Fecha: c.Fecha,
+                    Estado: "Ruta de entrega"
+                });
+            });
+
+            payload = {
+                codigos: codigosConDobleEstado,
+                motivo: "",
+                visitaDestinatario: false
+            };
+        }
+        else if (modo === "recolectar") {
+            // Solo recolección normal
+            const codigosConEstado = colaCodigosEscaneados.map(c => ({
+                Codigo: c.Codigo,
+                Fecha: c.Fecha,
+                Estado: "recolectado"
+            }));
+
+            payload = {
+                codigos: codigosConEstado,
+                motivo: "",
+                visitaDestinatario: false
+            };
+        }
+        else if (modo === "enrutar") {
+            const codigosConEstado = colaCodigosEscaneados.map(c => ({
+                Codigo: c.Codigo,
+                Fecha: c.Fecha,
+                Estado: "Ruta de entrega"
+            }));
+
+            payload = {
+                codigos: codigosConEstado,
+                motivo: "",
+                visitaDestinatario: false
+            };
+        }
+        else if (modo === "entregar") {
+            const codigosConEstado = colaCodigosEscaneados.map(c => ({
+                Codigo: c.Codigo,
+                Fecha: c.Fecha,
+                Estado: "entregado"
+            }));
+
+            payload = {
+                codigos: codigosConEstado,
+                motivo: "",
+                visitaDestinatario: false
+            };
+        }
+        else if (modo === "intento") {
+            const codigosConEstado = colaCodigosEscaneados.map(c => ({
+                Codigo: c.Codigo,
+                Fecha: c.Fecha,
+                Estado: "intento de entrega"
+            }));
+
+            payload = {
+                codigos: codigosConEstado,
+                motivo: motivo,
+                visitaDestinatario: visitaDestinatario
+            };
+        }
+        else if (modo === "devolucion") {
+            const codigosConEstado = colaCodigosEscaneados.map(c => ({
+                Codigo: c.Codigo,
+                Fecha: c.Fecha,
+                Estado: "Devolución " + motivo
+            }));
+
+            payload = {
+                codigos: codigosConEstado,
+                motivo: motivo,
+                visitaDestinatario: false
+            };
+        }
+
+        console.log("🚀 Payload enviado:", payload);
+
+        // Enviar al servidor
         fetch("DynamicData/FieldTemplates/ScannerHandler.aspx/RegistrarEstadoPaquetes", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(payload)
         })
-            .then(res => res.json())
+            .then(res => {
+                if (!res.ok) {
+                    throw new Error(`HTTP ${res.status}: ${res.statusText}`);
+                }
+                return res.json();
+            })
             .then(data => {
+                console.log("✅ Respuesta del servidor:", data);
+
                 if (!data || !data.d || !Array.isArray(data.d)) {
                     throw new Error("⚠️ Respuesta inesperada del servidor.");
                 }
@@ -668,14 +746,16 @@
                     const mensajes = errores.map(e => `Código ${e.Codigo}: ${e.Mensaje}`).join('<br>');
                     Swal.fire("⚠️ Algunos errores en los paquetes", mensajes, "warning");
                 }
+
                 limpiarTablaQr();
                 document.getElementById("contadorCodigos").innerText = "0";
             })
             .catch(err => {
-                console.error("❌ Error:", err);
-                Swal.fire("❌ Error", "No se pudo enviar la información al servidor.", "error");
+                console.error("❌ Error completo:", err);
+                Swal.fire("❌ Error", `No se pudo enviar la información: ${err.message}`, "error");
             });
     }
+
 
 
     

@@ -1,12 +1,13 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
+using System.Data;
+using System.Data.SqlClient;
+using System.Linq;
 using System.Web;
+using System.Web.Script.Serialization;
 using System.Web.Script.Services;
 using System.Web.Services;
-using System.Web.Script.Serialization;
-using System.Data;
-using Newtonsoft.Json;
-using System.Data.SqlClient;
 
 namespace EnviosExpress
 {
@@ -59,40 +60,83 @@ namespace EnviosExpress
 
 
         [WebMethod(EnableSession = true)]
-        public static List<ResultadoCodigo> RegistrarEstadoPaquetes(List<CodigoQR> codigos, string estado, string motivo, bool visitaDestinatario = false)
+        public static object RegistrarEstadoPaquetes(
+    List<CodigoEstadoQR> codigos, // ✅ CAMBIO: Usar CodigoEstadoQR que incluye Estado
+    string motivo = null,
+    bool visitaDestinatario = false)
         {
-            int idUsuarioMns = 0;
-            if (HttpContext.Current.Session["id"] != null)
+            try
             {
-                int.TryParse(HttpContext.Current.Session["id"].ToString(), out idUsuarioMns);
-            }
+                int idUsuarioMns = 0;
 
-            if (estado == "entregado")
+                if (HttpContext.Current.Session["id"] != null)
+                {
+                    int.TryParse(HttpContext.Current.Session["id"].ToString(), out idUsuarioMns);
+                }
+
+                // ✅ CORRECCIÓN: Determinar el tipo de operación basado en los estados
+                var primeraEntrada = codigos.FirstOrDefault();
+                if (primeraEntrada == null)
+                {
+                    return new List<ResultadoCodigo>
             {
-                return RegistrarEntregas(codigos, idUsuarioMns);
+                new ResultadoCodigo { Codigo = -1, Exito = false, Mensaje = "No hay códigos para procesar" }
+            };
+                }
+
+                string primerEstado = primeraEntrada.Estado;
+
+                // Manejar según el tipo de estado
+                if (primerEstado == "entregado")
+                {
+                    // Convertir a CodigoQR para mantener compatibilidad
+                    var codigosSimples = codigos.Select(c => new CodigoQR
+                    {
+                        Codigo = c.Codigo,
+                        Fecha = c.Fecha
+                    }).ToList();
+
+                    return RegistrarEntregas(codigosSimples, idUsuarioMns);
+                }
+                else if (primerEstado == "intento de entrega")
+                {
+                    var codigosSimples = codigos.Select(c => new CodigoQR
+                    {
+                        Codigo = c.Codigo,
+                        Fecha = c.Fecha
+                    }).ToList();
+
+                    return RegistrarIntentosEntrega(codigosSimples, idUsuarioMns, motivo, visitaDestinatario);
+                }
+                else if (primerEstado != null && primerEstado.StartsWith("Devolución "))
+                {
+                    var codigosSimples = codigos.Select(c => new CodigoQR
+                    {
+                        Codigo = c.Codigo,
+                        Fecha = c.Fecha
+                    }).ToList();
+
+                    return RegistrarDevoluciones(codigosSimples, primerEstado, idUsuarioMns);
+                }
+                else
+                {
+                    // ✅ Para recolección, enrutado y casos con múltiples estados
+                    return RegistrarRecoleccionRuta(codigos, idUsuarioMns);
+                }
             }
-            else if (estado == "intento de entrega")
+            catch (Exception ex)
             {
-                return RegistrarIntentosEntrega(codigos, idUsuarioMns, motivo, visitaDestinatario); // <- 🔧 AQUÍ
-            }
-            else if (estado.StartsWith("Devolución "))
-            {
-                return RegistrarDevoluciones(codigos, estado, idUsuarioMns);
-            }
-            else
-            {
-                return RegistrarRecoleccionRuta(codigos, estado, idUsuarioMns);
+                HttpContext.Current.Response.StatusCode = 500;
+                return new { error = true, mensaje = ex.Message, detalle = ex.StackTrace };
             }
         }
 
-
-
-
-
-        private static List<ResultadoCodigo> RegistrarRecoleccionRuta(List<CodigoQR> codigos, string estado, int idUsuarioMns)
+        // ✅ MÉTODO PRINCIPAL CORREGIDO para manejar múltiples estados
+        private static List<ResultadoCodigo> RegistrarRecoleccionRuta(List<CodigoEstadoQR> codigos, int idUsuarioMns)
         {
             var resultados = new List<ResultadoCodigo>();
 
+            // Crear tabla para enviar al SP
             DataTable dt = new DataTable();
             dt.Columns.Add("idpaquete", typeof(int));
             dt.Columns.Add("fechahora", typeof(DateTime));
@@ -102,21 +146,32 @@ namespace EnviosExpress
             dt.Columns.Add("idusuariomns", typeof(long));
             dt.Columns.Add("intentoentrega", typeof(string));
 
+            // ✅ Agregar cada código con su estado específico
             foreach (var item in codigos)
             {
-                dt.Rows.Add(item.Codigo, item.Fecha, estado, "-", 1L, idUsuarioMns, DBNull.Value);
+                dt.Rows.Add(
+                    item.Codigo,
+                    item.Fecha,
+                    item.Estado,    // ✅ Usar el estado específico de cada entrada
+                    "-",
+                    1L,
+                    idUsuarioMns,
+                    DBNull.Value
+                );
             }
 
             try
             {
-                using (SqlConnection conn = new SqlConnection("workstation id = EnviosExpress.mssql.somee.com; packet size = 4096; user id = EnviosExpress; pwd=Envios3228@;data source = EnviosExpress.mssql.somee.com;"))
+                using (SqlConnection conn = new SqlConnection("workstation id=EnviosExpress.mssql.somee.com;packet size=4096;user id=EnviosExpress;pwd=Envios3228@;data source=EnviosExpress.mssql.somee.com;"))
                 using (SqlCommand cmd = new SqlCommand("sp_registrar_estado_paquete", conn))
                 {
                     cmd.CommandType = CommandType.StoredProcedure;
+
                     SqlParameter tvpParam = cmd.Parameters.AddWithValue("@codigos", dt);
                     tvpParam.SqlDbType = SqlDbType.Structured;
 
                     conn.Open();
+
                     using (SqlDataReader reader = cmd.ExecuteReader())
                     {
                         while (reader.Read())
@@ -137,12 +192,17 @@ namespace EnviosExpress
                 {
                     Codigo = -1,
                     Exito = false,
-                    Mensaje = ex.Message
+                    Mensaje = $"Error en base de datos: {ex.Message}"
                 });
             }
 
             return resultados;
         }
+
+       
+
+
+
 
 
         //Para registrar entregas:
@@ -369,6 +429,10 @@ WHERE idpaquete = @id;";
             public DateTime Fecha { get; set; }
         }
 
+        public class CodigoEstadoQR : CodigoQR
+        {
+            public string Estado { get; set; }
+        }
 
 
     }
