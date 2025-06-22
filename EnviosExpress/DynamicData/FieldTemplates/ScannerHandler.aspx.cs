@@ -59,11 +59,14 @@ namespace EnviosExpress
         //WebMethod para que al escanear los códigos, se registren con un estado dependiendo el módulo en el que está.
 
 
+        // ✅ MÉTODO PRINCIPAL CORREGIDO
         [WebMethod(EnableSession = true)]
         public static object RegistrarEstadoPaquetes(
-    List<CodigoEstadoQR> codigos, // ✅ CAMBIO: Usar CodigoEstadoQR que incluye Estado
+    List<CodigoEstadoQR> codigos,
     string motivo = null,
-    bool visitaDestinatario = false)
+    bool visitaDestinatario = false,
+    string quienRecibe = "")
+
         {
             try
             {
@@ -74,7 +77,6 @@ namespace EnviosExpress
                     int.TryParse(HttpContext.Current.Session["id"].ToString(), out idUsuarioMns);
                 }
 
-                // ✅ CORRECCIÓN: Determinar el tipo de operación basado en los estados
                 var primeraEntrada = codigos.FirstOrDefault();
                 if (primeraEntrada == null)
                 {
@@ -89,15 +91,22 @@ namespace EnviosExpress
                 // Manejar según el tipo de estado
                 if (primerEstado == "entregado")
                 {
-                    // Convertir a CodigoQR para mantener compatibilidad
                     var codigosSimples = codigos.Select(c => new CodigoQR
                     {
                         Codigo = c.Codigo,
                         Fecha = c.Fecha
                     }).ToList();
 
-                    return RegistrarEntregas(codigosSimples, idUsuarioMns);
+                    var resultado = RegistrarEntregas(codigosSimples, idUsuarioMns);
+
+                    if (!string.IsNullOrWhiteSpace(quienRecibe))
+                    {
+                        ActualizarPaqueteRecibido(codigosSimples, quienRecibe);
+                    }
+
+                    return resultado;
                 }
+
                 else if (primerEstado == "intento de entrega")
                 {
                     var codigosSimples = codigos.Select(c => new CodigoQR
@@ -106,8 +115,10 @@ namespace EnviosExpress
                         Fecha = c.Fecha
                     }).ToList();
 
+                    // ✅ CORRECCIÓN PROBLEMA 2: Pasar visitaDestinatario al método
                     return RegistrarIntentosEntrega(codigosSimples, idUsuarioMns, motivo, visitaDestinatario);
                 }
+                // ✅ PROBLEMA YA CORREGIDO: El estado ya viene con "Devolución " desde el frontend
                 else if (primerEstado != null && primerEstado.StartsWith("Devolución "))
                 {
                     var codigosSimples = codigos.Select(c => new CodigoQR
@@ -116,20 +127,49 @@ namespace EnviosExpress
                         Fecha = c.Fecha
                     }).ToList();
 
-                    return RegistrarDevoluciones(codigosSimples, primerEstado, idUsuarioMns);
+                    if (primerEstado?.Trim().ToLower() == "devolución entregado")
+                    {
+                        // ✅ Registrar entrega normal
+                        var resultado = RegistrarEntregas(codigosSimples, idUsuarioMns);
+
+                        // ✅ Actualizar tabla paquete con quienRecibe si viene
+                        if (!string.IsNullOrWhiteSpace(quienRecibe))
+                        {
+                            ActualizarPaqueteRecibido(codigosSimples, quienRecibe);
+                        }
+
+                        return resultado;
+                    }
+                    else
+                    {
+                        // ✅ Resto de devoluciones con motivos
+                        return RegistrarDevoluciones(codigosSimples, primerEstado, idUsuarioMns, quienRecibe);
+                    }
                 }
+
+
                 else
                 {
-                    // ✅ Para recolección, enrutado y casos con múltiples estados
+                    // Para recolección, enrutado y casos con múltiples estados
                     return RegistrarRecoleccionRuta(codigos, idUsuarioMns);
                 }
+                return new List<ResultadoCodigo>
+{
+    new ResultadoCodigo { Codigo = -1, Exito = false, Mensaje = "Error inesperado: camino sin retorno." }
+};
+
             }
+
             catch (Exception ex)
             {
                 HttpContext.Current.Response.StatusCode = 500;
                 return new { error = true, mensaje = ex.Message, detalle = ex.StackTrace };
             }
         }
+
+
+
+
 
         // ✅ MÉTODO PRINCIPAL CORREGIDO para manejar múltiples estados
         private static List<ResultadoCodigo> RegistrarRecoleccionRuta(List<CodigoEstadoQR> codigos, int idUsuarioMns)
@@ -152,7 +192,7 @@ namespace EnviosExpress
                 dt.Rows.Add(
                     item.Codigo,
                     item.Fecha,
-                    item.Estado,    // ✅ Usar el estado específico de cada entrada
+                    item.Estado,
                     "-",
                     1L,
                     idUsuarioMns,
@@ -174,12 +214,18 @@ namespace EnviosExpress
 
                     using (SqlDataReader reader = cmd.ExecuteReader())
                     {
+                        // ✅ CORRECCIÓN PROBLEMA 1: Si no hay filas, significa éxito
+                        if (!reader.HasRows)
+                        {
+                            return new List<ResultadoCodigo>(); // Lista vacía = éxito
+                        }
+
                         while (reader.Read())
                         {
                             resultados.Add(new ResultadoCodigo
                             {
                                 Codigo = Convert.ToInt32(reader["idpaquete"]),
-                                Exito = false,
+                                Exito = false,  // Si retorna filas, son errores
                                 Mensaje = reader["mensaje"].ToString()
                             });
                         }
@@ -199,7 +245,7 @@ namespace EnviosExpress
             return resultados;
         }
 
-       
+
 
 
 
@@ -221,7 +267,8 @@ namespace EnviosExpress
 
             foreach (var item in codigos)
             {
-                dt.Rows.Add(item.Codigo, item.Fecha, "-", 1L, idUsuarioMns, "Intento exitoso");
+                // ✅ PROBLEMA 3: No agregar "Intento exitoso", dejar como NULL
+                dt.Rows.Add(item.Codigo, item.Fecha, "-", 1L, idUsuarioMns, DBNull.Value);
             }
 
             try
@@ -237,12 +284,18 @@ namespace EnviosExpress
                     conn.Open();
                     using (SqlDataReader reader = cmd.ExecuteReader())
                     {
+                        // ✅ CORRECCIÓN PROBLEMA 1: Si no hay filas, significa éxito
+                        if (!reader.HasRows)
+                        {
+                            return new List<ResultadoCodigo>(); // Lista vacía = éxito
+                        }
+
                         while (reader.Read())
                         {
                             resultados.Add(new ResultadoCodigo
                             {
                                 Codigo = Convert.ToInt32(reader["idpaquete"]),
-                                Exito = false,
+                                Exito = false,  // Si retorna filas, son errores
                                 Mensaje = reader["mensaje"].ToString()
                             });
                         }
@@ -263,12 +316,12 @@ namespace EnviosExpress
         }
 
 
-        //Intento de entrega: 
-
+        //Intento de entrega - VERSIÓN CORREGIDA: Evita que se sume 2 veces el campo de "valorvisita"
         private static List<ResultadoCodigo> RegistrarIntentosEntrega(List<CodigoQR> codigos, int idUsuarioMns, string motivo, bool visitaDestinatario)
         {
             var resultados = new List<ResultadoCodigo>();
 
+            // ✅ CORRECCIÓN: Usar el nuevo tipo de tabla que incluye visitadestinatario
             DataTable dt = new DataTable();
             dt.Columns.Add("idpaquete", typeof(int));
             dt.Columns.Add("fechahora", typeof(DateTime));
@@ -276,41 +329,14 @@ namespace EnviosExpress
             dt.Columns.Add("idusuario", typeof(long));
             dt.Columns.Add("idusuariomns", typeof(long));
             dt.Columns.Add("estado", typeof(string));
+            dt.Columns.Add("visitadestinatario", typeof(bool));  // ✅ NUEVO CAMPO
 
             if (string.IsNullOrEmpty(motivo))
                 motivo = "Intento de entrega fallido";
 
             foreach (var item in codigos)
             {
-                string motivoFinal = visitaDestinatario ? "VISITA" : motivo;
-
-                // Si visitó al destinatario, actualizar datos directamente
-                if (visitaDestinatario)
-                {
-                    using (SqlConnection conn = new SqlConnection("workstation id=EnviosExpress.mssql.somee.com; packet size=4096; user id=EnviosExpress; pwd=Envios3228@; data source=EnviosExpress.mssql.somee.com;"))
-                    {
-                        conn.Open();
-                        string updateSql = @"
-UPDATE paquete
-SET 
-    valorvisita = ISNULL(valorvisita, 0) + ISNULL(valorenvio, 0),
-    cantidadadepositar = CASE 
-        WHEN monto IS NOT NULL AND valorenvio IS NOT NULL AND valorvisita IS NOT NULL
-        THEN monto - valorenvio - valorvisita
-        ELSE NULL
-    END
-WHERE idpaquete = @id;";
-
-                        using (SqlCommand cmd = new SqlCommand(updateSql, conn))
-                        {
-                            cmd.Parameters.AddWithValue("@id", item.Codigo);
-                            cmd.ExecuteNonQuery();
-                        }
-                    }
-                }
-
-                // Añadir fila al TVP
-                dt.Rows.Add(item.Codigo, item.Fecha, "-", 1L, idUsuarioMns, motivoFinal);
+                dt.Rows.Add(item.Codigo, item.Fecha, "-", 1L, idUsuarioMns, motivo, visitaDestinatario);
             }
 
             try
@@ -326,29 +352,21 @@ WHERE idpaquete = @id;";
                     conn.Open();
                     using (SqlDataReader reader = cmd.ExecuteReader())
                     {
-                        // Leer errores
+                        // ✅ CORRECCIÓN PROBLEMA 1: Si no hay filas, significa éxito
+                        if (!reader.HasRows)
+                        {
+                            // No hay errores = éxito total
+                            return new List<ResultadoCodigo>(); // Lista vacía = éxito
+                        }
+
                         while (reader.Read())
                         {
                             resultados.Add(new ResultadoCodigo
                             {
                                 Codigo = Convert.ToInt32(reader["idpaquete"]),
-                                Exito = false,
+                                Exito = false,  // Si retorna filas, son errores
                                 Mensaje = reader["mensaje"].ToString()
                             });
-                        }
-
-                        // Leer éxitos
-                        if (reader.NextResult())
-                        {
-                            while (reader.Read())
-                            {
-                                resultados.Add(new ResultadoCodigo
-                                {
-                                    Codigo = Convert.ToInt32(reader["idpaquete"]),
-                                    Exito = true,
-                                    Mensaje = reader["mensaje"].ToString()
-                                });
-                            }
                         }
                     }
                 }
@@ -372,10 +390,10 @@ WHERE idpaquete = @id;";
 
 
 
+
         //Devoluciones: 
 
-
-        private static List<ResultadoCodigo> RegistrarDevoluciones(List<CodigoQR> codigos, string estadoCompleto, int idUsuarioMns)
+        private static List<ResultadoCodigo> RegistrarDevoluciones(List<CodigoQR> codigos, string estadoCompleto, int idUsuarioMns, string quienRecibe = "")
         {
             var resultados = new List<ResultadoCodigo>();
 
@@ -387,11 +405,13 @@ WHERE idpaquete = @id;";
             dt.Columns.Add("idusuario", typeof(long));
             dt.Columns.Add("idusuariomns", typeof(long));
 
+
+            // ✅ El estado ya viene con "Devolución " desde el frontend
             string motivo = estadoCompleto.Replace("Devolución ", "");
 
             foreach (var item in codigos)
             {
-                dt.Rows.Add(item.Codigo, item.Fecha, motivo, "-", 1L, idUsuarioMns); //idUsuarioMns Es el usuario que se logeó
+                dt.Rows.Add(item.Codigo, item.Fecha, motivo, "-", 1L, idUsuarioMns);
             }
 
             try
@@ -400,12 +420,21 @@ WHERE idpaquete = @id;";
                 using (SqlCommand cmd = new SqlCommand("sp_registrar_devolucion", conn))
                 {
                     cmd.CommandType = CommandType.StoredProcedure;
+
                     SqlParameter tvpParam = cmd.Parameters.AddWithValue("@codigos", dt);
                     tvpParam.SqlDbType = SqlDbType.Structured;
+
+                    // ✅ Ahora enviar el parámetro
+                    cmd.Parameters.AddWithValue("@quienRecibe", quienRecibe ?? "");
 
                     conn.Open();
                     using (SqlDataReader reader = cmd.ExecuteReader())
                     {
+                        if (!reader.HasRows)
+                        {
+                            return new List<ResultadoCodigo>(); // Éxito
+                        }
+
                         while (reader.Read())
                         {
                             resultados.Add(new ResultadoCodigo
@@ -417,6 +446,7 @@ WHERE idpaquete = @id;";
                         }
                     }
                 }
+
             }
             catch (Exception ex)
             {
@@ -431,6 +461,35 @@ WHERE idpaquete = @id;";
             return resultados;
         }
 
+
+
+        private static void ActualizarPaqueteRecibido(List<CodigoQR> codigos, string quienRecibe)
+        {
+            if (string.IsNullOrWhiteSpace(quienRecibe) || codigos == null || codigos.Count == 0)
+                return;
+
+            try
+            {
+                using (SqlConnection conn = new SqlConnection("workstation id=EnviosExpress.mssql.somee.com;packet size=4096;user id=EnviosExpress;pwd=Envios3228@;data source=EnviosExpress.mssql.somee.com;"))
+                {
+                    conn.Open();
+
+                    foreach (var c in codigos)
+                    {
+                        using (SqlCommand cmd = new SqlCommand("UPDATE paquete SET recibido = @recibido WHERE idpaquete = @id", conn))
+                        {
+                            cmd.Parameters.AddWithValue("@recibido", quienRecibe);
+                            cmd.Parameters.AddWithValue("@id", c.Codigo);
+                            cmd.ExecuteNonQuery();
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                // Opcional: log del error
+            }
+        }
 
 
 

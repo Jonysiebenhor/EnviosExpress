@@ -145,6 +145,11 @@
   </div>
 </div>
 
+                <!-- ✅ NUEVO CAMPO: Solo visible en modo devolución -->
+<div id="bloqueQuienRecibe" class="form-group" style="display: none; margin-top:10px;">
+  <label for="txtQuienRecibe">¿Quién recibió el paquete?</label>
+  <input type="text" class="form-control" id="txtQuienRecibe" placeholder="Nombre de quien recibió el paquete">
+</div>
 
                 
                 <!--Checkbox para pedir si desea enviarlos a ruta de una vez-->
@@ -198,11 +203,9 @@
         // Establecer modo
         document.getElementById("modoOperacion").value = modo;
 
-
         const bloqueMotivo = document.getElementById("bloqueMotivoIntento");
         if (bloqueMotivo) {
             bloqueMotivo.style.display = (modo === "intento" || modo === "devolucion") ? "block" : "none";
-
         }
 
         const bloqueVisita = document.getElementById("bloqueVisitaDestinatario");
@@ -210,7 +213,37 @@
             bloqueVisita.style.display = (modo === "intento") ? "block" : "none";
         }
 
+        // ✅ Mostrar/ocultar campo "¿Quién recibió?" en modo devolucion o entregar
+        const bloqueQuienRecibe = document.getElementById("bloqueQuienRecibe");
+        if (bloqueQuienRecibe) {
+            if (modo === "devolucion" || modo === "entregar") {
+                bloqueQuienRecibe.style.display = "block";
+            } else {
+                bloqueQuienRecibe.style.display = "none";
+                document.getElementById("txtQuienRecibe").value = "";
+            }
+        }
 
+
+        // ✅ CORRECCIÓN 2: Agregar "Entregado" al inicio del combobox en modo devolución
+        const selectMotivo = document.getElementById("motivoIntentoEntrega");
+        if (selectMotivo && modo === "devolucion") {
+            // Verificar si ya existe la opción "Entregado"
+            const opcionExistente = Array.from(selectMotivo.options).find(option => option.value === "Entregado");
+            if (!opcionExistente) {
+                const nuevaOpcion = document.createElement("option");
+                nuevaOpcion.value = "Entregado";
+                nuevaOpcion.textContent = "Entregado";
+                // ✅ INSERTAR AL INICIO (después de "--Seleccionar")
+                selectMotivo.insertBefore(nuevaOpcion, selectMotivo.options[1]);
+            }
+        } else if (selectMotivo && modo !== "devolucion") {
+            // Remover la opción "Entregado" si no está en modo devolución
+            const opcionEntregado = Array.from(selectMotivo.options).find(option => option.value === "Entregado");
+            if (opcionEntregado) {
+                selectMotivo.removeChild(opcionEntregado);
+            }
+        }
 
         // Establecer título dinámico
         let titulo = "Escanear paquetes";
@@ -218,6 +251,8 @@
         if (modo === "recolectar") titulo = "Recolectar paquetes";
         else if (modo === "enrutar") titulo = "Enrutar paquetes";
         else if (modo === "entregar") titulo = "Entrega de paquetes";
+        else if (modo === "intento") titulo = "Intento de entrega";
+        else if (modo === "devolucion") titulo = "Devolución de paquetes";
 
         const tituloLabel = document.getElementById("lblTitulo");
 
@@ -280,8 +315,6 @@
 
         console.log("🧭 Modo actual:", modo);
         console.log("📦 Estado se definirá en EnviarSegunModo()");
-
-
     }
 
 
@@ -607,6 +640,7 @@
         const enviarARuta = document.getElementById("chkRutaDirecta")?.checked || false;
         const motivo = document.getElementById("motivoIntentoEntrega")?.value || "";
         const visitaDestinatario = document.getElementById("chkVisitaDestinatario")?.checked || false;
+        const quienRecibe = document.getElementById("txtQuienRecibe")?.value || "";
 
         if (colaCodigosEscaneados.length === 0) {
             Swal.fire({
@@ -617,144 +651,127 @@
             return;
         }
 
-        if (modo === "intento" && (!motivo || motivo === "--Seleccionar")) {
-            Swal.fire("⚠️", "Debes seleccionar un motivo para el intento fallido.", "warning");
+        if ((modo === "intento" || modo === "devolucion") && (!motivo || motivo === "--Seleccionar")) {
+            Swal.fire("⚠️", "Debes seleccionar un motivo.", "warning");
+            return;
+        }
+
+        if ((modo === "entregar" || modo === "devolucion") && !quienRecibe.trim()) {
+            Swal.fire("⚠️", "Debes especificar quién recibió el paquete.", "warning");
             return;
         }
 
         let payload;
 
-        // ✅ CORRECCIÓN: Manejo específico para recolección con ruta directa
         if (modo === "recolectar" && enviarARuta) {
-            // Crear array con doble entrada para cada código
             const codigosConDobleEstado = [];
-
             colaCodigosEscaneados.forEach(c => {
-                // Primer estado: recolectado
-                codigosConDobleEstado.push({
-                    Codigo: c.Codigo,
-                    Fecha: c.Fecha,
-                    Estado: "recolectado"
-                });
-
-                // Segundo estado: Ruta de entrega
-                codigosConDobleEstado.push({
-                    Codigo: c.Codigo,
-                    Fecha: c.Fecha,
-                    Estado: "Ruta de entrega"
-                });
+                codigosConDobleEstado.push({ Codigo: c.Codigo, Fecha: c.Fecha, Estado: "recolectado" });
+                codigosConDobleEstado.push({ Codigo: c.Codigo, Fecha: c.Fecha, Estado: "Ruta de entrega" });
             });
 
             payload = {
                 codigos: codigosConDobleEstado,
                 motivo: "",
-                visitaDestinatario: false
+                visitaDestinatario: false,
+                quienRecibe: ""
             };
-        }
-        else if (modo === "recolectar") {
-            // Solo recolección normal
-            const codigosConEstado = colaCodigosEscaneados.map(c => ({
-                Codigo: c.Codigo,
-                Fecha: c.Fecha,
-                Estado: "recolectado"
-            }));
-
+        } else if (modo === "recolectar") {
             payload = {
-                codigos: codigosConEstado,
+                codigos: colaCodigosEscaneados.map(c => ({ Codigo: c.Codigo, Fecha: c.Fecha, Estado: "recolectado" })),
                 motivo: "",
-                visitaDestinatario: false
+                visitaDestinatario: false,
+                quienRecibe: ""
             };
-        }
-        else if (modo === "enrutar") {
-            const codigosConEstado = colaCodigosEscaneados.map(c => ({
-                Codigo: c.Codigo,
-                Fecha: c.Fecha,
-                Estado: "Ruta de entrega"
-            }));
-
+        } else if (modo === "enrutar") {
             payload = {
-                codigos: codigosConEstado,
+                codigos: colaCodigosEscaneados.map(c => ({ Codigo: c.Codigo, Fecha: c.Fecha, Estado: "Ruta de entrega" })),
                 motivo: "",
-                visitaDestinatario: false
+                visitaDestinatario: false,
+                quienRecibe: ""
             };
-        }
-        else if (modo === "entregar") {
-            const codigosConEstado = colaCodigosEscaneados.map(c => ({
-                Codigo: c.Codigo,
-                Fecha: c.Fecha,
-                Estado: "entregado"
-            }));
-
+        } else if (modo === "entregar") {
             payload = {
-                codigos: codigosConEstado,
+                codigos: colaCodigosEscaneados.map(c => ({ Codigo: c.Codigo, Fecha: c.Fecha, Estado: "entregado" })),
                 motivo: "",
-                visitaDestinatario: false
+                visitaDestinatario: false,
+                quienRecibe: quienRecibe
             };
-        }
-        else if (modo === "intento") {
-            const codigosConEstado = colaCodigosEscaneados.map(c => ({
-                Codigo: c.Codigo,
-                Fecha: c.Fecha,
-                Estado: "intento de entrega"
-            }));
-
+        } else if (modo === "intento") {
             payload = {
-                codigos: codigosConEstado,
+                codigos: colaCodigosEscaneados.map(c => ({ Codigo: c.Codigo, Fecha: c.Fecha, Estado: "intento de entrega" })),
                 motivo: motivo,
-                visitaDestinatario: visitaDestinatario
+                visitaDestinatario: visitaDestinatario,
+                quienRecibe: ""
             };
-        }
-        else if (modo === "devolucion") {
-            const codigosConEstado = colaCodigosEscaneados.map(c => ({
-                Codigo: c.Codigo,
-                Fecha: c.Fecha,
-                Estado: "Devolución " + motivo
-            }));
+        } else if (modo === "devolucion") {
+            let estadoFinal = motivo;
+            if (!motivo.toLowerCase().startsWith("devolución")) {
+                estadoFinal = `Devolución ${motivo}`;
+            }
 
             payload = {
-                codigos: codigosConEstado,
+                codigos: colaCodigosEscaneados.map(c => ({ Codigo: c.Codigo, Fecha: c.Fecha, Estado: estadoFinal })),
                 motivo: motivo,
-                visitaDestinatario: false
+                visitaDestinatario: false,
+                quienRecibe: quienRecibe
             };
         }
 
         console.log("🚀 Payload enviado:", payload);
 
-        // Enviar al servidor
         fetch("DynamicData/FieldTemplates/ScannerHandler.aspx/RegistrarEstadoPaquetes", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(payload)
         })
-            .then(res => {
-                if (!res.ok) {
-                    throw new Error(`HTTP ${res.status}: ${res.statusText}`);
-                }
-                return res.json();
-            })
+            .then(res => res.json())
             .then(data => {
-                console.log("✅ Respuesta del servidor:", data);
+                const resultado = data?.d || [];
 
-                if (!data || !data.d || !Array.isArray(data.d)) {
+                if (!Array.isArray(resultado)) {
                     throw new Error("⚠️ Respuesta inesperada del servidor.");
                 }
 
-                const errores = data.d;
-                if (errores.length === 0) {
-                    Swal.fire("✔️ Éxito", "Todos los paquetes se registraron correctamente.", "success");
+                // ✅ Si no se retorna nada, significa éxito total
+                if (resultado.length === 0) {
+                    Swal.fire("✅ Éxito", "Todos los paquetes se registraron correctamente.", "success");
                 } else {
-                    const mensajes = errores.map(e => `Código ${e.Codigo}: ${e.Mensaje}`).join('<br>');
-                    Swal.fire("⚠️ Algunos errores en los paquetes", mensajes, "warning");
+                    const exitosos = resultado.filter(e =>
+                        (e.Exito === true) ||
+                        (e.mensaje && (
+                            e.mensaje.toLowerCase().includes("registrado correctamente") ||
+                            e.mensaje.toLowerCase().includes("se registró") ||
+                            e.mensaje.toLowerCase().includes("exitosamente") ||
+                            e.mensaje.toLowerCase().includes("procesado")
+                        ))
+                    );
+
+                    const fallidos = resultado.filter(e => !exitosos.includes(e));
+
+                    if (exitosos.length > 0 && fallidos.length === 0) {
+                        Swal.fire("✅ Éxito", `Se procesaron ${exitosos.length} paquetes correctamente.`, "success");
+                    } else if (exitosos.length > 0 && fallidos.length > 0) {
+                        const mensajeExito = `✅ ${exitosos.length} registros exitosos\n`;
+                        const mensajeFallido = fallidos.map(e => `❌ Código ${e.Codigo || "?"}: ${e.mensaje || e.Mensaje}`).join('\n');
+                        Swal.fire("⚠️ Resultados mixtos", mensajeExito + mensajeFallido, "warning");
+                    } else {
+                        const mensajes = fallidos.map(e => `Código ${e.Codigo || "?"}: ${e.mensaje || e.Mensaje}`).join('<br>');
+                        Swal.fire("❌ Error en los registros", mensajes, "error");
+                    }
                 }
 
                 limpiarTablaQr();
                 document.getElementById("contadorCodigos").innerText = "0";
             })
             .catch(err => {
-                console.error("❌ Error completo:", err);
-                Swal.fire("❌ Error", `No se pudo enviar la información: ${err.message}`, "error");
+                console.error("❌ Error:", err);
+                Swal.fire("❌ Error", err.message || "No se pudo enviar la información al servidor.", "error");
             });
     }
+
+
+
 
 
 
