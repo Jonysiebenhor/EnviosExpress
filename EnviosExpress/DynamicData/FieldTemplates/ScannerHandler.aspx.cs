@@ -60,13 +60,15 @@ namespace EnviosExpress
 
 
         // ✅ MÉTODO PRINCIPAL CORREGIDO
+        // Reemplaza el WebMethod RegistrarEstadoPaquetes con esta versión:
+
         [WebMethod(EnableSession = true)]
         public static object RegistrarEstadoPaquetes(
-    List<CodigoEstadoQR> codigos,
-    string motivo = null,
-    bool visitaDestinatario = false,
-    string quienRecibe = "")
-
+            List<CodigoEstadoQR> codigos,
+            string motivo = null,
+            bool visitaDestinatario = false,
+            string quienRecibe = "",
+            bool esRutaDirecta = false) // ✅ NUEVO PARÁMETRO
         {
             try
             {
@@ -106,7 +108,6 @@ namespace EnviosExpress
 
                     return resultado;
                 }
-
                 else if (primerEstado == "intento de entrega")
                 {
                     var codigosSimples = codigos.Select(c => new CodigoQR
@@ -115,10 +116,8 @@ namespace EnviosExpress
                         Fecha = c.Fecha
                     }).ToList();
 
-                    // ✅ CORRECCIÓN PROBLEMA 2: Pasar visitaDestinatario al método
                     return RegistrarIntentosEntrega(codigosSimples, idUsuarioMns, motivo, visitaDestinatario);
                 }
-                // ✅ PROBLEMA YA CORREGIDO: El estado ya viene con "Devolución " desde el frontend
                 else if (primerEstado != null && primerEstado.StartsWith("Devolución "))
                 {
                     var codigosSimples = codigos.Select(c => new CodigoQR
@@ -129,10 +128,8 @@ namespace EnviosExpress
 
                     if (primerEstado?.Trim().ToLower() == "devolución entregado")
                     {
-                        // ✅ Registrar entrega normal
                         var resultado = RegistrarEntregas(codigosSimples, idUsuarioMns);
 
-                        // ✅ Actualizar tabla paquete con quienRecibe si viene
                         if (!string.IsNullOrWhiteSpace(quienRecibe))
                         {
                             ActualizarPaqueteRecibido(codigosSimples, quienRecibe);
@@ -142,24 +139,15 @@ namespace EnviosExpress
                     }
                     else
                     {
-                        // ✅ Resto de devoluciones con motivos
                         return RegistrarDevoluciones(codigosSimples, primerEstado, idUsuarioMns, quienRecibe);
                     }
                 }
-
-
                 else
                 {
-                    // Para recolección, enrutado y casos con múltiples estados
-                    return RegistrarRecoleccionRuta(codigos, idUsuarioMns);
+                    // ✅ CORRECCIÓN: Pasar el parámetro esRutaDirecta
+                    return RegistrarRecoleccionRuta(codigos, idUsuarioMns, esRutaDirecta);
                 }
-                return new List<ResultadoCodigo>
-{
-    new ResultadoCodigo { Codigo = -1, Exito = false, Mensaje = "Error inesperado: camino sin retorno." }
-};
-
             }
-
             catch (Exception ex)
             {
                 HttpContext.Current.Response.StatusCode = 500;
@@ -172,7 +160,9 @@ namespace EnviosExpress
 
 
         // ✅ MÉTODO PRINCIPAL CORREGIDO para manejar múltiples estados
-        private static List<ResultadoCodigo> RegistrarRecoleccionRuta(List<CodigoEstadoQR> codigos, int idUsuarioMns)
+        // Reemplaza el método RegistrarRecoleccionRuta con esta versión:
+
+        private static List<ResultadoCodigo> RegistrarRecoleccionRuta(List<CodigoEstadoQR> codigos, int idUsuarioMns, bool esRutaDirecta = false)
         {
             var resultados = new List<ResultadoCodigo>();
 
@@ -214,20 +204,43 @@ namespace EnviosExpress
 
                     using (SqlDataReader reader = cmd.ExecuteReader())
                     {
-                        // ✅ CORRECCIÓN PROBLEMA 1: Si no hay filas, significa éxito
+                        // ✅ CORRECCIÓN ESPECIAL PARA RUTA DIRECTA
                         if (!reader.HasRows)
                         {
-                            return new List<ResultadoCodigo>(); // Lista vacía = éxito
+                            // ✅ Éxito total - retornar lista vacía
+                            return new List<ResultadoCodigo>();
                         }
 
+                        // ✅ Si hay filas, verificar si son errores o confirmaciones
                         while (reader.Read())
                         {
-                            resultados.Add(new ResultadoCodigo
+                            string mensaje = reader["mensaje"].ToString();
+                            int codigoPaquete = Convert.ToInt32(reader["idpaquete"]);
+
+                            // ✅ DETECTAR MENSAJES DE ÉXITO vs ERRORES
+                            bool esExito = mensaje.ToLower().Contains("registrado correctamente") ||
+                                           mensaje.ToLower().Contains("insertado correctamente") ||
+                                           mensaje.ToLower().Contains("exitosamente") ||
+                                           mensaje.ToLower().Contains("se registró") ||
+                                           mensaje.ToLower().Contains("completado");
+
+                            // ✅ Si es un mensaje de éxito y es ruta directa, no agregarlo como error
+                            if (esRutaDirecta && esExito)
                             {
-                                Codigo = Convert.ToInt32(reader["idpaquete"]),
-                                Exito = false,  // Si retorna filas, son errores
-                                Mensaje = reader["mensaje"].ToString()
-                            });
+                                // No agregar a resultados - se considera éxito
+                                continue;
+                            }
+
+                            // ✅ Solo agregar si es realmente un error
+                            if (!esExito)
+                            {
+                                resultados.Add(new ResultadoCodigo
+                                {
+                                    Codigo = codigoPaquete,
+                                    Exito = false,
+                                    Mensaje = mensaje
+                                });
+                            }
                         }
                     }
                 }
