@@ -10,7 +10,7 @@
             <br />
             <asp:Label ID="Label1" runat="server" Text="Ingresar" Font-Bold="True" Font-Size="XX-Large" ForeColor="White"></asp:Label>
             <br /><br />
-         <div class="container text-center" style="   width:230px; height: 50%; background-image: url('Resources/.jpg');   background-color:ghostwhite;background-repeat :no-repeat;  position:page; z-index: auto;" >
+         <div class="container text-center"x style="   width:230px; height: 50%; background-image: url('Resources/.jpg');   background-color:ghostwhite;background-repeat :no-repeat;  position:page; z-index: auto;" >
               <p class="centrado">
                   <br />
                   <br />

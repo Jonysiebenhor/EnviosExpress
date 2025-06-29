@@ -58,17 +58,15 @@ namespace EnviosExpress
 
         //WebMethod para que al escanear los códigos, se registren con un estado dependiendo el módulo en el que está.
 
-
-        // ✅ MÉTODO PRINCIPAL CORREGIDO
-        // Reemplaza el WebMethod RegistrarEstadoPaquetes con esta versión:
+        // ✅ MÉTODO CORREGIDO
 
         [WebMethod(EnableSession = true)]
         public static object RegistrarEstadoPaquetes(
-            List<CodigoEstadoQR> codigos,
-            string motivo = null,
-            bool visitaDestinatario = false,
-            string quienRecibe = "",
-            bool esRutaDirecta = false) // ✅ NUEVO PARÁMETRO
+    List<CodigoEstadoQR> codigos,
+    string motivo = null,
+    bool visitaDestinatario = false,
+    string quienRecibe = "",
+    bool esRutaDirecta = false)
         {
             try
             {
@@ -82,15 +80,19 @@ namespace EnviosExpress
                 var primeraEntrada = codigos.FirstOrDefault();
                 if (primeraEntrada == null)
                 {
-                    return new List<ResultadoCodigo>
-            {
-                new ResultadoCodigo { Codigo = -1, Exito = false, Mensaje = "No hay códigos para procesar" }
-            };
+                    return new
+                    {
+                        success = false,
+                        errores = new List<ResultadoCodigo>
+                {
+                    new ResultadoCodigo { Codigo = -1, Exito = false, Mensaje = "No hay códigos para procesar" }
+                }
+                    };
                 }
 
                 string primerEstado = primeraEntrada.Estado;
+                List<ResultadoCodigo> resultado;
 
-                // Manejar según el tipo de estado
                 if (primerEstado == "entregado")
                 {
                     var codigosSimples = codigos.Select(c => new CodigoQR
@@ -99,14 +101,12 @@ namespace EnviosExpress
                         Fecha = c.Fecha
                     }).ToList();
 
-                    var resultado = RegistrarEntregas(codigosSimples, idUsuarioMns);
+                    resultado = RegistrarEntregas(codigosSimples, idUsuarioMns);
 
                     if (!string.IsNullOrWhiteSpace(quienRecibe))
                     {
                         ActualizarPaqueteRecibido(codigosSimples, quienRecibe);
                     }
-
-                    return resultado;
                 }
                 else if (primerEstado == "intento de entrega")
                 {
@@ -116,7 +116,7 @@ namespace EnviosExpress
                         Fecha = c.Fecha
                     }).ToList();
 
-                    return RegistrarIntentosEntrega(codigosSimples, idUsuarioMns, motivo, visitaDestinatario);
+                    resultado = RegistrarIntentosEntrega(codigosSimples, idUsuarioMns, motivo, visitaDestinatario);
                 }
                 else if (primerEstado != null && primerEstado.StartsWith("Devolución "))
                 {
@@ -126,32 +126,34 @@ namespace EnviosExpress
                         Fecha = c.Fecha
                     }).ToList();
 
-                    if (primerEstado?.Trim().ToLower() == "devolución entregado")
-                    {
-                        var resultado = RegistrarEntregas(codigosSimples, idUsuarioMns);
-
-                        if (!string.IsNullOrWhiteSpace(quienRecibe))
-                        {
-                            ActualizarPaqueteRecibido(codigosSimples, quienRecibe);
-                        }
-
-                        return resultado;
-                    }
-                    else
-                    {
-                        return RegistrarDevoluciones(codigosSimples, primerEstado, idUsuarioMns, quienRecibe);
-                    }
+                    resultado = RegistrarDevoluciones(codigosSimples, primerEstado, idUsuarioMns, quienRecibe);
                 }
                 else
                 {
-                    // ✅ CORRECCIÓN: Pasar el parámetro esRutaDirecta
-                    return RegistrarRecoleccionRuta(codigos, idUsuarioMns, esRutaDirecta);
+                    resultado = RegistrarRecoleccionRuta(codigos, idUsuarioMns, esRutaDirecta);
                 }
+
+                // ✅ Normalizar la salida
+                return new
+                {
+                    success = resultado.All(r => r.Exito),
+                    errores = resultado
+                };
             }
             catch (Exception ex)
             {
                 HttpContext.Current.Response.StatusCode = 500;
-                return new { error = true, mensaje = ex.Message, detalle = ex.StackTrace };
+                return new
+                {
+                    success = false,
+                    errores = new List<ResultadoCodigo> {
+                new ResultadoCodigo {
+                    Codigo = -1,
+                    Exito = false,
+                    Mensaje = "Error inesperado: " + ex.Message
+                }
+            }
+                };
             }
         }
 
@@ -159,8 +161,8 @@ namespace EnviosExpress
 
 
 
+
         // ✅ MÉTODO PRINCIPAL CORREGIDO para manejar múltiples estados
-        // Reemplaza el método RegistrarRecoleccionRuta con esta versión:
 
         private static List<ResultadoCodigo> RegistrarRecoleccionRuta(List<CodigoEstadoQR> codigos, int idUsuarioMns, bool esRutaDirecta = false)
         {
