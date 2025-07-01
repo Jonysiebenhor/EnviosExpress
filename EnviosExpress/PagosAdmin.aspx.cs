@@ -8,20 +8,70 @@ using System.Web.UI.WebControls;
 
 namespace EnviosExpress
 {
+
+
+
+
+
     public partial class PagosAdmin : System.Web.UI.Page
     {
         Conectar conectado = new Conectar();
         protected void Page_Load(object sender, EventArgs e)
+
+
         {
+
             if (!IsPostBack)
             {
                 if (Session["id"] is null)
                 {
                     Response.Redirect("/Login.aspx");
+
+                    
                 }
+               
+
                 bingrind();
             }
         }
+
+        /// <summary>
+        /// Al hacer clic en Ver Reporte, carga GridViewReporte.
+        /// </summary>
+        protected void btnVerReporte_Click(object sender, EventArgs e)
+        {
+            DateTime fechaDesde = DateTime.Parse(txtfecha1.Text);
+            DateTime fechaHasta = DateTime.Parse(txtfecha2.Text);
+
+            conectado.conectar();
+            DataTable dt = conectado.ObtenerReportePagos(fechaDesde, fechaHasta);
+            conectado.desconectar();
+
+            GridViewReporte.DataSource = dt;
+            GridViewReporte.DataBind();
+        }
+
+        /// <summary>
+        /// Captura el clic en el botón “Ver Reporte” dentro de cada fila de GridView2.
+        /// </summary>
+        protected void GridView2_RowCommand(object sender, GridViewCommandEventArgs e)
+        {
+            if (e.CommandName == "VerReporte")
+            {
+                string dpi = e.CommandArgument.ToString();
+                DateTime desde = DateTime.Parse(txtfecha1.Text);
+                DateTime hasta = DateTime.Parse(txtfecha2.Text);
+
+                conectado.conectar();
+                DataTable dt = conectado.ObtenerReportePagosCliente(dpi, desde, hasta);
+                conectado.desconectar();
+
+                GridViewReporte.DataSource = dt;
+                GridViewReporte.DataBind();
+            }
+        }
+
+
         private void bingrind()
         {
             /* SqlConnection con = new SqlConnection();

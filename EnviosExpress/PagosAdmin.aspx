@@ -23,10 +23,18 @@
 a: <asp:TextBox ID="txtfecha2" runat="server" Width="100px" TextMode="Date"></asp:TextBox>
            &nbsp;
         <asp:Button ID="Button3" runat="server" OnClick="btn3_Click" Text="Consultar" BackColor="#339933" ForeColor="White" />
+
+
+
+
+
                <br />
             <br />
                <p class="centrado">
                    <asp:GridView ID="GridView2" runat="server" ForeColor="Black" CellSpacing="10" HorizontalAlign="Center"
+                    OnRowCommand="GridView2_RowCommand"
+
+
                        AutoGenerateEditButton="true"
                        AutoGenerateColumns="false"
                        OnRowCancelingEdit="RowCancelingEvent1"
@@ -82,12 +90,43 @@ a: <asp:TextBox ID="txtfecha2" runat="server" Width="100px" TextMode="Date"></as
             </EditItemTemplate>
             </asp:TemplateField>
 
+             <asp:TemplateField HeaderText="Acción">
+      <ItemTemplate>
+        <asp:Button
+            ID="btnReporteFila"
+            runat="server"
+            Text="Ver Reporte"
+            CommandName="VerReporte"
+            CommandArgument='<%# Eval("dpi") %>'
+            CssClass="btn btn-info btn-sm" />
+      </ItemTemplate>
+    </asp:TemplateField>
+
          </Columns>
 
 
             </asp:GridView><p />
                <br />
                </div>
+
+                   <!-- NUEVO: GridView que muestra el informe detallado -->
+<asp:GridView
+    ID="GridViewReporte"
+    runat="server"
+    AutoGenerateColumns="false"
+    CssClass="table table-striped"
+    EmptyDataText="No hay datos para ese rango">
+  <Columns>
+    <asp:BoundField DataField="NoGuia"           HeaderText="No. Guía" />
+    <asp:BoundField DataField="MontoCobrado"     HeaderText="Monto Cobrado"     DataFormatString="Q{0:N2}" />
+    <asp:BoundField DataField="PagoCliente"      HeaderText="Pago al Cliente"    DataFormatString="Q{0:N2}" />
+    <asp:BoundField DataField="FechaHoraEntrega" HeaderText="Fecha y Hora Entrega" DataFormatString="{0:dd/MM/yyyy HH:mm}" />
+    <asp:BoundField DataField="Mensajero"        HeaderText="Mensajero" />
+  </Columns>
+</asp:GridView>
+
+
+
  <br /> 
                               <div class="container text-center""row" style="background-color:#f5f5f5; width:600px;">
 

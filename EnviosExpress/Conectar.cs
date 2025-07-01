@@ -10,6 +10,9 @@ using System.Windows.Controls.Primitives;
 using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 using static NPOI.SS.Formula.PTG.ArrayPtg;
 using static QRCoder.PayloadGenerator.SwissQrCode;
+using System.Data;
+using System.Data.SqlClient;
+
 
 namespace EnviosExpress
 {
@@ -974,6 +977,81 @@ namespace EnviosExpress
             returnVal.Fill(dt);
             return dt;
         }
+        /// <summary>
+        /// Devuelve el informe de entregas pendientes de pago entre dos fechas:
+        /// NoGuia, MontoCobrado, PagoCliente, FechaHoraEntrega y Mensajero.
+        /// </summary>
+        public DataTable ObtenerReportePagos(DateTime fechaDesde, DateTime fechaHasta)
+        {
+            var dt = new DataTable();
+            string sql = @"
+        SELECT
+            e.idpaquete                                AS NoGuia,
+            p.monto                                    AS MontoCobrado,
+            p.cantidadadepositar                       AS PagoCliente,
+            e.fechahora                                AS FechaHoraEntrega,
+            CONCAT(m.primerNombre,' ',m.primerApellido) AS Mensajero
+        FROM dbo.estadopaquete e
+        INNER JOIN dbo.paquete     p ON e.idpaquete    = p.idpaquete
+        LEFT  JOIN dbo.usuario     m ON e.idusuariomns = m.dpi
+        WHERE e.estado = 'Entregado'
+          AND CAST(e.fechahora AS date) BETWEEN @desde AND @hasta
+          AND NOT EXISTS (
+              -- excluir las que ya tienen pago registrado
+              SELECT 1 FROM dbo.pagos x WHERE x.idpago = e.idpaquete
+          )
+        ORDER BY e.fechahora DESC;
+    ";
+
+            using (var cmd = new SqlCommand(sql, conexion))
+            {
+                cmd.Parameters.AddWithValue("@desde", fechaDesde.Date);
+                cmd.Parameters.AddWithValue("@hasta", fechaHasta.Date);
+                using (var da = new SqlDataAdapter(cmd))
+                    da.Fill(dt);
+            }
+
+            return dt;
+        }
+
+        /// <summary>
+        /// Devuelve el informe de entregas pendientes de pago para un cliente (dpi) en un rango de fechas.
+        /// </summary>
+        public DataTable ObtenerReportePagosCliente(string dpi, DateTime fechaDesde, DateTime fechaHasta)
+        {
+            var dt = new DataTable();
+            const string sql = @"
+            SELECT
+                e.idpaquete                                AS NoGuia,
+                p.monto                                    AS MontoCobrado,
+                p.cantidadadepositar                       AS PagoCliente,
+                e.fechahora                                AS FechaHoraEntrega,
+                CONCAT(m.primerNombre,' ',m.primerApellido) AS Mensajero
+            FROM dbo.estadopaquete e
+            JOIN dbo.paquete     p ON e.idpaquete    = p.idpaquete
+            LEFT JOIN dbo.usuario m ON e.idusuariomns = m.dpi
+            WHERE e.estado    = 'Entregado'
+              AND p.idusuario = @dpi
+              AND CAST(e.fechahora AS date) BETWEEN @desde AND @hasta
+              AND NOT EXISTS (
+                  SELECT 1 FROM dbo.pagos x WHERE x.idpago = e.idpaquete
+              )
+            ORDER BY e.fechahora DESC;
+        ";
+
+            using (var cmd = new SqlCommand(sql, conexion))
+            {
+                cmd.Parameters.AddWithValue("@dpi", dpi);
+                cmd.Parameters.AddWithValue("@desde", fechaDesde.Date);
+                cmd.Parameters.AddWithValue("@hasta", fechaHasta.Date);
+                using (var da = new SqlDataAdapter(cmd))
+                    da.Fill(dt);
+            }
+
+            return dt;
+        }
+
+
         public DataTable pendiente(String guia)
         {
             string query = "INSERT INTO estadopaquete" +
