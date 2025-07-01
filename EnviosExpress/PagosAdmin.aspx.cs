@@ -63,13 +63,22 @@ namespace EnviosExpress
                 DateTime hasta = DateTime.Parse(txtfecha2.Text);
 
                 conectado.conectar();
+                // 1) Traer nombre completo del cliente
+                DataTable usu = conectado.consultaUsuarioDPI(dpi);
+                string cliente = "Desconocido";
+                if (usu.Rows.Count > 0)
+                    cliente = usu.Rows[0]["primerNombre"] + " " + usu.Rows[0]["primerApellido"];
+
+                // 2) Traer detalle del reporte
                 DataTable dt = conectado.ObtenerReportePagosCliente(dpi, desde, hasta);
                 conectado.desconectar();
 
+                // 3) Fijar título con nombre y DPI
                 lblReporteTitulo.Text =
-                  $"Informe de pagos para el cliente {dpi} " +
-                  $"del {desde:dd/MM/yyyy} al {hasta:dd/MM/yyyy}";
+                    $"Informe de pagos para {cliente} (DPI: {dpi}) " +
+                    $"del {desde:dd/MM/yyyy} al {hasta:dd/MM/yyyy}";
 
+                // 4) Enlazar tabla
                 GridViewReporte.DataSource = dt;
                 GridViewReporte.DataBind();
             }
