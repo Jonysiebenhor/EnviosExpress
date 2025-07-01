@@ -66,6 +66,10 @@ namespace EnviosExpress
                 DataTable dt = conectado.ObtenerReportePagosCliente(dpi, desde, hasta);
                 conectado.desconectar();
 
+                lblReporteTitulo.Text =
+                  $"Informe de pagos para el cliente {dpi} " +
+                  $"del {desde:dd/MM/yyyy} al {hasta:dd/MM/yyyy}";
+
                 GridViewReporte.DataSource = dt;
                 GridViewReporte.DataBind();
             }
