@@ -47,16 +47,19 @@ namespace EnviosExpress
                         if (prueba2 == "1")
                         {
                             Session["id"] = txtdpi.Text;
+                            Session["rol"] = prueba2;
                             Response.Redirect("Menu.aspx");
                         }
                         else if (prueba2 == "2")
                         {
                             Session["id"] = txtdpi.Text;
+                            Session["rol"] = prueba2;
                             Response.Redirect("MenuMensajero.aspx");
                         }
                         else
                         {
                             Session["id"] = txtdpi.Text;
+                            Session["rol"] = prueba2;
                             Response.Redirect("MenuAdministrador.aspx");
                         }
                     }
