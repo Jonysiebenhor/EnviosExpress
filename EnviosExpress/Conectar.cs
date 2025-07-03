@@ -810,7 +810,7 @@ namespace EnviosExpress
         }
         public DataTable estadopaquete1(String guia)
         {
-            string query = "SELECT a.idpaquete, b.idpaquete, b.estado from paquete a left join estadopaquete b on a.idpaquete = b.idpaquete  where b.idpaquete = " + guia + "and (  b.estado='Entregado' or  b.estado='Devolucion Entregado')";
+            string query = "SELECT a.idpaquete, b.idpaquete, b.estado from paquete a left join estadopaquete b on a.idpaquete = b.idpaquete  where b.idpaquete = " + guia + "and (  b.estado='Entregado' or  b.estado='Devolución Entregado')";
 
             SqlCommand cmd = new SqlCommand(query, conexion);
             SqlDataAdapter returnVal = new SqlDataAdapter(query, conexion);
@@ -895,6 +895,7 @@ namespace EnviosExpress
             returnVal.Fill(dt);
             return dt;
         }
+        
         public DataTable pagosclientes5(String dpi1,String dpi2)
         {
             string query = "update estadopaquete set fechahora = GETDATE(),idusuariomns=" + dpi2 + ", estado = 'Liquidado' where fechahora is null and idusuario = " + dpi1 + "";
@@ -1330,7 +1331,7 @@ namespace EnviosExpress
                         "('" + guia + "'," +
                         "GETDATE()," +
                         "'" + dpi + "' ," +
-                        "'Devolucion '+'" + intento + "' )";
+                        "'Devolución '+'" + intento + "' )";
 
             SqlCommand cmd = new SqlCommand(query, conexion);
             SqlDataAdapter returnVal = new SqlDataAdapter(query, conexion);
