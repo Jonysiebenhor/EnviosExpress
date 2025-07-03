@@ -13,7 +13,7 @@
            
                <div class="container text-center" style="background-color:#e1dddd; height:90%; width:90%;">
              <br /><br />
-           <div class="container text-center""row" style="background-color:#f5f5f5; width:600px;">
+           <div class="container text-center row" style="background-color:#f5f5f5; width:600px;">
 
 
 <br /><br />
@@ -33,6 +33,8 @@ a: <asp:TextBox ID="txtfecha2" runat="server" Width="100px" TextMode="Date"></as
                <p class="centrado">
                    <asp:GridView ID="GridView2" runat="server" ForeColor="Black" CellSpacing="10" HorizontalAlign="Center"
                     OnRowCommand="GridView2_RowCommand"
+                        DataKeyNames="dpi"
+                        
 
 
                        AutoGenerateEditButton="true"
@@ -119,7 +121,7 @@ a: <asp:TextBox ID="txtfecha2" runat="server" Width="100px" TextMode="Date"></as
 
 
                    <!-- NUEVO: GridView que muestra el informe detallado -->
-<div style="width:600px; margin:0 auto;">
+<div style="width:700px; margin-left: 0;">
 
   <asp:GridView
       ID="GridViewReporte"
@@ -127,46 +129,73 @@ a: <asp:TextBox ID="txtfecha2" runat="server" Width="100px" TextMode="Date"></as
       AutoGenerateColumns="false"
       CssClass="table table-striped"
       EmptyDataText="No hay datos para ese rango"
-      Width="600px"
+      Width="700px"
       Style="table-layout:fixed;">
 
     <%-- Encabezado en rojo --%>
     <HeaderStyle BackColor="#FF0000" ForeColor="White" />
 
     <Columns>
-      <asp:BoundField
-          DataField="NoGuia"
-          HeaderText="No. Guía"
-          HeaderStyle-Width="80px"
-          ItemStyle-Width="80px" />
 
-      <asp:BoundField
-          DataField="MontoCobrado"
-          HeaderText="Monto Cobrado"
-          DataFormatString="Q{0:N2}"
-          HeaderStyle-Width="120px"
-          ItemStyle-Width="120px" />
+       
+     <asp:BoundField DataField="NoGuia"
+                  HeaderText="No. Guía"
+                  HeaderStyle-Width="70px"
+                  ItemStyle-Width="70px" />
 
-      <asp:BoundField
-          DataField="PagoCliente"
-          HeaderText="Pago al Cliente"
-          DataFormatString="Q{0:N2}"
-          HeaderStyle-Width="120px"
-          ItemStyle-Width="120px" />
+    <asp:BoundField DataField="Departamento"
+                  HeaderText="Departamento"
+                  HeaderStyle-Width="100px"
+                  ItemStyle-Width="100px" />
 
-      <asp:BoundField
-          DataField="FechaHoraEntrega"
-          HeaderText="Fecha y Hora Entrega"
-          DataFormatString="{0:dd/MM/yyyy HH:mm}"
-          HeaderStyle-Width="140px"
-          ItemStyle-Width="140px" />
+   <asp:BoundField DataField="Municipio"
+                  HeaderText="Municipio"
+                  HeaderStyle-Width="135px"
+                  ItemStyle-Width="135px" />
 
-      <asp:BoundField
-          DataField="Mensajero"
-          HeaderText="Mensajero"
-          HeaderStyle-Width="100px"
-          ItemStyle-Width="100px" />
-    </Columns>
+   <asp:BoundField DataField="Zona"
+                  HeaderText="Zona"
+                  HeaderStyle-Width="150px"
+                  ItemStyle-Width="150px" />
+
+   <asp:BoundField DataField="MontoCobrado"
+                  HeaderText="Monto Cobrado"
+                  DataFormatString="Q{0:N2}"
+                  HeaderStyle-Width="90px"
+                  ItemStyle-Width="90px" />
+
+   <asp:BoundField DataField="ValorEnvio"
+                  HeaderText="Valor Envío"
+                  DataFormatString="Q{0:N2}"
+                  HeaderStyle-Width="90px"
+                  ItemStyle-Width="90px" />
+
+   <asp:BoundField DataField="ValorVisita"
+                  HeaderText="Valor Visita"
+                  DataFormatString="Q{0:N2}"
+                  HeaderStyle-Width="90px"
+                  ItemStyle-Width="90px" />
+
+   <asp:BoundField DataField="PagoCliente"
+                  HeaderText="Pago al Cliente"
+                  DataFormatString="Q{0:N2}"
+                  HeaderStyle-Width="90px"
+                  ItemStyle-Width="90px" />
+
+   <asp:BoundField DataField="FechaHoraEntrega"
+                  HeaderText="Fecha y Hora Entrega"
+                  DataFormatString="{0:dd/MM/yyyy HH:mm}"
+                  HeaderStyle-Width="120px"
+                  ItemStyle-Width="120px" />
+
+   <asp:BoundField DataField="Mensajero"
+                  HeaderText="Mensajero"
+                  HeaderStyle-Width="80px"
+                  ItemStyle-Width="80px" />
+</Columns>
+  
+      
+ 
   </asp:GridView>
 
 </div>
@@ -175,7 +204,7 @@ a: <asp:TextBox ID="txtfecha2" runat="server" Width="100px" TextMode="Date"></as
 
 
  <br /> 
-                              <div class="container text-center""row" style="background-color:#f5f5f5; width:600px;">
+                              <div class="container text-center row" style="background-color:#f5f5f5; width:600px;">
 
 
 <br /><br />
@@ -200,7 +229,7 @@ a: <asp:TextBox ID="txtfecha4" runat="server" Width="100px" TextMode="Date"></as
                <br />
                </div>
  <br /> 
-                <div class="container text-center""row" style="background-color:#f5f5f5; width:600px;">
+                <div class="container text-center row" style="background-color:#f5f5f5; width:600px;">
 
 
 <br /><br />
