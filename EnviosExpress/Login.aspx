@@ -19,7 +19,7 @@
             <asp:Label ID="estado0"  runat="server">D P I</asp:Label>
                   <br />
              
-            <asp:TextBox ID="txtdpi" runat="server" placeholder="" Width="115px" ></asp:TextBox>
+            <asp:TextBox ID="txtdpi" runat="server" placeholder="" Width="115px" ></asp:TextBox> 
         <br />
             <asp:Label ID="estado1"  runat="server">Contraseña</asp:Label>
             <br />

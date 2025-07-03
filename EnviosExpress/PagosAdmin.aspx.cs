@@ -63,11 +63,31 @@ namespace EnviosExpress
                 DateTime hasta = DateTime.Parse(txtfecha2.Text);
 
                 conectado.conectar();
-                DataTable dt = conectado.ObtenerReportePagosCliente(dpi, desde, hasta);
+                // 1) Traer nombre completo del negocio
+                DataTable usu = conectado.consultaUsuarioDPI(dpi);
+                string negocio = "Desconocido";
+                if (usu.Rows.Count > 0)
+                    negocio = usu.Rows[0]["nombrenegocio"].ToString();
+
+                // 2) Traer detalle del reporte (todo el rango)
+                DataTable dt = conectado.ObtenerReportePagos(desde, hasta);
                 conectado.desconectar();
 
-                GridViewReporte.DataSource = dt;
+                // 3) Filtrar SOLO el DPI seleccionado
+                dt.DefaultView.RowFilter = $"dpi = '{dpi}'";
+
+                // 4) (Opcional) convertir a DataTable si quieres
+                DataTable dtFiltrado = dt.DefaultView.ToTable();
+
+                // 5) Fijar título…
+                lblReporteTitulo.Text =
+                  $"Informe de pagos para {negocio} (DPI: {dpi}) " +
+                  $"del {desde:dd/MM/yyyy} al {hasta:dd/MM/yyyy}";
+
+                // 6) Enlazar sólo los datos filtrados
+                GridViewReporte.DataSource = dtFiltrado;
                 GridViewReporte.DataBind();
+
             }
         }
 

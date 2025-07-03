@@ -12,6 +12,7 @@ using static NPOI.SS.Formula.PTG.ArrayPtg;
 using static QRCoder.PayloadGenerator.SwissQrCode;
 using System.Data;
 using System.Data.SqlClient;
+using System.Configuration;
 
 
 namespace EnviosExpress
@@ -60,6 +61,34 @@ namespace EnviosExpress
                 //MessageBox.Show("Error en Conexion");
             }
         }
+
+        public DataTable ObtenerReportePagosPorCliente(string dpi, DateTime desde, DateTime hasta)
+        {
+            DataTable dt = new DataTable();
+
+            using (SqlConnection con = new SqlConnection(ConfigurationManager.ConnectionStrings["EnviosExpressConnectionString"].ToString()))
+
+            {
+                con.Open();
+
+                using (SqlCommand cmd = new SqlCommand(@"
+            SELECT * FROM pagos 
+            WHERE idusuario = (SELECT idusuario FROM usuario WHERE dpi = @dpi) 
+            AND CONVERT(date, fechahora) BETWEEN @desde AND @hasta", con))
+                {
+                    cmd.Parameters.AddWithValue("@dpi", dpi);
+                    cmd.Parameters.AddWithValue("@desde", desde.Date);
+                    cmd.Parameters.AddWithValue("@hasta", hasta.Date);
+
+                    SqlDataAdapter da = new SqlDataAdapter(cmd);
+                    da.Fill(dt);
+                }
+            }
+
+            return dt;
+        }
+
+
         public DataTable consultaUsuarioloign2(String dpi)
         {
             String query = "Select activo,rol  from usuario where dpi ='" + dpi + "' ";
@@ -979,78 +1008,54 @@ namespace EnviosExpress
             return dt;
         }
         /// <summary>
-        /// Devuelve el informe de entregas pendientes de pago entre dos fechas:
-        /// NoGuia, MontoCobrado, PagoCliente, FechaHoraEntrega y Mensajero.
+        /// Devuelve el informe de entregas pendientes de pago en un rango de fechas.
         /// </summary>
         public DataTable ObtenerReportePagos(DateTime fechaDesde, DateTime fechaHasta)
         {
             var dt = new DataTable();
-            string sql = @"
-        SELECT
-            e.idpaquete                                AS NoGuia,
-            p.monto                                    AS MontoCobrado,
-            p.cantidadadepositar                       AS PagoCliente,
-            e.fechahora                                AS FechaHoraEntrega,
-            CONCAT(m.primerNombre,' ',m.primerApellido) AS Mensajero
-        FROM dbo.estadopaquete e
-        INNER JOIN dbo.paquete     p ON e.idpaquete    = p.idpaquete
-        LEFT  JOIN dbo.usuario     m ON e.idusuariomns = m.dpi
-        WHERE e.estado = 'Entregado'
-          AND CAST(e.fechahora AS date) BETWEEN @desde AND @hasta
-          AND NOT EXISTS (
-              -- excluir las que ya tienen pago registrado
-              SELECT 1 FROM dbo.pagos x WHERE x.idpago = e.idpaquete
-          )
-        ORDER BY e.fechahora DESC;
-    ";
-
-            using (var cmd = new SqlCommand(sql, conexion))
-            {
-                cmd.Parameters.AddWithValue("@desde", fechaDesde.Date);
-                cmd.Parameters.AddWithValue("@hasta", fechaHasta.Date);
-                using (var da = new SqlDataAdapter(cmd))
-                    da.Fill(dt);
-            }
-
-            return dt;
-        }
-
-        /// <summary>
-        /// Devuelve el informe de entregas pendientes de pago para un cliente (dpi) en un rango de fechas.
-        /// </summary>
-        public DataTable ObtenerReportePagosCliente(string dpi, DateTime fechaDesde, DateTime fechaHasta)
-        {
-            var dt = new DataTable();
             const string sql = @"
-            SELECT
-                e.idpaquete                                AS NoGuia,
-                p.monto                                    AS MontoCobrado,
-                p.cantidadadepositar                       AS PagoCliente,
-                e.fechahora                                AS FechaHoraEntrega,
-                CONCAT(m.primerNombre,' ',m.primerApellido) AS Mensajero
-            FROM dbo.estadopaquete e
-            JOIN dbo.paquete     p ON e.idpaquete    = p.idpaquete
-            LEFT JOIN dbo.usuario m ON e.idusuariomns = m.dpi
-            WHERE e.estado    = 'Entregado'
-              AND p.idusuario = @dpi
-              AND CAST(e.fechahora AS date) BETWEEN @desde AND @hasta
-              AND NOT EXISTS (
-                  SELECT 1 FROM dbo.pagos x WHERE x.idpago = e.idpaquete
-              )
-            ORDER BY e.fechahora DESC;
-        ";
+SELECT
+    p.idusuario                                  AS dpi,
+    e.idpaquete                                  AS NoGuia,
+    b.nombre                                     AS Departamento,
+    c.nombre                                     AS Municipio,
+    d.nombre                                     AS Zona,
+    p.monto                                      AS MontoCobrado,
+    p.valorenvio                                 AS ValorEnvio,
+    p.valorvisita                                AS ValorVisita,
+    p.cantidadadepositar                         AS PagoCliente,
+    e.fechahora                                  AS FechaHoraEntrega,
+    CONCAT(m.primerNombre,' ',m.primerApellido)  AS Mensajero
+FROM dbo.estadopaquete e
+INNER JOIN dbo.paquete      p ON e.idpaquete      = p.idpaquete
+LEFT  JOIN dbo.departamento b ON p.iddepartamento = b.iddepartamento
+LEFT  JOIN dbo.municipio    c ON p.idmunicipio    = c.idmunicipio
+LEFT  JOIN dbo.zona         d ON p.idzona         = d.idzona
+LEFT  JOIN dbo.usuario      m ON e.idusuariomns   = m.dpi
+WHERE e.estado    = 'Entregado'
+  AND CAST(e.fechahora AS date) BETWEEN @desde AND @hasta
+  AND NOT EXISTS (
+      SELECT 1 FROM dbo.pagos x WHERE x.idpago = e.idpaquete
+  )
+ORDER BY e.fechahora DESC;
+";
 
             using (var cmd = new SqlCommand(sql, conexion))
             {
-                cmd.Parameters.AddWithValue("@dpi", dpi);
+
                 cmd.Parameters.AddWithValue("@desde", fechaDesde.Date);
                 cmd.Parameters.AddWithValue("@hasta", fechaHasta.Date);
                 using (var da = new SqlDataAdapter(cmd))
+
                     da.Fill(dt);
             }
 
+            if (!dt.Columns.Contains("dpi"))
+                throw new InvalidOperationException("Falta la columna 'dpi' en el DataTable.");
             return dt;
         }
+
+
 
 
         public DataTable pendiente(String guia)
