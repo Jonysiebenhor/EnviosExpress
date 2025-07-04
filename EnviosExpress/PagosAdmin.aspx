@@ -3,7 +3,16 @@
     Envios Express
 </asp:Content>
 <asp:Content ID="Content2" ContentPlaceHolderID="head" runat="server">
+  <style>
+    /* Fuerza el salto de línea dentro de celdas y encabezados */
+    .text-wrap td,
+    .text-wrap th {
+      white-space: normal !important;
+      word-wrap: break-word !important;
+    }
+  </style>
 </asp:Content>
+
 <asp:Content ID="Content3" ContentPlaceHolderID="body" runat="server">
 
 
@@ -31,7 +40,7 @@ a: <asp:TextBox ID="txtfecha2" runat="server" Width="100px" TextMode="Date"></as
                <br />
             <br />
                <p class="centrado">
-                   <asp:GridView ID="GridView2" runat="server" ForeColor="Black" CellSpacing="10" HorizontalAlign="Center"
+                   <asp:GridView ID="GridView2" runat="server" ForeColor="Black" CellSpacing="30" HorizontalAlign="Center"
                     OnRowCommand="GridView2_RowCommand"
                         DataKeyNames="dpi"
                         
@@ -115,7 +124,7 @@ a: <asp:TextBox ID="txtfecha2" runat="server" Width="100px" TextMode="Date"></as
 <asp:Label 
     ID="lblReporteTitulo" 
     runat="server" 
-    CssClass="h4 text-center" 
+    CssClass="h4 text-left"
     Text="" 
     Style="display:block; margin-bottom:10px;" />
 
@@ -124,74 +133,73 @@ a: <asp:TextBox ID="txtfecha2" runat="server" Width="100px" TextMode="Date"></as
 <div style="width:700px; margin-left: 0;">
 
   <asp:GridView
-      ID="GridViewReporte"
-      runat="server"
-      AutoGenerateColumns="false"
-      CssClass="table table-striped"
-      EmptyDataText="No hay datos para ese rango"
-      Width="700px"
-      Style="table-layout:fixed;">
-
-    <%-- Encabezado en rojo --%>
-    <HeaderStyle BackColor="#FF0000" ForeColor="White" />
-
-    <Columns>
+    ID="GridViewReporte"
+    runat="server"
+    AutoGenerateColumns="false"
+    CssClass="table table-striped text-wrap"
+    EmptyDataText="No hay datos para ese rango"
+    Width="700px"
+    Style="table-layout:fixed;"
+    CellSpacing="30">
+  <HeaderStyle BackColor="#FF0000" ForeColor="White" />
+  
+      <Columns>
 
        
      <asp:BoundField DataField="NoGuia"
                   HeaderText="No. Guía"
-                  HeaderStyle-Width="70px"
-                  ItemStyle-Width="70px" />
+                  HeaderStyle-Width="60px"
+                  ItemStyle-Width="60px" />
 
     <asp:BoundField DataField="Departamento"
                   HeaderText="Departamento"
-                  HeaderStyle-Width="100px"
-                  ItemStyle-Width="100px" />
+                  HeaderStyle-Width="90px"
+                  ItemStyle-Width="90px" />
 
    <asp:BoundField DataField="Municipio"
                   HeaderText="Municipio"
-                  HeaderStyle-Width="135px"
-                  ItemStyle-Width="135px" />
+                  HeaderStyle-Width="70px"
+                  ItemStyle-Width="70px" />
 
    <asp:BoundField DataField="Zona"
                   HeaderText="Zona"
-                  HeaderStyle-Width="150px"
-                  ItemStyle-Width="150px" />
+                  HeaderStyle-Width="70px"
+                  ItemStyle-Width="70px" />
 
    <asp:BoundField DataField="MontoCobrado"
                   HeaderText="Monto Cobrado"
                   DataFormatString="Q{0:N2}"
-                  HeaderStyle-Width="90px"
-                  ItemStyle-Width="90px" />
+                  HeaderStyle-Width="80px"
+                  ItemStyle-Width="80px" />
 
    <asp:BoundField DataField="ValorEnvio"
                   HeaderText="Valor Envío"
                   DataFormatString="Q{0:N2}"
-                  HeaderStyle-Width="90px"
-                  ItemStyle-Width="90px" />
+                  HeaderStyle-Width="80px"
+                  ItemStyle-Width="80px" />
 
    <asp:BoundField DataField="ValorVisita"
                   HeaderText="Valor Visita"
                   DataFormatString="Q{0:N2}"
-                  HeaderStyle-Width="90px"
-                  ItemStyle-Width="90px" />
+                  HeaderStyle-Width="80px"
+                  ItemStyle-Width="80px" />
 
    <asp:BoundField DataField="PagoCliente"
                   HeaderText="Pago al Cliente"
                   DataFormatString="Q{0:N2}"
-                  HeaderStyle-Width="90px"
-                  ItemStyle-Width="90px" />
+                  HeaderStyle-Width="80px"
+                  ItemStyle-Width="80px" />
 
    <asp:BoundField DataField="FechaHoraEntrega"
                   HeaderText="Fecha y Hora Entrega"
                   DataFormatString="{0:dd/MM/yyyy HH:mm}"
-                  HeaderStyle-Width="120px"
-                  ItemStyle-Width="120px" />
+                  HeaderStyle-Width="70px"
+                  ItemStyle-Width="70px" />
 
    <asp:BoundField DataField="Mensajero"
                   HeaderText="Mensajero"
-                  HeaderStyle-Width="80px"
-                  ItemStyle-Width="80px" />
+                  HeaderStyle-Width="60px"
+                  ItemStyle-Width="60px" />
 </Columns>
   
       
