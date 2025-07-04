@@ -26,7 +26,7 @@
      <br />
         <br />
     
-   <asp:Button ID="Recoleccion" runat="server" Text="Solicitar Recolección al numero +502 123456879" OnClick="Recoleccion_Click" Height="70px" Width="250px" BackColor="White" Font-Bold="False" Font-Size="Large" BorderColor="#CCCCCC" BorderStyle="Outset" />
+   <asp:Button ID="Recoleccion" runat="server" Text="Solicitar Recolección" OnClick="Recoleccion_Click" Height="70px" Width="250px" BackColor="White" Font-Bold="False" Font-Size="Large" BorderColor="#CCCCCC" BorderStyle="Outset" />
         <br />
         <br />
       
