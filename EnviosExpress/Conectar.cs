@@ -1033,6 +1033,7 @@ LEFT  JOIN dbo.municipio    c ON p.idmunicipio    = c.idmunicipio
 LEFT  JOIN dbo.zona         d ON p.idzona         = d.idzona
 LEFT  JOIN dbo.usuario      m ON e.idusuariomns   = m.dpi
 WHERE e.estado    = 'Entregado'
+and p.idpago is null
   AND CAST(e.fechahora AS date) BETWEEN @desde AND @hasta
   AND NOT EXISTS (
       SELECT 1 FROM dbo.pagos x WHERE x.idpago = e.idpaquete
