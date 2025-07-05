@@ -60,6 +60,42 @@ namespace EnviosExpress
         protected global::System.Web.UI.WebControls.GridView GridView2;
 
         /// <summary>
+        /// Control pnlDetallePendientes.
+        /// </summary>
+        /// <remarks>
+        /// Campo generado automáticamente.
+        /// Para modificarlo, mueva la declaración del campo del archivo del diseñador al archivo de código subyacente.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Panel pnlDetallePendientes;
+
+        /// <summary>
+        /// Control lblTituloDetallePendientes.
+        /// </summary>
+        /// <remarks>
+        /// Campo generado automáticamente.
+        /// Para modificarlo, mueva la declaración del campo del archivo del diseñador al archivo de código subyacente.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Label lblTituloDetallePendientes;
+
+        /// <summary>
+        /// Control GridViewDetallePendientes.
+        /// </summary>
+        /// <remarks>
+        /// Campo generado automáticamente.
+        /// Para modificarlo, mueva la declaración del campo del archivo del diseñador al archivo de código subyacente.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.GridView GridViewDetallePendientes;
+
+        /// <summary>
+        /// Control pnlReporte.
+        /// </summary>
+        /// <remarks>
+        /// Campo generado automáticamente.
+        /// Para modificarlo, mueva la declaración del campo del archivo del diseñador al archivo de código subyacente.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Panel pnlReporte;
+
+        /// <summary>
         /// Control lblReporteTitulo.
         /// </summary>
         /// <remarks>
@@ -78,13 +114,13 @@ namespace EnviosExpress
         protected global::System.Web.UI.WebControls.GridView GridViewReporte;
 
         /// <summary>
-        /// Control Label11.
+        /// Control lblPagosLiquidados.
         /// </summary>
         /// <remarks>
         /// Campo generado automáticamente.
         /// Para modificarlo, mueva la declaración del campo del archivo del diseñador al archivo de código subyacente.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.Label Label11;
+        protected global::System.Web.UI.WebControls.Label lblPagosLiquidados;
 
         /// <summary>
         /// Control txtfecha3.
@@ -105,13 +141,13 @@ namespace EnviosExpress
         protected global::System.Web.UI.WebControls.TextBox txtfecha4;
 
         /// <summary>
-        /// Control Button2.
+        /// Control btn2.
         /// </summary>
         /// <remarks>
         /// Campo generado automáticamente.
         /// Para modificarlo, mueva la declaración del campo del archivo del diseñador al archivo de código subyacente.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.Button Button2;
+        protected global::System.Web.UI.WebControls.Button btn2;
 
         /// <summary>
         /// Control GridView3.
@@ -121,6 +157,33 @@ namespace EnviosExpress
         /// Para modificarlo, mueva la declaración del campo del archivo del diseñador al archivo de código subyacente.
         /// </remarks>
         protected global::System.Web.UI.WebControls.GridView GridView3;
+
+        /// <summary>
+        /// Control pnlDetalleLiquidados.
+        /// </summary>
+        /// <remarks>
+        /// Campo generado automáticamente.
+        /// Para modificarlo, mueva la declaración del campo del archivo del diseñador al archivo de código subyacente.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Panel pnlDetalleLiquidados;
+
+        /// <summary>
+        /// Control lblTituloDetalle.
+        /// </summary>
+        /// <remarks>
+        /// Campo generado automáticamente.
+        /// Para modificarlo, mueva la declaración del campo del archivo del diseñador al archivo de código subyacente.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Label lblTituloDetalle;
+
+        /// <summary>
+        /// Control GridViewDetalleLiquidados.
+        /// </summary>
+        /// <remarks>
+        /// Campo generado automáticamente.
+        /// Para modificarlo, mueva la declaración del campo del archivo del diseñador al archivo de código subyacente.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.GridView GridViewDetalleLiquidados;
 
         /// <summary>
         /// Control Label1.
@@ -166,6 +229,33 @@ namespace EnviosExpress
         /// Para modificarlo, mueva la declaración del campo del archivo del diseñador al archivo de código subyacente.
         /// </remarks>
         protected global::System.Web.UI.WebControls.GridView GridView1;
+
+        /// <summary>
+        /// Control pnlDetalleMensajeros.
+        /// </summary>
+        /// <remarks>
+        /// Campo generado automáticamente.
+        /// Para modificarlo, mueva la declaración del campo del archivo del diseñador al archivo de código subyacente.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Panel pnlDetalleMensajeros;
+
+        /// <summary>
+        /// Control lblTituloDetalleMensajeros.
+        /// </summary>
+        /// <remarks>
+        /// Campo generado automáticamente.
+        /// Para modificarlo, mueva la declaración del campo del archivo del diseñador al archivo de código subyacente.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Label lblTituloDetalleMensajeros;
+
+        /// <summary>
+        /// Control GridViewDetalleMensajeros.
+        /// </summary>
+        /// <remarks>
+        /// Campo generado automáticamente.
+        /// Para modificarlo, mueva la declaración del campo del archivo del diseñador al archivo de código subyacente.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.GridView GridViewDetalleMensajeros;
 
         /// <summary>
         /// Control btnrecolectar0.

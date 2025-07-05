@@ -40,19 +40,26 @@ namespace EnviosExpress
         /// </summary>
         protected void btnVerReporte_Click(object sender, EventArgs e)
         {
-            DateTime fechaDesde = DateTime.Parse(txtfecha1.Text);
-            DateTime fechaHasta = DateTime.Parse(txtfecha2.Text);
+            DateTime desde = DateTime.Parse(txtfecha1.Text);
+            DateTime hasta = DateTime.Parse(txtfecha2.Text);
 
             conectado.conectar();
-            DataTable dt = conectado.ObtenerReportePagos(fechaDesde, fechaHasta);
+            DataTable dt = conectado.ObtenerReportePagos(desde, hasta);
             conectado.desconectar();
+
+            // Muestro el panel y título
+            pnlReporte.Visible = true;
+            lblReporteTitulo.Text =
+                $"Informe de pagos pendientes (DPI: {Session["id"]}) del {desde:dd/MM/yyyy} al {hasta:dd/MM/yyyy}";
 
             GridViewReporte.DataSource = dt;
             GridViewReporte.DataBind();
         }
 
+
+
         /// <summary>
-        /// Captura el clic en el botón “Ver Reporte” dentro de cada fila de GridView2.
+        /// Captura el clic en “Ver Reporte” dentro de GridView2 (pendientes)
         /// </summary>
         protected void GridView2_RowCommand(object sender, GridViewCommandEventArgs e)
         {
@@ -62,34 +69,20 @@ namespace EnviosExpress
                 DateTime desde = DateTime.Parse(txtfecha1.Text);
                 DateTime hasta = DateTime.Parse(txtfecha2.Text);
 
-                conectado.conectar();
-                // 1) Traer nombre completo del negocio
-                DataTable usu = conectado.consultaUsuarioDPI(dpi);
-                string negocio = "Desconocido";
-                if (usu.Rows.Count > 0)
-                    negocio = usu.Rows[0]["nombrenegocio"].ToString();
+                // Muestra el panel de tu GridView de reporte
+                lblReporteTitulo.Text = $"Reporte de pagos pendientes para DPI {dpi}";
+                pnlReporte.Visible = true;    // o el Panel que envuelve a GridViewReporte
 
-                // 2) Traer detalle del reporte (todo el rango)
-                DataTable dt = conectado.ObtenerReportePagos(desde, hasta);
+                // Llama al método ya existente y vincula:
+                conectado.conectar();
+                var dt = conectado.ObtenerReportePagosPorCliente(dpi, desde, hasta);
                 conectado.desconectar();
 
-                // 3) Filtrar SOLO el DPI seleccionado
-                dt.DefaultView.RowFilter = $"dpi = '{dpi}'";
-
-                // 4) (Opcional) convertir a DataTable si quieres
-                DataTable dtFiltrado = dt.DefaultView.ToTable();
-
-                // 5) Fijar título…
-                lblReporteTitulo.Text =
-                  $"Informe de pagos para {negocio} (DPI: {dpi}) " +
-                  $"del {desde:dd/MM/yyyy} al {hasta:dd/MM/yyyy}";
-
-                // 6) Enlazar sólo los datos filtrados
-                GridViewReporte.DataSource = dtFiltrado;
+                GridViewReporte.DataSource = dt;
                 GridViewReporte.DataBind();
-
             }
         }
+
 
 
         private void bingrind()
@@ -142,6 +135,7 @@ namespace EnviosExpress
         }
         protected void btn2_Click(object sender, EventArgs e)
         {
+            pnlDetalleLiquidados.Visible = false;
             conectado.conectar();
             String fecha3 = txtfecha3.Text;
             String fecha4 = txtfecha4.Text;
@@ -149,6 +143,7 @@ namespace EnviosExpress
             GridView3.DataBind();
             conectado.desconectar();
         }
+
 
         protected void RowUpdatingEvent(object sender, System.Web.UI.WebControls.GridViewUpdateEventArgs e)
         {
@@ -253,6 +248,68 @@ namespace EnviosExpress
             GridView3.DataBind();
             conectado.desconectar();
         }
+        /// <summary>
+        /// Captura el clic en “Generar Reporte” dentro de GridView3
+        /// </summary>
+        protected void GridView3_RowCommand(object sender, GridViewCommandEventArgs e)
+        {
+            if (e.CommandName == "GenerarReporte")
+            {
+                string idPago = e.CommandArgument.ToString();
+
+                // 1) Traer datos
+                conectado.conectar();
+                DataTable detalle = conectado.ObtenerDetalleLiquidacionCliente(idPago);
+                conectado.desconectar();
+
+                // 2) Sacar el nombre del cliente (si viene)
+                string cliente = "(desconocido)";
+                if (detalle.Rows.Count > 0 && detalle.Columns.Contains("Cliente"))
+                    cliente = detalle.Rows[0]["Cliente"].ToString();
+
+                // 3) Mostrar el panel
+                pnlDetalleLiquidados.Visible = true;
+
+                // 4) Fijar el título con cliente + IDpago
+                lblTituloDetalle.Text =
+                  $"Informe de liquidación para {cliente} con el ID de pago {idPago}";
+
+                // 5) Rellenar el GridView de detalle
+                GridViewDetalleLiquidados.DataSource = detalle;
+                GridViewDetalleLiquidados.DataBind();
+            }
+        }
+
+        protected void GridView1_RowCommand(object sender, GridViewCommandEventArgs e)
+        {
+            if (e.CommandName == "VerReporteMensajero")
+            {
+                string idPago = e.CommandArgument.ToString();
+
+                // 1) Traer datos
+                conectado.conectar();
+                DataTable dtDetalle = conectado.ObtenerDetalleMensajero(idPago);
+                conectado.desconectar();
+
+                // 2) Obtener el nombre del mensajero (si existe)
+                string mensajero = "(desconocido)";
+                if (dtDetalle.Rows.Count > 0 && dtDetalle.Columns.Contains("Mensajero"))
+                    mensajero = dtDetalle.Rows[0]["Mensajero"].ToString();
+
+                // 3) Ajustar el título del panel
+                lblTituloDetalleMensajeros.Text =
+                    $"Reporte del mensajero {mensajero} con un ID de pago {idPago}";
+
+                // 4) Enlazar la grilla y mostrar el panel
+                GridViewDetalleMensajeros.DataSource = dtDetalle;
+                GridViewDetalleMensajeros.DataBind();
+                pnlDetalleMensajeros.Visible = true;
+            }
+        }
+
+
+
+
 
     }
 } //Redirigir al menu principal

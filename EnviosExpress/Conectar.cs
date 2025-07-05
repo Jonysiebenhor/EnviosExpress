@@ -15,6 +15,8 @@ using System.Data.SqlClient;
 using System.Configuration;
 
 
+
+
 namespace EnviosExpress
 {
     public class Conectar
@@ -31,12 +33,15 @@ namespace EnviosExpress
 
         //String conexionString = "Data Source=DESKTOP-QTSGBLO;DATABASE=EnviosExpress;Integrated security=true";pasada
         //String conexionString = "Data Source=DESKTOP-KNTJ3BG\\SQLEXPRESS;DATABASE=EnviosExpress;Integrated security=true";
-        String conexionString = "workstation id = EnviosExpress.mssql.somee.com; packet size = 4096; user id = EnviosExpress; pwd=Envios3228@;data source = EnviosExpress.mssql.somee.com;";
+       
         public void conectar()
         {
             try
             {
-                conexion.ConnectionString = conexionString;
+                conexion.ConnectionString =
+            ConfigurationManager
+                .ConnectionStrings["EnviosExpressConnectionString"]
+                .ConnectionString;
                 conexion.Open();
             }
             catch
@@ -53,7 +58,7 @@ namespace EnviosExpress
         {
             try
             {
-                conexion.ConnectionString = conexionString;
+                
                 conexion.Close();
             }
             catch
@@ -64,29 +69,45 @@ namespace EnviosExpress
 
         public DataTable ObtenerReportePagosPorCliente(string dpi, DateTime desde, DateTime hasta)
         {
-            DataTable dt = new DataTable();
+            var dt = new DataTable();
+            const string sql = @"
+SELECT
+    p.idpaquete                                  AS NoGuia,
+    p.idusuario                                  AS dpi,
+    b.nombre                                     AS Departamento,
+    c.nombre                                     AS Municipio,
+    d.nombre                                     AS Zona,
+    p.monto                                      AS MontoCobrado,
+    p.valorenvio                                 AS ValorEnvio,
+    p.valorvisita                                AS ValorVisita,
+    p.cantidadadepositar                         AS PagoCliente,
+    e.fechahora                                  AS FechaHoraEntrega,
+    CONCAT(m.primerNombre,' ',m.primerApellido)  AS Mensajero
+FROM dbo.estadopaquete e
+INNER JOIN dbo.paquete      p ON e.idpaquete      = p.idpaquete
+LEFT  JOIN dbo.departamento b ON p.iddepartamento = b.iddepartamento
+LEFT  JOIN dbo.municipio    c ON p.idmunicipio    = c.idmunicipio
+LEFT  JOIN dbo.zona         d ON p.idzona         = d.idzona
+LEFT  JOIN dbo.usuario      m ON e.idusuariomns   = m.dpi
+WHERE e.estado    = 'Entregado'
+  AND p.idpago    IS NULL
+  AND p.idusuario = (SELECT idusuario FROM usuario WHERE dpi = @dpi)
+  AND CAST(e.fechahora AS date) BETWEEN @desde AND @hasta
+ORDER BY e.fechahora DESC;
+";
 
-            using (SqlConnection con = new SqlConnection(ConfigurationManager.ConnectionStrings["EnviosExpressConnectionString"].ToString()))
-
+            using (var cmd = new SqlCommand(sql, conexion))
             {
-                con.Open();
-
-                using (SqlCommand cmd = new SqlCommand(@"
-            SELECT * FROM pagos 
-            WHERE idusuario = (SELECT idusuario FROM usuario WHERE dpi = @dpi) 
-            AND CONVERT(date, fechahora) BETWEEN @desde AND @hasta", con))
-                {
-                    cmd.Parameters.AddWithValue("@dpi", dpi);
-                    cmd.Parameters.AddWithValue("@desde", desde.Date);
-                    cmd.Parameters.AddWithValue("@hasta", hasta.Date);
-
-                    SqlDataAdapter da = new SqlDataAdapter(cmd);
+                cmd.Parameters.AddWithValue("@dpi", dpi);
+                cmd.Parameters.AddWithValue("@desde", desde.Date);
+                cmd.Parameters.AddWithValue("@hasta", hasta.Date);
+                using (var da = new SqlDataAdapter(cmd))
                     da.Fill(dt);
-                }
             }
 
             return dt;
         }
+
 
 
         public DataTable consultaUsuarioloign2(String dpi)
@@ -871,16 +892,38 @@ namespace EnviosExpress
             return dt;
 
         }
-        public DataTable pagosclientes1(String fecha1, String fecha2)
+        public DataTable pagosclientes1(string fecha1, string fecha2)
         {
-            String query = "select b.dpi, CONCAT(b.primerNombre, ' ', b.primerApellido) as Cliente,b.nombrenegocio as Negocio, sum(cantidadadepositar) as Monto from paquete c  left join usuario b on c.idusuario=b.dpi left join estadopaquete d on d.idpaquete=c.idpaquete  where c.idpago is null and d.estado = 'entregado' and d.fechahora between '" + fecha1 + " 00:00:00.000" + "' and '" + fecha2 + " 23:59:59.000" + "' group by b.primerNombre,b.primerApellido,b.nombrenegocio,b.dpi;";
+            // Agregamos '' AS descripcion para que exista esa columna
+            string query =
+                "SELECT " +
+                "   b.dpi, " +
+                "   CONCAT(b.primerNombre, ' ', b.primerApellido) AS Cliente, " +
+                "   b.nombrenegocio AS Negocio, " +
+                "   SUM(cantidadadepositar) AS Monto, " +
+                "   '' AS descripcion " +
+                "FROM paquete c " +
+                "LEFT JOIN usuario b ON c.idusuario = b.dpi " +
+                "LEFT JOIN estadopaquete d ON d.idpaquete = c.idpaquete " +
+                "WHERE c.idpago IS NULL " +
+                "  AND d.estado = 'entregado' " +
+                "  AND d.fechahora BETWEEN '" + fecha1 + " 00:00:00.000' " +
+                "                       AND '" + fecha2 + " 23:59:59.000' " +
+                "GROUP BY " +
+                "   b.primerNombre, " +
+                "   b.primerApellido, " +
+                "   b.nombrenegocio, " +
+                "   b.dpi;";
 
-            SqlCommand cmd = new SqlCommand(query, conexion);
-            SqlDataAdapter returnVal = new SqlDataAdapter(query, conexion);
-            DataTable dt = new DataTable();
-            returnVal.Fill(dt);
-            return dt;
+            using (var cmd = new SqlCommand(query, conexion))
+            {
+                var da = new SqlDataAdapter(cmd);
+                var dt = new DataTable();
+                da.Fill(dt);
+                return dt;
+            }
         }
+
         public DataTable pagosclientes2(String dpi, String dpi2, String monto,String refe)
         {
             string query = "INSERT INTO pagos" +
@@ -935,16 +978,170 @@ namespace EnviosExpress
             returnVal.Fill(dt);
             return dt;
         }
-        public DataTable pagosclientes6(String fecha3, String fecha4)
+        public DataTable pagosclientes6(string fecha3, string fecha4)
         {
-            string query = "Select a.idpago, CONCAT(b.primerNombre, ' ', b.primerApellido) as Cliente, a.fechahora as Fecha,  CONCAT('Q', a.monto) as Monto, a.Estado as Estado,a.descripcion as #Referencia from pagos a left join usuario b on a.idusuario=b.dpi where b.rol= 1 and a.estado='Liquidado' and a.fechahora between '" + fecha3 + " 00:00:00.000" + "' and '" + fecha4 + " 23:59:59.000" + "' order by a.fechahora DESC";
+            string sql = @"
+SELECT
+    a.idpago                AS idpago,
+    CONCAT(u.primerNombre, ' ', u.primerApellido) AS Cliente,
+    CONVERT(varchar(16), a.fechahora, 103)
+      + ' '
+      + CONVERT(varchar(5), a.fechahora, 108)          AS FechaHoraEntrega,
+    'Q' + CAST(a.monto AS varchar(20))                  AS Monto,
+    a.estado                                            AS Estado,
+    a.descripcion                                       AS descripcion   -- aquí
+FROM pagos AS a
+LEFT JOIN usuario AS u ON a.idusuario = u.dpi
+WHERE u.rol = 1
+  AND a.estado = 'Liquidado'
+  AND a.fechahora BETWEEN @fecha3 AND @fecha4
+ORDER BY a.fechahora DESC;
+";
 
-            SqlCommand cmd = new SqlCommand(query, conexion);
-            SqlDataAdapter returnVal = new SqlDataAdapter(query, conexion);
-            DataTable dt = new DataTable();
-            returnVal.Fill(dt);
+            using (var cmd = new SqlCommand(sql, conexion))
+            {
+                cmd.Parameters.AddWithValue("@fecha3", fecha3 + " 00:00:00.000");
+                cmd.Parameters.AddWithValue("@fecha4", fecha4 + " 23:59:59.000");
+                var da = new SqlDataAdapter(cmd);
+                var dt = new DataTable();
+                da.Fill(dt);
+                return dt;
+            }
+        }
+
+        /// <summary>
+        /// Devuelve el detalle completo de los clientes pendientes (por DPI).
+        /// </summary>
+        /// <summary>
+        /// Devuelve el detalle completo de los paquetes entregados pendientes de pago para un cliente dado (por DPI).
+        /// </summary>
+        /// <summary>
+        /// Devuelve el detalle completo de los clientes pendientes (por DPI).
+        /// </summary>
+        public DataTable ObtenerDetallePendientesCliente(string dpi)
+        {
+            const string sql = @"
+SELECT
+    p.idpaquete                             AS NoGuia,
+    d.nombre                                AS Departamento,
+    m.nombre                                AS Municipio,
+    z.nombre                                AS Zona,
+    p.monto                                 AS MontoCobrado,
+    p.valorenvio                            AS ValorEnvio,
+    p.cantidadadepositar                    AS PagoCliente,
+    e.fechahora                             AS FechaHoraEntrega,
+    -- aquí concatenamos el nombre del mensajero
+    CONCAT(u.primerNombre, ' ', u.primerApellido) AS Mensajero
+FROM paquete AS p
+INNER JOIN estadopaquete AS e
+    ON p.idpaquete = e.idpaquete
+LEFT JOIN departamento AS d
+    ON p.iddepartamento = d.iddepartamento
+LEFT JOIN municipio AS m
+    ON p.idmunicipio = m.idmunicipio
+LEFT JOIN zona AS z
+    ON p.idzona = z.idzona
+LEFT JOIN usuario AS u
+    ON e.idusuariomns = u.dpi
+WHERE e.idusuario = @dpi
+  AND e.estado    = 'Entregado'
+  AND p.idpago   IS NULL
+ORDER BY e.fechahora DESC;
+";
+
+            using (var cmd = new SqlCommand(sql, conexion))
+            {
+                cmd.Parameters.AddWithValue("@dpi", dpi);
+                var da = new SqlDataAdapter(cmd);
+                var dt = new DataTable();
+                da.Fill(dt);
+                return dt;
+            }
+        }
+
+
+        /// <summary>
+        /// Devuelve todos los datos de liquidación de un pago específico.
+        /// </summary>
+        public DataTable ObtenerDetalleLiquidacionCliente(string idPago)
+        {
+            string sql = @"
+SELECT
+    a.idpago                             AS idpago,
+    usu.primerNombre + ' ' + usu.primerApellido AS Cliente,    -- <-- nueva columna
+    p.idpaquete                          AS NoGuia,
+    d.nombre                             AS Departamento,
+    c.nombre                             AS Municipio,
+    z.nombre                             AS Zona,
+    a.monto                              AS MontoCobrado,
+    p.valorenvio                         AS ValorEnvio,
+    p.cantidadadepositar                 AS PagoCliente,
+    e.fechahora                          AS FechaHoraEntrega,
+    a.estado                             AS Estado,
+    a.descripcion                        AS descripcion
+FROM pagos AS a
+LEFT JOIN usuario      AS usu ON a.idusuario       = usu.dpi       -- <— aquí traemos al cliente
+LEFT JOIN paquete      AS p   ON a.idpago          = p.idpago
+LEFT JOIN departamento AS d   ON p.iddepartamento  = d.iddepartamento
+LEFT JOIN municipio    AS c   ON p.idmunicipio     = c.idmunicipio
+LEFT JOIN zona         AS z   ON p.idzona          = z.idzona
+LEFT JOIN estadopaquete AS e  ON p.idpaquete       = e.idpaquete
+WHERE a.idpago = @idPago;
+";
+
+            using (var cmd = new SqlCommand(sql, conexion))
+            {
+                cmd.Parameters.AddWithValue("@idPago", idPago);
+                var da = new SqlDataAdapter(cmd);
+                var dt = new DataTable();
+                da.Fill(dt);
+                return dt;
+            }
+        }
+
+        /// <summary>
+        /// Devuelve todos los datos de detalle de un pago de mensajero específico.
+        /// </summary>
+        public DataTable ObtenerDetalleMensajero(string idPago)
+        {
+            const string sql = @"
+SELECT
+    a.idpago                                 AS IdPago,
+    d.nombre                                 AS Departamento,
+    m.nombre                                 AS Municipio,
+    z.nombre                                 AS Zona,
+    p.monto                                  AS MontoCobrado,        -- de paquete
+    p.valorenvio                             AS ValorEnvio,          -- de paquete
+    p.cantidadadepositar                     AS PagoCliente,         -- de paquete
+    e.fechahora                              AS FechaHoraEntrega,
+    a.estado                                 AS Estado,
+    CONCAT(u.primerNombre,' ',u.primerApellido) AS Mensajero
+FROM pagos AS a
+LEFT JOIN paquete      AS p ON a.idpago        = p.idpagomns   -- <-- aquí
+LEFT JOIN departamento AS d ON p.iddepartamento = d.iddepartamento
+LEFT JOIN municipio    AS m ON p.idmunicipio    = m.idmunicipio
+LEFT JOIN zona         AS z ON p.idzona         = z.idzona
+LEFT JOIN estadopaquete AS e ON p.idpaquete     = e.idpaquete
+LEFT JOIN usuario      AS u ON a.idusuariomns   = u.dpi          -- puedes traer el mensajero directo de pagos
+WHERE a.idpago = @idPago;
+";
+
+            var dt = new DataTable();
+            using (var cmd = new SqlCommand(sql, conexion))
+            {
+                cmd.Parameters.AddWithValue("@idPago", idPago);
+                using (var da = new SqlDataAdapter(cmd))
+                    da.Fill(dt);
+            }
             return dt;
         }
+
+
+
+
+
+
+
         public DataTable pagosclientes7(String dpi, String fecha1, String fecha2)
         {
             string query = "Select a.idpago, CONCAT(b.primerNombre, ' ', b.primerApellido) as Cliente, a.fechahora as Fecha,  CONCAT('Q', a.monto) as Monto, a.Estado as Estado,a.descripcion as #Referencia from pagos a left join usuario b on a.idusuario=b.dpi where b.rol= 1 and a.estado='Liquidado' and a.idusuario=" + dpi  + " and a.fechahora between '" + fecha1 + " 00:00:00.000" + "' and '" + fecha2 + " 23:59:59.000" + "' order by a.fechahora DESC";
@@ -1015,8 +1212,8 @@ namespace EnviosExpress
             var dt = new DataTable();
             const string sql = @"
 SELECT
+    p.idpaquete                                  AS NoGuia,         
     p.idusuario                                  AS dpi,
-    e.idpaquete                                  AS NoGuia,
     b.nombre                                     AS Departamento,
     c.nombre                                     AS Municipio,
     d.nombre                                     AS Zona,
@@ -1033,30 +1230,21 @@ LEFT  JOIN dbo.municipio    c ON p.idmunicipio    = c.idmunicipio
 LEFT  JOIN dbo.zona         d ON p.idzona         = d.idzona
 LEFT  JOIN dbo.usuario      m ON e.idusuariomns   = m.dpi
 WHERE e.estado    = 'Entregado'
-and p.idpago is null
+  AND p.idpago    IS NULL
   AND CAST(e.fechahora AS date) BETWEEN @desde AND @hasta
-  AND NOT EXISTS (
-      SELECT 1 FROM dbo.pagos x WHERE x.idpago = e.idpaquete
-  )
 ORDER BY e.fechahora DESC;
 ";
 
             using (var cmd = new SqlCommand(sql, conexion))
             {
-
                 cmd.Parameters.AddWithValue("@desde", fechaDesde.Date);
                 cmd.Parameters.AddWithValue("@hasta", fechaHasta.Date);
                 using (var da = new SqlDataAdapter(cmd))
-
                     da.Fill(dt);
             }
 
-            if (!dt.Columns.Contains("dpi"))
-                throw new InvalidOperationException("Falta la columna 'dpi' en el DataTable.");
             return dt;
         }
-
-
 
 
         public DataTable pendiente(String guia)
