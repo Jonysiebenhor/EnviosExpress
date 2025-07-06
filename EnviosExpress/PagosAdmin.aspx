@@ -326,19 +326,80 @@ a: <asp:TextBox ID="txtfecha2" runat="server" Width="100px" TextMode="Date"></as
     <HeaderStyle BackColor="#FF0000" ForeColor="White" />
     <Columns>
     <%-- Ahora mostramos el pago --%>
-    <asp:BoundField DataField="idpago"            HeaderText="ID Pago"             />
+        <asp:BoundField DataField="NoGuia"
+            HeaderText="No. Guía"
+            HeaderStyle-Width="80px"
+            ItemStyle-Width="80px" />
+    
+        <asp:BoundField 
+DataField="idpago"      
+HeaderText="ID Pago"       
+HeaderStyle-Width="80px" 
+ItemStyle-Width="80px" />
 
- 
+    <asp:BoundField 
+    DataField="Departamento"      
+    HeaderText="Departamento"       
+    HeaderStyle-Width="80px" 
+    ItemStyle-Width="80px" />
 
-    <asp:BoundField DataField="Departamento"      HeaderText="Departamento"       />
-    <asp:BoundField DataField="Municipio"         HeaderText="Municipio"          />
-    <asp:BoundField DataField="Zona"              HeaderText="Zona"               />
-    <asp:BoundField DataField="MontoCobrado"      HeaderText="Monto Cobrado"       DataFormatString="Q{0:N2}" />
-    <asp:BoundField DataField="ValorEnvio"        HeaderText="Valor Envío"         DataFormatString="Q{0:N2}" />
-    <asp:BoundField DataField="PagoCliente"       HeaderText="Pago al Cliente"     DataFormatString="Q{0:N2}" />
-    <asp:BoundField DataField="FechaHoraEntrega"  HeaderText="Fecha y Hora Entrega" DataFormatString="{0:dd/MM/yyyy HH:mm}" />
-    <asp:BoundField DataField="Estado"            HeaderText="Estado"             />
-    <asp:BoundField DataField="descripcion"        HeaderText="#Referencia"        />
+<asp:BoundField 
+    DataField="Municipio"         
+    HeaderText="Municipio"          
+    HeaderStyle-Width="80px" 
+    ItemStyle-Width="80px" />
+
+<asp:BoundField 
+    DataField="Zona"              
+    HeaderText="Zona"               
+    HeaderStyle-Width="80px" 
+    ItemStyle-Width="80px" />
+
+<asp:BoundField 
+    DataField="MontoCobrado"      
+    HeaderText="Monto Cobrado"       
+    DataFormatString="Q{0:N2}" 
+    HeaderStyle-Width="80px" 
+    ItemStyle-Width="80px" />
+
+<asp:BoundField 
+    DataField="ValorEnvio"        
+    HeaderText="Valor Envío"         
+    DataFormatString="Q{0:N2}" 
+    HeaderStyle-Width="80px" 
+    ItemStyle-Width="80px" />
+
+         <asp:BoundField 
+ DataField="ValorVisita"      
+ HeaderText="Valor Visita"       
+ HeaderStyle-Width="80px" 
+ ItemStyle-Width="80px" />
+
+<asp:BoundField 
+    DataField="PagoCliente"       
+    HeaderText="Pago al Cliente"     
+    DataFormatString="Q{0:N2}" 
+    HeaderStyle-Width="80px" 
+    ItemStyle-Width="80px" />
+
+<asp:BoundField 
+    DataField="FechaHoraEntrega"  
+    HeaderText="Fecha y Hora Entrega" 
+    DataFormatString="{0:dd/MM/yyyy HH:mm}" 
+    HeaderStyle-Width="80px" 
+    ItemStyle-Width="80px" />
+
+<asp:BoundField 
+    DataField="Estado"            
+    HeaderText="Estado"             
+    HeaderStyle-Width="80px" 
+    ItemStyle-Width="80px" />
+
+<asp:BoundField 
+    DataField="descripcion"       
+    HeaderText="#Referencia"        
+    HeaderStyle-Width="80px" 
+    ItemStyle-Width="80px" />
     </Columns>
   </asp:GridView>
 </asp:Panel>
@@ -476,16 +537,24 @@ a: <asp:TextBox ID="txtfecha6" runat="server" Width="100px" TextMode="Date"></as
       CellSpacing="10">
     <HeaderStyle BackColor="#DD4B39" ForeColor="White" />
     <Columns>
+        <asp:BoundField DataField="NoGuia"
+                    HeaderText="No. Guía"
+                    HeaderStyle-Width="80px"
+                    ItemStyle-Width="80px" />
       <asp:BoundField DataField="IdPago"           HeaderText="ID Pago" />
       <asp:BoundField DataField="Departamento"     HeaderText="Departamento" />
       <asp:BoundField DataField="Municipio"        HeaderText="Municipio" />
       <asp:BoundField DataField="Zona"             HeaderText="Zona" />
       <asp:BoundField DataField="MontoCobrado"     HeaderText="Monto Cobrado" DataFormatString="Q{0:N2}" />
       <asp:BoundField DataField="ValorEnvio"       HeaderText="Valor Envío"   DataFormatString="Q{0:N2}" />
+         <asp:BoundField DataField="ValorVisita"      HeaderText="Valor Visita"    DataFormatString="Q{0:N2}" />
+    
+
       <asp:BoundField DataField="PagoCliente"      HeaderText="Pago al Cliente" DataFormatString="Q{0:N2}" />
       <asp:BoundField DataField="FechaHoraEntrega" HeaderText="Fecha/Hora Entrega" DataFormatString="{0:dd/MM/yyyy HH:mm}" />
       <asp:BoundField DataField="Estado"           HeaderText="Estado" />
       <asp:BoundField DataField="Mensajero"        HeaderText="Mensajero" />
+        <asp:BoundField DataField="Referencia"       HeaderText="Referencia" />
     </Columns>
   </asp:GridView>
 </asp:Panel>

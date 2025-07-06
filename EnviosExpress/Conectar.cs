@@ -1070,11 +1070,13 @@ SELECT
     a.idpago                             AS idpago,
     usu.primerNombre + ' ' + usu.primerApellido AS Cliente,    -- <-- nueva columna
     p.idpaquete                          AS NoGuia,
+    p.idpaquete                             AS NoGuia,
     d.nombre                             AS Departamento,
     c.nombre                             AS Municipio,
     z.nombre                             AS Zona,
     a.monto                              AS MontoCobrado,
     p.valorenvio                         AS ValorEnvio,
+    p.valorvisita                        AS ValorVisita,
     p.cantidadadepositar                 AS PagoCliente,
     e.fechahora                          AS FechaHoraEntrega,
     a.estado                             AS Estado,
@@ -1107,14 +1109,17 @@ WHERE a.idpago = @idPago;
             const string sql = @"
 SELECT
     a.idpago                                 AS IdPago,
+    p.idpaquete                              AS NoGuia,
     d.nombre                                 AS Departamento,
     m.nombre                                 AS Municipio,
     z.nombre                                 AS Zona,
     p.monto                                  AS MontoCobrado,        -- de paquete
     p.valorenvio                             AS ValorEnvio,          -- de paquete
+    p.valorvisita                            AS ValorVisita,
     p.cantidadadepositar                     AS PagoCliente,         -- de paquete
     e.fechahora                              AS FechaHoraEntrega,
     a.estado                                 AS Estado,
+    a.descripcion                            AS Referencia,
     CONCAT(u.primerNombre,' ',u.primerApellido) AS Mensajero
 FROM pagos AS a
 LEFT JOIN paquete      AS p ON a.idpago        = p.idpagomns   -- <-- aquí
