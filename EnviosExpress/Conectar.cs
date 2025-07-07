@@ -1128,7 +1128,7 @@ LEFT JOIN municipio    AS m ON p.idmunicipio    = m.idmunicipio
 LEFT JOIN zona         AS z ON p.idzona         = z.idzona
 LEFT JOIN estadopaquete AS e ON p.idpaquete     = e.idpaquete
 LEFT JOIN usuario      AS u ON a.idusuariomns   = u.dpi          -- puedes traer el mensajero directo de pagos
-WHERE a.idpago = @idPago;
+WHERE a.idpago = @idPago and e.estado='Entregado';
 ";
             var dt = new DataTable();
             using (var cmd = new SqlCommand(sql, conexion))
