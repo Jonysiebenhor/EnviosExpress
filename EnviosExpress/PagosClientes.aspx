@@ -35,7 +35,16 @@
                    
                
                <p />
-               <asp:GridView ID="GridView5" runat="server" ForeColor="Black" CellSpacing="10" HorizontalAlign="Center" GridLines="Horizontal" CellPadding="10" Width="380px" >
+               <asp:GridView ID="GridView5" runat="server"  
+                   AutoGenerateColumns="false"
+                   DataKeyNames="idpagoCliente"
+                   OnRowCommand="GridView5_RowCommand"
+                   ForeColor="Black" 
+                   CellSpacing="10" 
+                   HorizontalAlign="Center" 
+                   GridLines="Horizontal" 
+                   CellPadding="10" 
+                   Width="380px" >
                    <AlternatingRowStyle HorizontalAlign="Center" VerticalAlign="Middle" />
                    <EditRowStyle HorizontalAlign="Center" />
                 <HeaderStyle BackColor="#FF6600" Font-Bold="True" Font-Italic="False" ForeColor="White" HorizontalAlign="Center" VerticalAlign="Middle" Width="600px" Wrap="True" />
@@ -43,7 +52,57 @@
                 <SelectedRowStyle BorderStyle="Solid" HorizontalAlign="Center" />
                    <SortedAscendingHeaderStyle HorizontalAlign="Center" VerticalAlign="Middle" />
                    <SortedDescendingHeaderStyle HorizontalAlign="Center" />
+                   <Columns>
+    <asp:BoundField DataField="idpagoCliente"    HeaderText="ID Pago Cliente" />
+    <asp:BoundField DataField="FechaHoraEntrega" HeaderText="Fecha" DataFormatString="{0:dd/MM/yyyy HH:mm}" />
+    <asp:BoundField DataField="MontoEstado"      HeaderText="Monto/Estado" />
+    <asp:BoundField DataField="descripcion"      HeaderText="#Referencia" />
+    <asp:TemplateField HeaderText="Acción">
+      <ItemTemplate>
+        <asp:Button
+          ID="btnVerConsulta"
+          runat="server"
+          Text="Ver Consulta"
+          CommandName="VerConsulta"
+          CommandArgument='<%# Eval("idpagoCliente") %>'
+          CssClass="btn btn-info btn-sm" />
+      </ItemTemplate>
+    </asp:TemplateField>
+  </Columns>
             </asp:GridView>
+
+
+             <%-- PANEL OCULTO CON LA TABLA DE DETALLE --%>
+<asp:Panel ID="pnlDetalleT" runat="server" Visible="false" Style="margin-top:20px;">
+  <asp:Label runat="server" Text="Detalle de la transferencia" CssClass="h4" />
+
+  <%-- 1) Contenedor scrollable --%>
+  <div style="overflow-x:auto;">
+    <asp:GridView ID="GridViewDetalleT" runat="server"
+        AutoGenerateColumns="false"
+        CssClass="table table-bordered table-hover"
+        Width="100%"
+        HeaderStyle-BackColor="#d9534f" HeaderStyle-ForeColor="White"
+        RowStyle-Wrap="True">
+      
+      <%-- 2) Columnas con anchos fijos y word-wrap --%>
+      <Columns>
+        <asp:BoundField DataField="NoGuia"           HeaderText="No. Guía"               HeaderStyle-Width="80px" ItemStyle-Width="80px" />
+        <asp:BoundField DataField="IdPago"           HeaderText="ID Pago"               HeaderStyle-Width="60px" ItemStyle-Width="60px" />
+        <asp:BoundField DataField="Departamento"     HeaderText="Departamento"          HeaderStyle-Width="120px" ItemStyle-Width="120px" />
+        <asp:BoundField DataField="Municipio"        HeaderText="Municipio"             HeaderStyle-Width="120px" ItemStyle-Width="120px" />
+        <asp:BoundField DataField="Zona"             HeaderText="Zona"                  HeaderStyle-Width="100px" ItemStyle-Width="100px" />
+        <asp:BoundField DataField="MontoCobrado"     HeaderText="Monto Cobrado"         DataFormatString="Q{0:N2}" HeaderStyle-Width="100px" ItemStyle-Width="100px" />
+        <asp:BoundField DataField="ValorEnvio"       HeaderText="Valor Envío"           DataFormatString="Q{0:N2}" HeaderStyle-Width="100px" ItemStyle-Width="100px" />
+        <asp:BoundField DataField="ValorVisita"      HeaderText="Valor Visita"          DataFormatString="Q{0:N2}" HeaderStyle-Width="100px" ItemStyle-Width="100px" />
+        <asp:BoundField DataField="PagoCliente"      HeaderText="Pago al Cliente"       DataFormatString="Q{0:N2}" HeaderStyle-Width="100px" ItemStyle-Width="100px" />
+        <asp:BoundField DataField="FechaHoraEntrega" HeaderText="Fecha y Hora Entrega"  DataFormatString="{0:dd/MM/yyyy HH:mm}" HeaderStyle-Width="140px" ItemStyle-Width="140px" />
+        <asp:BoundField DataField="Estado"           HeaderText="Estado"                HeaderStyle-Width="80px" ItemStyle-Width="80px" />
+        <asp:BoundField DataField="descripcion"      HeaderText="#Referencia"           HeaderStyle-Width="100px" ItemStyle-Width="100px" />
+      </Columns>
+    </asp:GridView>
+  </div>
+</asp:Panel>
              </div>
             <br />
         

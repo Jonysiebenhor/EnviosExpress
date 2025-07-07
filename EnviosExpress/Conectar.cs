@@ -1147,16 +1147,32 @@ WHERE a.idpago = @idPago and e.estado='Entregado';
 
 
 
-        public DataTable pagosclientes7(String dpi, String fecha1, String fecha2)
+            public DataTable pagosclientes7(String dpi, String fecha1, String fecha2)
         {
-            string query = "Select a.idpago, CONCAT(b.primerNombre, ' ', b.primerApellido) as Cliente, a.fechahora as Fecha,  CONCAT('Q', a.monto) as Monto, a.Estado as Estado,a.descripcion as #Referencia from pagos a left join usuario b on a.idusuario=b.dpi where b.rol= 1 and a.estado='Liquidado' and a.idusuario=" + dpi  + " and a.fechahora between '" + fecha1 + " 00:00:00.000" + "' and '" + fecha2 + " 23:59:59.000" + "' order by a.fechahora DESC";
+            string query =
+              "SELECT  " +
+              "  a.idpago                               AS idpagoCliente,    " + // coincida con DataKeyNames
+              "  a.fechahora                            AS FechaHoraEntrega, " + // coincida con DataField
+              "  CONCAT('Q', a.monto, ' ', a.Estado)    AS MontoEstado,      " + // coincida con DataField
+              "  a.descripcion                          AS descripcion       " + // coincida con DataField
+              "FROM pagos AS a                           " +
+              "LEFT JOIN usuario AS b ON a.idusuario=b.dpi " +
+              "WHERE b.rol = 1                          " +
+              "  AND a.estado='Liquidado'               " +
+              "  AND a.idusuario=" + dpi + "             " +
+              "  AND a.fechahora BETWEEN '" + fecha1 + " 00:00:00.000' " +
+              "                       AND '" + fecha2 + " 23:59:59.000' " +
+              "ORDER BY a.fechahora DESC;               ";
 
-            SqlCommand cmd = new SqlCommand(query, conexion);
-            SqlDataAdapter returnVal = new SqlDataAdapter(query, conexion);
-            DataTable dt = new DataTable();
-            returnVal.Fill(dt);
-            return dt;
+            using (var cmd = new SqlCommand(query, conexion))
+            {
+                var da = new SqlDataAdapter(cmd);
+                var dt = new DataTable();
+                da.Fill(dt);
+                return dt;
+            }
         }
+
         public DataTable ultim(String idpaquete1)
         {
             string query = "select*from paquete where idpaquete=" + idpaquete1 + "";

@@ -69,6 +69,24 @@ namespace EnviosExpress
         protected global::System.Web.UI.WebControls.GridView GridView5;
 
         /// <summary>
+        /// Control pnlDetalleT.
+        /// </summary>
+        /// <remarks>
+        /// Campo generado automáticamente.
+        /// Para modificarlo, mueva la declaración del campo del archivo del diseñador al archivo de código subyacente.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Panel pnlDetalleT;
+
+        /// <summary>
+        /// Control GridViewDetalleT.
+        /// </summary>
+        /// <remarks>
+        /// Campo generado automáticamente.
+        /// Para modificarlo, mueva la declaración del campo del archivo del diseñador al archivo de código subyacente.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.GridView GridViewDetalleT;
+
+        /// <summary>
         /// Control Button3.
         /// </summary>
         /// <remarks>

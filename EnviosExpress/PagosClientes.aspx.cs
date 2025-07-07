@@ -40,6 +40,24 @@ namespace EnviosExpress
             GridView5.DataBind();
             conectado.desconectar();
         }
+        protected void GridView5_RowCommand(object sender, GridViewCommandEventArgs e)
+        {
+            if (e.CommandName == "VerConsulta")
+            {
+                // 1) Tomamos el idpagoCliente de la fila pulsada
+                string idPago = e.CommandArgument.ToString();
+
+                // 2) Obtenemos el detalle desde la capa de datos
+                conectado.conectar();
+                var dtDetalle = conectado.ObtenerDetalleLiquidacionCliente(idPago);
+                conectado.desconectar();
+
+                // 3) Lo enlazamos al GridView de detalle y lo mostramos
+                GridViewDetalleT.DataSource = dtDetalle;
+                GridViewDetalleT.DataBind();
+                pnlDetalleT.Visible = true;
+            }
+        }
 
     }
 
