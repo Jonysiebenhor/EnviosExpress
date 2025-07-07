@@ -3,7 +3,7 @@
     Envios Express
 </asp:Content>
 <asp:Content ID="Content2" ContentPlaceHolderID="head" runat="server">
-  <style>
+    <style>
     /* Fuerza el salto de línea dentro de celdas y encabezados */
     .text-wrap td,
     .text-wrap th {
@@ -147,6 +147,7 @@ a: <asp:TextBox ID="txtfecha2" runat="server" Width="100px" TextMode="Date"></as
       <asp:BoundField DataField="Zona"            HeaderText="Zona"                   />
       <asp:BoundField DataField="MontoCobrado"    HeaderText="Monto Cobrado"          DataFormatString="Q{0:N2}" />
       <asp:BoundField DataField="ValorEnvio"      HeaderText="Valor Envío"            DataFormatString="Q{0:N2}" />
+        <asp:BoundField DataField="ValorVisita"      HeaderText="Valor Visita"        DataFormatString="Q{0:N2}" />
       <asp:BoundField DataField="PagoCliente"     HeaderText="Pago al Cliente"        DataFormatString="Q{0:N2}" />
       <asp:BoundField DataField="FechaHoraEntrega" HeaderText="Fecha y Hora Entrega" DataFormatString="{0:dd/MM/yyyy HH:mm}" />
 
@@ -568,4 +569,5 @@ a: <asp:TextBox ID="txtfecha6" runat="server" Width="100px" TextMode="Date"></as
      
 
         <br/><br/></div> </div>
-            </asp:Content>
+            </div>
+</asp:Content>
