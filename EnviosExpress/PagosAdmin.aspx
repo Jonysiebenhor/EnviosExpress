@@ -147,7 +147,9 @@ a: <asp:TextBox ID="txtfecha2" runat="server" Width="100px" TextMode="Date"></as
       <asp:BoundField DataField="Zona"            HeaderText="Zona"                   />
       <asp:BoundField DataField="MontoCobrado"    HeaderText="Monto Cobrado"          DataFormatString="Q{0:N2}" />
       <asp:BoundField DataField="ValorEnvio"      HeaderText="Valor Envío"            DataFormatString="Q{0:N2}" />
-        <asp:BoundField DataField="ValorVisita"      HeaderText="Valor Visita"        DataFormatString="Q{0:N2}" />
+      <asp:BoundField DataField="ValorVisita"
+                HeaderText="Valor Visita"
+                DataFormatString="Q{0:N2}" />
       <asp:BoundField DataField="PagoCliente"     HeaderText="Pago al Cliente"        DataFormatString="Q{0:N2}" />
       <asp:BoundField DataField="FechaHoraEntrega" HeaderText="Fecha y Hora Entrega" DataFormatString="{0:dd/MM/yyyy HH:mm}" />
 
@@ -199,8 +201,8 @@ a: <asp:TextBox ID="txtfecha2" runat="server" Width="100px" TextMode="Date"></as
       <asp:BoundField
         DataField="Zona"
         HeaderText="Zona"
-        HeaderStyle-Width="70px"
-        ItemStyle-Width="70px" />
+        HeaderStyle-Width="90px"
+        ItemStyle-Width="90px" />
 
       <asp:BoundField
         DataField="MontoCobrado"
@@ -215,6 +217,12 @@ a: <asp:TextBox ID="txtfecha2" runat="server" Width="100px" TextMode="Date"></as
         DataFormatString="Q{0:N2}"
         HeaderStyle-Width="100px"
         ItemStyle-Width="100px" />
+
+         <asp:BoundField DataField="ValorVisita"
+                      HeaderText="Valor Visita"
+                      DataFormatString="Q{0:N2}"
+                      HeaderStyle-Width="100px"
+                      ItemStyle-Width="100px" />
 
       <asp:BoundField
         DataField="PagoCliente"
@@ -341,8 +349,8 @@ ItemStyle-Width="80px" />
     <asp:BoundField 
     DataField="Departamento"      
     HeaderText="Departamento"       
-    HeaderStyle-Width="80px" 
-    ItemStyle-Width="80px" />
+    HeaderStyle-Width="100px" 
+    ItemStyle-Width="100px" />
 
 <asp:BoundField 
     DataField="Municipio"         
@@ -367,14 +375,14 @@ ItemStyle-Width="80px" />
     DataField="ValorEnvio"        
     HeaderText="Valor Envío"         
     DataFormatString="Q{0:N2}" 
-    HeaderStyle-Width="80px" 
-    ItemStyle-Width="80px" />
+    HeaderStyle-Width="70px" 
+    ItemStyle-Width="70px" />
 
          <asp:BoundField 
  DataField="ValorVisita"      
  HeaderText="Valor Visita"       
- HeaderStyle-Width="80px" 
- ItemStyle-Width="80px" />
+ HeaderStyle-Width="70px" 
+ ItemStyle-Width="70px" />
 
 <asp:BoundField 
     DataField="PagoCliente"       
@@ -399,8 +407,8 @@ ItemStyle-Width="80px" />
 <asp:BoundField 
     DataField="descripcion"       
     HeaderText="#Referencia"        
-    HeaderStyle-Width="80px" 
-    ItemStyle-Width="80px" />
+    HeaderStyle-Width="90px" 
+    ItemStyle-Width="90px" />
     </Columns>
   </asp:GridView>
 </asp:Panel>
