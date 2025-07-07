@@ -65,15 +65,22 @@ namespace EnviosExpress
         {
             if (e.CommandName == "VerReporte")
             {
+                // 1) DPI y fechas
                 string dpi = e.CommandArgument.ToString();
                 DateTime desde = DateTime.Parse(txtfecha1.Text);
                 DateTime hasta = DateTime.Parse(txtfecha2.Text);
 
-                // Muestra el panel de tu GridView de reporte
-                lblReporteTitulo.Text = $"Reporte de pagos pendientes para DPI {dpi}";
-                pnlReporte.Visible = true;    // o el Panel que envuelve a GridViewReporte
+                // 2) Obtenemos el 'Negocio' desde la fila pulsada
+                Button btn = (Button)e.CommandSource;
+                GridViewRow row = (GridViewRow)btn.NamingContainer;
+                string negocio = ((Label)row.FindControl("Label9")).Text;
 
-                // Llama al método ya existente y vincula:
+                // 3) Armamos el encabezado dinámico
+                lblReporteTitulo.Text =
+                    $"Informe de pagos para {negocio} con número de DPI {dpi} del {desde:dd/MM/yyyy}";
+                pnlReporte.Visible = true;
+
+                // 4) Cargamos los datos en la grilla
                 conectado.conectar();
                 var dt = conectado.ObtenerReportePagosPorCliente(dpi, desde, hasta);
                 conectado.desconectar();
@@ -82,6 +89,7 @@ namespace EnviosExpress
                 GridViewReporte.DataBind();
             }
         }
+
 
 
 
