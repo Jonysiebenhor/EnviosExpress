@@ -21,6 +21,14 @@ namespace EnviosExpress
                     Response.Redirect("/Login.aspx");
                 }
             }
+            String dpi = Session["id"].ToString();
+            conectado.conectar();
+            DataRow cierree = conectado.cierrepaquete(dpi).Rows[0];
+            String monto = Convert.ToString(Convert.ToString(cierree["montototal"]));
+            
+                Label3.Text = "Q"+monto;
+                conectado.desconectar();
+            
         }
 
 
