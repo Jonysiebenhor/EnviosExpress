@@ -1070,11 +1070,10 @@ SELECT
     a.idpago                             AS idpago,
     usu.primerNombre + ' ' + usu.primerApellido AS Cliente,    -- <-- nueva columna
     p.idpaquete                          AS NoGuia,
-    p.idpaquete                             AS NoGuia,
     d.nombre                             AS Departamento,
     c.nombre                             AS Municipio,
     z.nombre                             AS Zona,
-    a.monto                              AS MontoCobrado,
+    p.monto                              AS MontoCobrado,
     p.valorenvio                         AS ValorEnvio,
     p.valorvisita                        AS ValorVisita,
     p.cantidadadepositar                 AS PagoCliente,
@@ -1082,13 +1081,13 @@ SELECT
     a.estado                             AS Estado,
     a.descripcion                        AS descripcion
 FROM pagos AS a
-LEFT JOIN usuario      AS usu ON a.idusuario       = usu.dpi       -- <— aquí traemos al cliente
-LEFT JOIN paquete      AS p   ON a.idpago          = p.idpago
-LEFT JOIN departamento AS d   ON p.iddepartamento  = d.iddepartamento
-LEFT JOIN municipio    AS c   ON p.idmunicipio     = c.idmunicipio
-LEFT JOIN zona         AS z   ON p.idzona          = z.idzona
-LEFT JOIN estadopaquete AS e  ON p.idpaquete       = e.idpaquete
-WHERE a.idpago = @idPago;
+left JOIN usuario      AS usu ON a.idusuario       = usu.dpi       -- <— aquí traemos al cliente
+left JOIN paquete      AS p   ON a.idpago          = p.idpago
+left JOIN departamento AS d   ON p.iddepartamento  = d.iddepartamento
+left JOIN municipio    AS c   ON p.idmunicipio     = c.idmunicipio
+left JOIN zona         AS z   ON p.idzona          = z.idzona
+left JOIN estadopaquete AS e  ON p.idpaquete       = e.idpaquete
+WHERE a.idpago = @idPago and e.estado='Entregado';
 ";
 
             using (var cmd = new SqlCommand(sql, conexion))
@@ -1128,7 +1127,7 @@ LEFT JOIN municipio    AS m ON p.idmunicipio    = m.idmunicipio
 LEFT JOIN zona         AS z ON p.idzona         = z.idzona
 LEFT JOIN estadopaquete AS e ON p.idpaquete     = e.idpaquete
 LEFT JOIN usuario      AS u ON a.idusuariomns   = u.dpi          -- puedes traer el mensajero directo de pagos
-WHERE a.idpago = @idPago;
+WHERE a.idpago = @idPago and e.estado='Entregado';
 ";
 
             var dt = new DataTable();
