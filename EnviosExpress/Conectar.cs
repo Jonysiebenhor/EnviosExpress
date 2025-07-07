@@ -1028,6 +1028,7 @@ SELECT
     z.nombre                                AS Zona,
     p.monto                                 AS MontoCobrado,
     p.valorenvio                            AS ValorEnvio,
+    p.valorvisita                           AS ValorVisita,
     p.cantidadadepositar                    AS PagoCliente,
     e.fechahora                             AS FechaHoraEntrega,
     -- aquí concatenamos el nombre del mensajero
@@ -1070,10 +1071,11 @@ SELECT
     a.idpago                             AS idpago,
     usu.primerNombre + ' ' + usu.primerApellido AS Cliente,    -- <-- nueva columna
     p.idpaquete                          AS NoGuia,
+    p.idpaquete                             AS NoGuia,
     d.nombre                             AS Departamento,
     c.nombre                             AS Municipio,
     z.nombre                             AS Zona,
-    p.monto                              AS MontoCobrado,
+    a.monto                              AS MontoCobrado,
     p.valorenvio                         AS ValorEnvio,
     p.valorvisita                        AS ValorVisita,
     p.cantidadadepositar                 AS PagoCliente,
@@ -1081,13 +1083,13 @@ SELECT
     a.estado                             AS Estado,
     a.descripcion                        AS descripcion
 FROM pagos AS a
-left JOIN usuario      AS usu ON a.idusuario       = usu.dpi       -- <— aquí traemos al cliente
-left JOIN paquete      AS p   ON a.idpago          = p.idpago
-left JOIN departamento AS d   ON p.iddepartamento  = d.iddepartamento
-left JOIN municipio    AS c   ON p.idmunicipio     = c.idmunicipio
-left JOIN zona         AS z   ON p.idzona          = z.idzona
-left JOIN estadopaquete AS e  ON p.idpaquete       = e.idpaquete
-WHERE a.idpago = @idPago and e.estado='Entregado';
+LEFT JOIN usuario      AS usu ON a.idusuario       = usu.dpi       -- <— aquí traemos al cliente
+LEFT JOIN paquete      AS p   ON a.idpago          = p.idpago
+LEFT JOIN departamento AS d   ON p.iddepartamento  = d.iddepartamento
+LEFT JOIN municipio    AS c   ON p.idmunicipio     = c.idmunicipio
+LEFT JOIN zona         AS z   ON p.idzona          = z.idzona
+LEFT JOIN estadopaquete AS e  ON p.idpaquete       = e.idpaquete
+WHERE a.idpago = @idPago;
 ";
 
             using (var cmd = new SqlCommand(sql, conexion))
@@ -1112,24 +1114,27 @@ SELECT
     d.nombre                                 AS Departamento,
     m.nombre                                 AS Municipio,
     z.nombre                                 AS Zona,
-    p.monto                                  AS MontoCobrado,        -- de paquete
-    p.valorenvio                             AS ValorEnvio,          -- de paquete
+    p.monto                                  AS MontoCobrado,
+    p.valorenvio                             AS ValorEnvio,
     p.valorvisita                            AS ValorVisita,
-    p.cantidadadepositar                     AS PagoCliente,         -- de paquete
+    p.cantidadadepositar                     AS PagoCliente,
     e.fechahora                              AS FechaHoraEntrega,
     a.estado                                 AS Estado,
     a.descripcion                            AS Referencia,
     CONCAT(u.primerNombre,' ',u.primerApellido) AS Mensajero
-FROM pagos AS a
-LEFT JOIN paquete      AS p ON a.idpago        = p.idpagomns   -- <-- aquí
+FROM pagos      AS a
+LEFT JOIN paquete      AS p ON a.idpago      = p.idpagomns
 LEFT JOIN departamento AS d ON p.iddepartamento = d.iddepartamento
 LEFT JOIN municipio    AS m ON p.idmunicipio    = m.idmunicipio
 LEFT JOIN zona         AS z ON p.idzona         = z.idzona
-LEFT JOIN estadopaquete AS e ON p.idpaquete     = e.idpaquete
-LEFT JOIN usuario      AS u ON a.idusuariomns   = u.dpi          -- puedes traer el mensajero directo de pagos
-WHERE a.idpago = @idPago and e.estado='Entregado';
+-- aquí filtramos sólo el registro 'Entregado'
+LEFT JOIN estadopaquete AS e 
+    ON p.idpaquete = e.idpaquete 
+   AND e.estado    = 'Entregado'
+LEFT JOIN usuario      AS u ON a.idusuariomns = u.dpi
+WHERE a.idpago = @idPago
+ORDER BY e.fechahora DESC;
 ";
-
             var dt = new DataTable();
             using (var cmd = new SqlCommand(sql, conexion))
             {
@@ -1139,6 +1144,7 @@ WHERE a.idpago = @idPago and e.estado='Entregado';
             }
             return dt;
         }
+
 
 
 
