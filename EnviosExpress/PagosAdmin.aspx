@@ -22,7 +22,7 @@
            
                <div class="container text-center" style="background-color:#e1dddd; height:90%; width:90%;">
              <br /><br />
-           <div class="container text-center row" style="background-color:#f5f5f5; width:600px;">
+           <div class="container text-center row" style="background-color:#f5f5f5; width:1150px;">
 
 
 <br /><br />
@@ -249,7 +249,7 @@ a: <asp:TextBox ID="txtfecha2" runat="server" Width="100px" TextMode="Date"></as
 
 
  <br /> 
-                              <div class="container text-center row" style="background-color:#f5f5f5; width:600px;">
+                              <div class="container text-center row" style="background-color:#f5f5f5; width:1150px;">
 
 
 <br /><br />
@@ -283,7 +283,7 @@ a: <asp:TextBox ID="txtfecha2" runat="server" Width="100px" TextMode="Date"></as
     <asp:BoundField DataField="Cliente"    HeaderText="Cliente" />
     <asp:BoundField
       DataField="FechaHoraEntrega"
-      HeaderText="Fecha y Hora Entrega"
+      HeaderText="Fecha"
       DataFormatString="{0:dd/MM/yyyy HH:mm}"
       HeaderStyle-Width="140px" ItemStyle-Width="140px" />
     <asp:BoundField DataField="Monto"      HeaderText="Monto" />
@@ -298,7 +298,7 @@ a: <asp:TextBox ID="txtfecha2" runat="server" Width="100px" TextMode="Date"></as
           CommandName="GenerarReporte"
           CommandArgument='<%# Eval("idpago") %>'
           CssClass="btn btn-sm btn-success">
-          Generar Reporte
+          Ver Reporte
         </asp:LinkButton>
       </ItemTemplate>
     </asp:TemplateField>
@@ -407,7 +407,7 @@ ItemStyle-Width="80px" />
                <br />
                </div>
  <br /> 
-                <div class="container text-center row" style="background-color:#f5f5f5; width:600px;">
+                <div class="container text-center row" style="background-color:#f5f5f5; width:1150px;">
 
 
 <br /><br />
@@ -511,10 +511,10 @@ a: <asp:TextBox ID="txtfecha6" runat="server" Width="100px" TextMode="Date"></as
   </asp:TemplateField>
 
                        </Columns>
-            </asp:GridView><p />
+            </asp:GridView>
                
                <br />
-               </div>
+              
 
                    <%-- Panel oculto con detalle de este mensajero --%>
 <asp:Panel
@@ -559,7 +559,7 @@ a: <asp:TextBox ID="txtfecha6" runat="server" Width="100px" TextMode="Date"></as
     </Columns>
   </asp:GridView>
 </asp:Panel>
-
+                   </div> <p />
 
      
 
