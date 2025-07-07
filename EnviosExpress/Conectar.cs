@@ -91,7 +91,7 @@ LEFT  JOIN dbo.zona         d ON p.idzona         = d.idzona
 LEFT  JOIN dbo.usuario      m ON e.idusuariomns   = m.dpi
 WHERE e.estado    = 'Entregado'
   AND p.idpago    IS NULL
-  AND p.idusuario = (SELECT idusuario FROM usuario WHERE dpi = @dpi)
+  AND p.idusuario = (SELECT dpi FROM usuario WHERE dpi = @dpi)
   AND CAST(e.fechahora AS date) BETWEEN @desde AND @hasta
 ORDER BY e.fechahora DESC;
 ";
@@ -1218,7 +1218,7 @@ WHERE a.idpago = @idPago;
             const string sql = @"
 SELECT
     p.idpaquete                                  AS NoGuia,         
-    p.idusuario                                  AS dpi,
+    p.dpi                                  AS dpi,
     b.nombre                                     AS Departamento,
     c.nombre                                     AS Municipio,
     d.nombre                                     AS Zona,
