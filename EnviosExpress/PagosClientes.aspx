@@ -75,7 +75,7 @@
 
              <%-- PANEL OCULTO CON LA TABLA DE DETALLE --%>
 <asp:Panel ID="pnlDetalleT" runat="server" Visible="false" Style="margin-top:20px;">
-  <asp:Label runat="server" Text="Detalle de la transferencia" CssClass="h4" />
+  <asp:Label ID="lblTituloDetalleT" runat="server" Text="" CssClass="h4" />
 
   <%-- 1) Contenedor scrollable --%>
   <div style="overflow-x:auto;">

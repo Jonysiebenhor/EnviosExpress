@@ -44,20 +44,31 @@ namespace EnviosExpress
         {
             if (e.CommandName == "VerConsulta")
             {
-                // 1) Tomamos el idpagoCliente de la fila pulsada
+                // Recuperamos la fila donde se pulsó el botón
+                var btn = (System.Web.UI.WebControls.Button)e.CommandSource;
+                var row = (GridViewRow)btn.NamingContainer;
+
+                // Suponiendo que la columna Cliente es la segunda (índice 1):
+                string cliente = row.Cells[1].Text;
+
+                // Tomamos el ID de pago
                 string idPago = e.CommandArgument.ToString();
 
-                // 2) Obtenemos el detalle desde la capa de datos
+                //  ---> Aquí asignamos el encabezado dinámico:
+                lblTituloDetalleT.Text =
+                  $"Informe de liquidación para {cliente} con el ID de pago {idPago}";
+
+                // El resto igual:
                 conectado.conectar();
                 var dtDetalle = conectado.ObtenerDetalleLiquidacionCliente(idPago);
                 conectado.desconectar();
-
-                // 3) Lo enlazamos al GridView de detalle y lo mostramos
+               
                 GridViewDetalleT.DataSource = dtDetalle;
                 GridViewDetalleT.DataBind();
                 pnlDetalleT.Visible = true;
             }
         }
+
 
     }
 

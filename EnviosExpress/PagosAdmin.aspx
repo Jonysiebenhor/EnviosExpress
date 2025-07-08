@@ -380,7 +380,9 @@ ItemStyle-Width="80px" />
 
          <asp:BoundField 
  DataField="ValorVisita"      
- HeaderText="Valor Visita"       
+ HeaderText="Valor Visita"  
+ DataFormatString="Q{0:N2}" 
+ HtmlEncode="False" 
  HeaderStyle-Width="70px" 
  ItemStyle-Width="70px" />
 
