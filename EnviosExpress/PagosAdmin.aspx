@@ -135,11 +135,13 @@ a: <asp:TextBox ID="txtfecha2" runat="server" Width="100px" TextMode="Date"></as
       ID="GridViewDetallePendientes"
       runat="server"
       AutoGenerateColumns="false"
+     ShowFooter="True"
       CssClass="table table-striped text-wrap"
       EmptyDataText="No hay detalles"
       Width="100%"
       CellSpacing="10">
     <HeaderStyle BackColor="#FF0000" ForeColor="White" />
+    <FooterStyle BackColor="#F2F2F2" Font-Bold="True" />
     <Columns>
       <asp:BoundField DataField="NoGuia"          HeaderText="No. Guía"               />
       <asp:BoundField DataField="Departamento"    HeaderText="Departamento"           />

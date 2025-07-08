@@ -70,25 +70,73 @@ namespace EnviosExpress
                 DateTime desde = DateTime.Parse(txtfecha1.Text);
                 DateTime hasta = DateTime.Parse(txtfecha2.Text);
 
-                // 2) Obtenemos el 'Negocio' desde la fila pulsada
-                Button btn = (Button)e.CommandSource;
-                GridViewRow row = (GridViewRow)btn.NamingContainer;
+                // 2) Encabezado dinámico
+                var btn = (Button)e.CommandSource;
+                var row = (GridViewRow)btn.NamingContainer;
                 string negocio = ((Label)row.FindControl("Label9")).Text;
-
-                // 3) Armamos el encabezado dinámico
                 lblReporteTitulo.Text =
                     $"Informe de pagos para {negocio} con número de DPI {dpi} del {desde:dd/MM/yyyy}";
                 pnlReporte.Visible = true;
 
-                // 4) Cargamos los datos en la grilla
+                // 3) Traigo los datos
                 conectado.conectar();
                 var dt = conectado.ObtenerReportePagosPorCliente(dpi, desde, hasta);
                 conectado.desconectar();
 
-                GridViewReporte.DataSource = dt;
-                GridViewReporte.DataBind();
+                if (dt.Rows.Count > 0)
+                {
+                    // 4) Calculo los subtotales ANTES de añadir la fila
+                    decimal totalMonto = Convert.ToDecimal(dt.Compute("SUM(MontoCobrado)", ""));
+                    decimal totalEnvio = Convert.ToDecimal(dt.Compute("SUM(ValorEnvio)", ""));
+                    decimal totalVisita = Convert.ToDecimal(dt.Compute("SUM(ValorVisita)", ""));
+                    decimal totalPagoCliente = Convert.ToDecimal(dt.Compute("SUM(PagoCliente)", ""));
+
+                    // 5) Creo la fila de totales
+                    var sumRow = dt.NewRow();
+                    sumRow["NoGuia"] = 0;               // campo clave debe ser numérico
+                    sumRow["Departamento"] = DBNull.Value;    // dejamos vacías las otras columnas
+                    sumRow["Municipio"] = DBNull.Value;
+                    sumRow["Zona"] = DBNull.Value;
+                    sumRow["MontoCobrado"] = totalMonto;
+                    sumRow["ValorEnvio"] = totalEnvio;
+                    sumRow["ValorVisita"] = totalVisita;
+                    sumRow["PagoCliente"] = totalPagoCliente;
+                    sumRow["FechaHoraEntrega"] = DBNull.Value;
+                    sumRow["Mensajero"] = DBNull.Value;
+                    dt.Rows.Add(sumRow);
+
+                    // 6) Bindeo
+                    GridViewReporte.DataSource = dt;
+                    GridViewReporte.DataBind();
+
+                    // 7) Pinto manualmente la última fila con las etiquetas
+                    int last = GridViewReporte.Rows.Count - 1;
+                    var totalRow = GridViewReporte.Rows[last];
+
+                    // Columna 0 -> "Totales:"
+                    totalRow.Cells[0].Text = "Totales:";
+                    totalRow.Cells[0].HorizontalAlign = HorizontalAlign.Right;
+
+                    // Ajusta estos índices si cambias el orden de columnas:
+                    totalRow.Cells[4].Text = $"Q{totalMonto:N2}";       // MontoCobrado
+                    totalRow.Cells[5].Text = $"Q{totalEnvio:N2}";       // ValorEnvio
+                    totalRow.Cells[6].Text = $"Q{totalVisita:N2}";      // ValorVisita
+                    totalRow.Cells[7].Text = $"Q{totalPagoCliente:N2}"; // PagoCliente
+
+                    totalRow.Font.Bold = true;
+                }
+                else
+                {
+                    // Si no hay datos, igual bind (vacío) para que el EmptyDataText aparezca
+                    GridViewReporte.DataSource = dt;
+                    GridViewReporte.DataBind();
+                }
             }
         }
+
+
+
+
 
 
 
@@ -267,7 +315,7 @@ namespace EnviosExpress
 
                 // 1) Traer datos
                 conectado.conectar();
-                DataTable detalle = conectado.ObtenerDetalleLiquidacionCliente(idPago);
+                var detalle = conectado.ObtenerDetalleLiquidacionCliente(idPago);
                 conectado.desconectar();
 
                 // 2) Sacar el nombre del cliente (si viene)
@@ -275,18 +323,72 @@ namespace EnviosExpress
                 if (detalle.Rows.Count > 0 && detalle.Columns.Contains("Cliente"))
                     cliente = detalle.Rows[0]["Cliente"].ToString();
 
-                // 3) Mostrar el panel
+                // 3) Mostrar el panel y fijar el título
                 pnlDetalleLiquidados.Visible = true;
-
-                // 4) Fijar el título con cliente + IDpago
                 lblTituloDetalle.Text =
                   $"Informe de liquidación para {cliente} con el ID de pago {idPago}";
 
-                // 5) Rellenar el GridView de detalle
+                // 4) Calcular totales SI HAY filas
+                decimal sumCobrado = 0m;
+                decimal sumEnvio = 0m;
+                decimal sumVisita = 0m;
+                decimal sumPagoCliente = 0m;
+                if (detalle.Rows.Count > 0)
+                {
+                    sumCobrado = Convert.ToDecimal(detalle.Compute("SUM(MontoCobrado)", ""));
+                    sumEnvio = Convert.ToDecimal(detalle.Compute("SUM(ValorEnvio)", ""));
+                    sumVisita = Convert.ToDecimal(detalle.Compute("SUM(ValorVisita)", ""));
+                    sumPagoCliente = Convert.ToDecimal(detalle.Compute("SUM(PagoCliente)", ""));
+                }
+
+                // 5) Crear y añadir la fila de totales
+                if (detalle.Rows.Count > 0)
+                {
+                    var totRow = detalle.NewRow();
+                    totRow["NoGuia"] = 0;               // PK entera
+                    totRow["IdPago"] = DBNull.Value;
+                    totRow["Departamento"] = DBNull.Value;
+                    totRow["Municipio"] = DBNull.Value;
+                    totRow["Zona"] = DBNull.Value;
+                    totRow["MontoCobrado"] = sumCobrado;
+                    totRow["ValorEnvio"] = sumEnvio;
+                    totRow["ValorVisita"] = sumVisita;
+                    totRow["PagoCliente"] = sumPagoCliente;
+                    totRow["FechaHoraEntrega"] = DBNull.Value;
+                    totRow["Estado"] = DBNull.Value;
+                    totRow["descripcion"] = DBNull.Value;
+                    detalle.Rows.Add(totRow);
+                }
+
+                // 6) Enlazar al GridView
                 GridViewDetalleLiquidados.DataSource = detalle;
                 GridViewDetalleLiquidados.DataBind();
+
+                // 7) Dar formato a la última fila como "Totales:"
+                if (detalle.Rows.Count > 0)
+                {
+                    int lastIndex = GridViewDetalleLiquidados.Rows.Count - 1;
+                    var filaTot = GridViewDetalleLiquidados.Rows[lastIndex];
+
+                    // Ajusta estos índices según el orden real de tus columnas:
+                    filaTot.Cells[0].Text = "Totales:";
+                    filaTot.Cells[0].HorizontalAlign = HorizontalAlign.Right;
+
+                    // Suponiendo:
+                    //   5 → "MontoCobrado", 
+                    //   6 → "ValorEnvio", 
+                    //   7 → "ValorVisita", 
+                    //   8 → "PagoCliente"
+                    filaTot.Cells[5].Text = $"Q{sumCobrado:N2}";
+                    filaTot.Cells[6].Text = $"Q{sumEnvio:N2}";
+                    filaTot.Cells[7].Text = $"Q{sumVisita:N2}";
+                    filaTot.Cells[8].Text = $"Q{sumPagoCliente:N2}";
+
+                    filaTot.Font.Bold = true;
+                }
             }
         }
+
 
         protected void GridView1_RowCommand(object sender, GridViewCommandEventArgs e)
         {
@@ -308,12 +410,55 @@ namespace EnviosExpress
                 lblTituloDetalleMensajeros.Text =
                     $"Reporte del mensajero {mensajero} con un ID de pago {idPago}";
 
-                // 4) Enlazar la grilla y mostrar el panel
+                // 4) --- NUEVO: calcular y añadir la fila de totales ---
+                if (dtDetalle.Rows.Count > 0)
+                {
+                    // Calculamos cada columna numérica
+                    decimal sumCobrado = Convert.ToDecimal(dtDetalle.Compute("SUM(MontoCobrado)", ""));
+                    decimal sumEnvio = Convert.ToDecimal(dtDetalle.Compute("SUM(ValorEnvio)", ""));
+                    decimal sumVisita = Convert.ToDecimal(dtDetalle.Compute("SUM(ValorVisita)", ""));
+                    decimal sumPagoCliente = Convert.ToDecimal(dtDetalle.Compute("SUM(PagoCliente)", ""));
+
+                    // Creamos la fila de totales
+                    var totRow = dtDetalle.NewRow();
+                    totRow["NoGuia"] = DBNull.Value;  // la pondremos como texto al bind
+                    totRow["IdPago"] = DBNull.Value;
+                    totRow["Departamento"] = DBNull.Value;
+                    totRow["Municipio"] = DBNull.Value;
+                    totRow["Zona"] = DBNull.Value;
+                    totRow["MontoCobrado"] = sumCobrado;
+                    totRow["ValorEnvio"] = sumEnvio;
+                    totRow["ValorVisita"] = sumVisita;
+                    totRow["PagoCliente"] = sumPagoCliente;
+                    totRow["FechaHoraEntrega"] = DBNull.Value;
+                    totRow["Estado"] = DBNull.Value;
+                    totRow["Mensajero"] = DBNull.Value;
+                    totRow["Referencia"] = DBNull.Value;
+                    dtDetalle.Rows.Add(totRow);
+                }
+
+                // 5) Bindeo al GridView y muestro panel
                 GridViewDetalleMensajeros.DataSource = dtDetalle;
                 GridViewDetalleMensajeros.DataBind();
                 pnlDetalleMensajeros.Visible = true;
+
+                // 6) Doy formato a la última fila para que muestre “Totales:” en la primera celda
+                if (dtDetalle.Rows.Count > 0)
+                {
+                    int last = GridViewDetalleMensajeros.Rows.Count - 1;
+                    GridViewRow filaTot = GridViewDetalleMensajeros.Rows[last];
+
+                    // Pongo el texto en la columna “No. Guía”
+                    filaTot.Cells[0].Text = "Totales:";
+                    filaTot.Cells[0].HorizontalAlign = HorizontalAlign.Right;
+
+                    // El resto de las columnas numéricas ya trajeron sus valores
+                    // Sólo las pongo en negrita:
+                    filaTot.Font.Bold = true;
+                }
             }
         }
+
 
 
 
