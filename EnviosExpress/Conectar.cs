@@ -1151,9 +1151,11 @@ WHERE a.idpago = @idPago and e.estado='Entregado';
         {
             string query =
               "SELECT  " +
-              "  a.idpago                               AS idpagoCliente,    " + // coincida con DataKeyNames
-              "  a.fechahora                            AS FechaHoraEntrega, " + // coincida con DataField
-              "  CONCAT('Q', a.monto, ' ', a.Estado)    AS MontoEstado,      " + // coincida con DataField
+              "  a.idpago                               AS idpago,    " + // coincida con DataKeyNames
+              "  b.nombrenegocio                        AS Cliente,    " +
+              "  a.fechahora                            AS Fecha, " + // coincida con DataField
+              "  CONCAT('Q', a.monto)    AS Monto,      " + // coincida con DataField
+              "  a.estado                               AS Estado,       " +
               "  a.descripcion                          AS descripcion       " + // coincida con DataField
               "FROM pagos AS a                           " +
               "LEFT JOIN usuario AS b ON a.idusuario=b.dpi " +

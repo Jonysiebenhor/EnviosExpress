@@ -40,7 +40,7 @@ a: <asp:TextBox ID="txtfecha2" runat="server" Width="100px" TextMode="Date"></as
                <br />
             <br />
                <p class="centrado">
-                   <asp:GridView ID="GridView2" runat="server" ForeColor="Black" CellSpacing="30" HorizontalAlign="Center"
+                   <asp:GridView ID="GridView2" Width="800px" runat="server" ForeColor="Black" CellSpacing="30" HorizontalAlign="Center" CellPadding="10" 
                     OnRowCommand="GridView2_RowCommand"
                         DataKeyNames="dpi"
                         
@@ -282,7 +282,7 @@ a: <asp:TextBox ID="txtfecha2" runat="server" Width="100px" TextMode="Date"></as
   DataKeyNames="idpago"
   OnRowCommand="GridView3_RowCommand"
   CssClass="table table-striped text-wrap"
-  Style="table-layout:fixed; width:700px;"
+  Style="table-layout:fixed; width:800px;"
   ForeColor="Black" CellSpacing="10" HorizontalAlign="Center">
   <HeaderStyle BackColor="#FF6600" Font-Bold="True" ForeColor="White" />
   <SelectedRowStyle BorderStyle="Solid" />
@@ -428,7 +428,7 @@ a: <asp:TextBox ID="txtfecha6" runat="server" Width="100px" TextMode="Date"></as
                <br />
             <br />
                <p class="centrado">
-                   <asp:GridView ID="GridView1" runat="server" ForeColor="Black" CellSpacing="10" HorizontalAlign="Center"
+                   <asp:GridView ID="GridView1" Width="800px" runat="server" ForeColor="Black" CellSpacing="10" HorizontalAlign="Center"
                        OnRowCommand="GridView1_RowCommand"
                        OnRowUpdating="RowUpdatingEvent" 
                        OnRowEditing="RowEditingEvent" AutoGenerateEditButton="true"

@@ -9,7 +9,7 @@
         <div class="container text-center" style="background-color:#2d2d30; height:100%; width:100%;">
              <br />
             <br />
-           <div class="container text-center""row" style="background-color:#f5f5f5; width:500px;">
+           <div class="container text-center""row" style="background-color:#f5f5f5; width:1300px;">
                <br />
                <asp:Label ID="Label3" runat="server" Font-Bold="True" Font-Size="X-Large" Text="Transferencias" Visible="True"></asp:Label>
 <br />
@@ -29,7 +29,7 @@
                &nbsp;&nbsp;
                <br />
                 <br />
-         <div class="container text-center" style="   width:400px;  background-image: url('Resources/.jpg'); background-attachment:fixed;  background-color:white;background-repeat :no-repeat;  position:page; z-index: auto;" >
+         <div class="container text-center" style="   width:1150px;  background-image: url('Resources/.jpg'); background-attachment:fixed;  background-color:white;background-repeat :no-repeat;  position:page; z-index: auto;" >
             
              &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br />
                    
@@ -37,25 +37,26 @@
                <p />
                <asp:GridView ID="GridView5" runat="server"  
                    AutoGenerateColumns="false"
-                   DataKeyNames="idpagoCliente"
+                   DataKeyNames="idpago"
                    OnRowCommand="GridView5_RowCommand"
                    ForeColor="Black" 
-                   CellSpacing="10" 
+                   CellSpacing="30" 
                    HorizontalAlign="Center" 
-                   GridLines="Horizontal" 
                    CellPadding="10" 
-                   Width="380px" >
+                   Width="800px" >
                    <AlternatingRowStyle HorizontalAlign="Center" VerticalAlign="Middle" />
                    <EditRowStyle HorizontalAlign="Center" />
-                <HeaderStyle BackColor="#FF6600" Font-Bold="True" Font-Italic="False" ForeColor="White" HorizontalAlign="Center" VerticalAlign="Middle" Width="600px" Wrap="True" />
+                <HeaderStyle BackColor="#FF6600" Font-Bold="True" Font-Italic="False" ForeColor="White" HorizontalAlign="Right" VerticalAlign="Middle" Width="600px" Wrap="false"  />
                    <RowStyle HorizontalAlign="Center" />
                 <SelectedRowStyle BorderStyle="Solid" HorizontalAlign="Center" />
                    <SortedAscendingHeaderStyle HorizontalAlign="Center" VerticalAlign="Middle" />
                    <SortedDescendingHeaderStyle HorizontalAlign="Center" />
                    <Columns>
-    <asp:BoundField DataField="idpagoCliente"    HeaderText="ID Pago Cliente" />
-    <asp:BoundField DataField="FechaHoraEntrega" HeaderText="Fecha" DataFormatString="{0:dd/MM/yyyy HH:mm}" />
-    <asp:BoundField DataField="MontoEstado"      HeaderText="Monto/Estado" />
+    <asp:BoundField DataField="idpago"    HeaderText="ID Pago" />
+    <asp:BoundField DataField="Cliente"      HeaderText="Cliente" />
+    <asp:BoundField DataField="Fecha" HeaderText="Fecha" DataFormatString="{0:dd/MM/yyyy HH:mm}" />
+    <asp:BoundField DataField="Monto"      HeaderText="Monto" />
+    <asp:BoundField DataField="Estado"      HeaderText="Estado" />
     <asp:BoundField DataField="descripcion"      HeaderText="#Referencia" />
     <asp:TemplateField HeaderText="Acción">
       <ItemTemplate>
@@ -64,7 +65,7 @@
           runat="server"
           Text="Ver Consulta"
           CommandName="VerConsulta"
-          CommandArgument='<%# Eval("idpagoCliente") %>'
+          CommandArgument='<%# Eval("idpago") %>'
           CssClass="btn btn-info btn-sm" />
       </ItemTemplate>
     </asp:TemplateField>
