@@ -26,6 +26,7 @@
 
 
 <br /><br />
+               <asp:Panel ID="pnlPendientes" runat="server" Visible="true">
      <asp:Label ID="Label2" runat="server" Text="Pagos de Clientes Pendientes" Font-Bold="True" Font-Size="XX-Large" ForeColor="Black"></asp:Label>
  <p>
               Desde: <asp:TextBox ID="txtfecha1" runat="server" Width="100px" TextMode="Date"></asp:TextBox>&nbsp;
@@ -128,6 +129,7 @@ a: <asp:TextBox ID="txtfecha2" runat="server" Width="100px" TextMode="Date"></as
 
 
             </asp:GridView><p />
+               </asp:Panel>
 
 <asp:Panel ID="pnlDetallePendientes" runat="server" Visible="false" Style="margin-top:20px;">
   <asp:Label ID="lblTituloDetallePendientes" runat="server" CssClass="h4" Text="" Style="display:block; margin-bottom:10px;" />
@@ -249,6 +251,12 @@ a: <asp:TextBox ID="txtfecha2" runat="server" Width="100px" TextMode="Date"></as
     </Columns>
 
   </asp:GridView>
+        <asp:Button 
+    ID="btnRegresar" 
+    runat="server" 
+    Text="← Regresar" 
+    CssClass="btn btn-warning"
+    OnClick="btnRegresar_Click" />
 
       </asp:Panel>
 
@@ -264,6 +272,7 @@ a: <asp:TextBox ID="txtfecha2" runat="server" Width="100px" TextMode="Date"></as
 
 <br /><br />
      <%-- Pagos de Clientes Liquidados --%>
+  <asp:Panel ID="pnlLiquidados" runat="server" Visible="true">
 <asp:Label ID="lblPagosLiquidados" runat="server"
   Text="Pagos de Clientes Liquidados"
   Font-Bold="True" Font-Size="XX-Large" ForeColor="Black" />
@@ -314,9 +323,8 @@ a: <asp:TextBox ID="txtfecha2" runat="server" Width="100px" TextMode="Date"></as
     </asp:TemplateField>
   </Columns>
 </asp:GridView>
-
-
-<%-- Panel oculto con detalle completo --%>
+</asp:Panel>
+                                  <%-- Panel oculto con detalle completo --%>
 <asp:Panel ID="pnlDetalleLiquidados" runat="server" Visible="false" Style="margin-top:20px;">
   <asp:Label
     ID="lblTituloDetalle"
@@ -415,7 +423,16 @@ ItemStyle-Width="80px" />
     ItemStyle-Width="90px" />
     </Columns>
   </asp:GridView>
+      <br />
+  <asp:Button
+    ID="btnRegresarDetalle"
+    runat="server"
+    Text="← Regresar"
+    CssClass="btn btn-warning"
+    OnClick="btnRegresarDetalle_Click" />
+
 </asp:Panel>
+
                <br />
                </div>
  <br /> 
@@ -423,6 +440,7 @@ ItemStyle-Width="80px" />
 
 
 <br /><br />
+                    <asp:Panel ID="pnlMensajeros" runat="server" Visible="true">
      <asp:Label ID="Label1" runat="server" Text="Pagos de Mensajeros" Font-Bold="True" Font-Size="XX-Large" ForeColor="Black"></asp:Label>
  <p>
           Desde: <asp:TextBox ID="txtfecha5" runat="server" Width="100px" TextMode="Date"></asp:TextBox>&nbsp;
@@ -525,10 +543,9 @@ a: <asp:TextBox ID="txtfecha6" runat="server" Width="100px" TextMode="Date"></as
                        </Columns>
             </asp:GridView>
                
-               <br />
-              
-
-                   <%-- Panel oculto con detalle de este mensajero --%>
+          <br />
+</asp:Panel>
+                                       <%-- Panel oculto con detalle de este mensajero --%>
 <asp:Panel
     ID="pnlDetalleMensajeros"
     runat="server"
@@ -569,17 +586,15 @@ a: <asp:TextBox ID="txtfecha6" runat="server" Width="100px" TextMode="Date"></as
       <asp:BoundField DataField="Mensajero"        HeaderText="Mensajero" />
         <asp:BoundField DataField="Referencia"       HeaderText="Referencia" />
     </Columns>
-  </asp:GridView>
-</asp:Panel>
+         </asp:GridView>
+   <asp:Button ID="btnRegresarMensajerosDetalle" runat="server"
+       Text="← Regresar" CssClass="btn btn-warning"
+       OnClick="btnRegresarMensajerosDetalle_Click"
+       Style="margin-top:10px;" />
+ </asp:Panel>
+
+
                    </div> <p />
-
-     
-
-        <asp:Button ID="btnrecolectar0" runat="server" OnClick="regresar_Click" Text="&lt; Regresar" BackColor="#FF3300" ForeColor="White" />
-        
-        &nbsp;&nbsp;&nbsp;&nbsp;
-     
-
-        <br/><br/></div> </div>
+ <br/><br/></div> </div>
             </div>
 </asp:Content>

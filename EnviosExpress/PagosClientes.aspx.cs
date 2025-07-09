@@ -44,6 +44,8 @@ namespace EnviosExpress
         {
             if (e.CommandName == "VerConsulta")
             {
+                pnlTransferencias.Visible = false;
+                pnlDetalleT.Visible = true;
                 // 1) Recuperamos la fila donde se pulsó el botón y el cliente
                 var btn = (System.Web.UI.WebControls.Button)e.CommandSource;
                 var row = (GridViewRow)btn.NamingContainer;
@@ -114,6 +116,17 @@ namespace EnviosExpress
                 }
             }
         }
+
+        /// <summary>
+        /// Al clicar “← Regresar” en detalle de transferencias,
+        /// volvemos al listado principal.
+        /// </summary>
+        protected void btnRegresarT_Click(object sender, EventArgs e)
+        {
+            pnlDetalleT.Visible = false;
+            pnlTransferencias.Visible = true;
+        }
+
 
 
 

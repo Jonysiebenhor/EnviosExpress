@@ -35,6 +35,8 @@
                    
                
                <p />
+             <asp:Panel ID="pnlTransferencias" runat="server" Visible="true">
+
                <asp:GridView ID="GridView5" runat="server"  
                    AutoGenerateColumns="false"
                    DataKeyNames="idpago"
@@ -71,6 +73,7 @@
     </asp:TemplateField>
   </Columns>
             </asp:GridView>
+                 </asp:Panel>
 
 
              <%-- PANEL OCULTO CON LA TABLA DE DETALLE --%>
@@ -103,6 +106,13 @@
       </Columns>
     </asp:GridView>
   </div>
+     <asp:Button
+    ID="btnRegresarT"
+    runat="server"
+    Text="&lt; Regresar"
+    CssClass="btn btn-warning"
+    OnClick="btnRegresarT_Click"
+    Style="margin-top:10px;" />
 </asp:Panel>
              </div>
             <br />

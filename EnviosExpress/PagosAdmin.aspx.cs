@@ -32,6 +32,13 @@ namespace EnviosExpress
                
 
                 bingrind();
+
+                pnlPendientes.Visible = true;   // ← ya lo tenías
+                pnlLiquidados.Visible = true;    // ← cambialo a true
+                pnlMensajeros.Visible = true;    // ← cambialo a true
+                pnlReporte.Visible = false;
+                pnlDetalleLiquidados.Visible = false;
+                pnlDetalleMensajeros.Visible = false;
             }
         }
 
@@ -65,6 +72,12 @@ namespace EnviosExpress
         {
             if (e.CommandName == "VerReporte")
             {
+                // ocultamos el listado y mostramos el panel de reporte
+                 pnlPendientes.Visible = false;
+                 pnlReporte.Visible = true;
+                pnlLiquidados.Visible = false;
+                pnlMensajeros.Visible = false;
+
                 // 1) DPI y fechas
                 string dpi = e.CommandArgument.ToString();
                 DateTime desde = DateTime.Parse(txtfecha1.Text);
@@ -255,6 +268,20 @@ namespace EnviosExpress
             conectado.desconectar();
         }
 
+        /// <summary>
+        /// Vuelve al listado inicial de pagos pendientes
+        /// </summary>
+        protected void btnRegresar_Click(object sender, EventArgs e)
+        {
+            pnlReporte.Visible = false;
+            pnlPendientes.Visible = true;
+
+            pnlLiquidados.Visible = true;
+            pnlMensajeros.Visible = true;
+
+        }
+
+
         protected void RowEditingEvent1(object sender, System.Web.UI.WebControls.GridViewEditEventArgs e)
         {
             conectado.conectar();
@@ -311,6 +338,10 @@ namespace EnviosExpress
         {
             if (e.CommandName == "GenerarReporte")
             {
+                pnlPendientes.Visible = false;
+                pnlReporte.Visible = false;
+                pnlLiquidados.Visible = false;
+                pnlMensajeros.Visible = false;
                 string idPago = e.CommandArgument.ToString();
 
                 // 1) Traer datos
@@ -394,6 +425,11 @@ namespace EnviosExpress
         {
             if (e.CommandName == "VerReporteMensajero")
             {
+                pnlPendientes.Visible = false;
+                pnlReporte.Visible = false;
+                pnlLiquidados.Visible = false;
+                pnlMensajeros.Visible = false;
+
                 string idPago = e.CommandArgument.ToString();
 
                 // 1) Traer datos
@@ -455,13 +491,36 @@ namespace EnviosExpress
                     // El resto de las columnas numéricas ya trajeron sus valores
                     // Sólo las pongo en negrita:
                     filaTot.Font.Bold = true;
+                    pnlDetalleMensajeros.Visible = true;
                 }
             }
         }
+        
+        protected void btnRegresarDetalle_Click(object sender, EventArgs e)
+        {
+            // 1) Ocultar paneles de detalle/reporte
+            pnlDetalleLiquidados.Visible = false;
+            pnlDetalleMensajeros.Visible = false;
+            pnlReporte.Visible = false;
 
+            // 2) Volver a mostrar los 3 listados principales
+            pnlPendientes.Visible = true;
+            pnlLiquidados.Visible = true;
+            pnlMensajeros.Visible = true;
+        }
 
-
-
+        /// <summary>
+        /// Al hacer clic en “← Regresar” del detalle de mensajeros,
+        /// ocultamos el panel de detalle y volvemos a mostrar las 3 secciones.
+        /// </summary>
+        protected void btnRegresarMensajerosDetalle_Click(object sender, EventArgs e)
+        {
+            pnlDetalleMensajeros.Visible = false;
+            pnlPendientes.Visible = true;
+            pnlLiquidados.Visible = true;
+            pnlMensajeros.Visible = true;
+            pnlReporte.Visible = false;
+        }
 
 
     }

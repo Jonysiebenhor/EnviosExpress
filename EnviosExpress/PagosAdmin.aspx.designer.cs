@@ -15,6 +15,15 @@ namespace EnviosExpress
     {
 
         /// <summary>
+        /// Control pnlPendientes.
+        /// </summary>
+        /// <remarks>
+        /// Campo generado automáticamente.
+        /// Para modificarlo, mueva la declaración del campo del archivo del diseñador al archivo de código subyacente.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Panel pnlPendientes;
+
+        /// <summary>
         /// Control Label2.
         /// </summary>
         /// <remarks>
@@ -114,6 +123,24 @@ namespace EnviosExpress
         protected global::System.Web.UI.WebControls.GridView GridViewReporte;
 
         /// <summary>
+        /// Control btnRegresar.
+        /// </summary>
+        /// <remarks>
+        /// Campo generado automáticamente.
+        /// Para modificarlo, mueva la declaración del campo del archivo del diseñador al archivo de código subyacente.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Button btnRegresar;
+
+        /// <summary>
+        /// Control pnlLiquidados.
+        /// </summary>
+        /// <remarks>
+        /// Campo generado automáticamente.
+        /// Para modificarlo, mueva la declaración del campo del archivo del diseñador al archivo de código subyacente.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Panel pnlLiquidados;
+
+        /// <summary>
         /// Control lblPagosLiquidados.
         /// </summary>
         /// <remarks>
@@ -184,6 +211,24 @@ namespace EnviosExpress
         /// Para modificarlo, mueva la declaración del campo del archivo del diseñador al archivo de código subyacente.
         /// </remarks>
         protected global::System.Web.UI.WebControls.GridView GridViewDetalleLiquidados;
+
+        /// <summary>
+        /// Control btnRegresarDetalle.
+        /// </summary>
+        /// <remarks>
+        /// Campo generado automáticamente.
+        /// Para modificarlo, mueva la declaración del campo del archivo del diseñador al archivo de código subyacente.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Button btnRegresarDetalle;
+
+        /// <summary>
+        /// Control pnlMensajeros.
+        /// </summary>
+        /// <remarks>
+        /// Campo generado automáticamente.
+        /// Para modificarlo, mueva la declaración del campo del archivo del diseñador al archivo de código subyacente.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Panel pnlMensajeros;
 
         /// <summary>
         /// Control Label1.
@@ -258,12 +303,12 @@ namespace EnviosExpress
         protected global::System.Web.UI.WebControls.GridView GridViewDetalleMensajeros;
 
         /// <summary>
-        /// Control btnrecolectar0.
+        /// Control btnRegresarMensajerosDetalle.
         /// </summary>
         /// <remarks>
         /// Campo generado automáticamente.
         /// Para modificarlo, mueva la declaración del campo del archivo del diseñador al archivo de código subyacente.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.Button btnrecolectar0;
+        protected global::System.Web.UI.WebControls.Button btnRegresarMensajerosDetalle;
     }
 }

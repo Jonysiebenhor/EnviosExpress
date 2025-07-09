@@ -60,6 +60,15 @@ namespace EnviosExpress
         protected global::System.Web.UI.WebControls.Label Label11;
 
         /// <summary>
+        /// Control pnlTransferencias.
+        /// </summary>
+        /// <remarks>
+        /// Campo generado automáticamente.
+        /// Para modificarlo, mueva la declaración del campo del archivo del diseñador al archivo de código subyacente.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Panel pnlTransferencias;
+
+        /// <summary>
         /// Control GridView5.
         /// </summary>
         /// <remarks>
@@ -94,6 +103,15 @@ namespace EnviosExpress
         /// Para modificarlo, mueva la declaración del campo del archivo del diseñador al archivo de código subyacente.
         /// </remarks>
         protected global::System.Web.UI.WebControls.GridView GridViewDetalleT;
+
+        /// <summary>
+        /// Control btnRegresarT.
+        /// </summary>
+        /// <remarks>
+        /// Campo generado automáticamente.
+        /// Para modificarlo, mueva la declaración del campo del archivo del diseñador al archivo de código subyacente.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Button btnRegresarT;
 
         /// <summary>
         /// Control Button3.
