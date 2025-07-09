@@ -1,9 +1,7 @@
 ﻿<%@ Page Title="" Language="C#" MasterPageFile="~/PaginaMaestra.Master" AutoEventWireup="true" CodeBehind="IntentoEntrega.aspx.cs" Inherits="EnviosExpress.IntentoEntrega" %>
 <%@ Register Src="~/DynamicData/FieldTemplates/CuwScannerCode.ascx" TagPrefix="uc2" TagName="CuwScannerCode" %>
 
-<asp:Content ID="Content1" ContentPlaceHolderID="title" runat="server">
-    Envios Express
-</asp:Content>
+
 
 <asp:Content ID="Content2" ContentPlaceHolderID="head" runat="server">
 </asp:Content>

@@ -1,9 +1,7 @@
 ﻿<%@ Page Title="" Language="C#" MasterPageFile="~/PaginaMaestra.Master" AutoEventWireup="true" CodeBehind="Ruta.aspx.cs" Inherits="EnviosExpress.Ruta" %>
 <%@ Register Src="~/DynamicData/FieldTemplates/CuwScannerCode.ascx" TagPrefix="uc1" TagName="ScannerControl" %>
 
-<asp:Content ID="Content1" ContentPlaceHolderID="title" runat="server">
-    Envios Express
-</asp:Content>
+
 
 <asp:Content ID="Content2" ContentPlaceHolderID="head" runat="server">
     <style>

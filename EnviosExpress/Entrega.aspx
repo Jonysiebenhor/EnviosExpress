@@ -1,9 +1,7 @@
 ﻿<%@ Page Title="" Language="C#" MasterPageFile="~/PaginaMaestra.Master" AutoEventWireup="true" CodeBehind="Entrega.aspx.cs" Inherits="EnviosExpress.Entrega" %>
 <%@ Register Src="~/DynamicData/FieldTemplates/CuwScannerCode.ascx" TagPrefix="uc2" TagName="CuwScannerCode" %>
 
-<asp:Content ID="Content1" ContentPlaceHolderID="title" runat="server">
-    Envios Express
-</asp:Content>
+
 
 <asp:Content ID="Content2" ContentPlaceHolderID="head" runat="server">
     <meta name="viewport" content="width=device-width, initial-scale=1" />

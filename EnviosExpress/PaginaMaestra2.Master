@@ -13,7 +13,7 @@
  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
 
     <title>
-    <asp:ContentPlaceHolder ID="title" runat="server"></asp:ContentPlaceHolder>
+    <asp:ContentPlaceHolder ID="title" runat="server">Envios Express</asp:ContentPlaceHolder>
 </title>
     <asp:ContentPlaceHolder ID="head" runat="server">
     </asp:ContentPlaceHolder>

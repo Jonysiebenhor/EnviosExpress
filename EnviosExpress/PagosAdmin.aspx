@@ -1,7 +1,5 @@
 ﻿<%@ Page Title="" Language="C#" MasterPageFile="~/PaginaMaestra.Master" AutoEventWireup="true" CodeBehind="PagosAdmin.aspx.cs" Inherits="EnviosExpress.PagosAdmin" %>
-<asp:Content ID="Content1" ContentPlaceHolderID="title" runat="server">
-    Envios Express
-</asp:Content>
+
 <asp:Content ID="Content2" ContentPlaceHolderID="head" runat="server">
     <style>
     /* Fuerza el salto de línea dentro de celdas y encabezados */

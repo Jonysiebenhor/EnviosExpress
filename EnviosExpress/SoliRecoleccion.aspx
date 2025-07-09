@@ -1,7 +1,5 @@
 ﻿<%@ Page Title="" Language="C#" MasterPageFile="~/PaginaMaestra2.Master" AutoEventWireup="true" CodeBehind="SoliRecoleccion.aspx.cs" Inherits="EnviosExpress.SoliRecoleccion" %>
-<asp:Content ID="Content1" ContentPlaceHolderID="title" runat="server">
-    Envios Express
-</asp:Content>
+
 <asp:Content ID="Content2" ContentPlaceHolderID="head" runat="server">
 </asp:Content>
 <asp:Content ID="Content3" ContentPlaceHolderID="body" runat="server">

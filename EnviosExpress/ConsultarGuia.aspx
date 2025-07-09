@@ -1,7 +1,5 @@
 ﻿<%@ Page Title="" Language="C#" MasterPageFile="~/PaginaMaestra.Master" AutoEventWireup="true" CodeBehind="ConsultarGuia.aspx.cs" Inherits="EnviosExpress.ConsultarGuia" %>
-<asp:Content ID="Content1" ContentPlaceHolderID="title" runat="server">
-    Envios Express
-</asp:Content>
+
 <asp:Content ID="Content2" ContentPlaceHolderID="head" runat="server">
 </asp:Content>
 <asp:Content ID="Content3" ContentPlaceHolderID="body" runat="server">
@@ -178,4 +176,16 @@
      
 
         <br/><br/></div>
+            <script>
+                document.addEventListener('DOMContentLoaded', () => {
+                    document.querySelectorAll('input[type=text]').forEach(node => node.addEventListener('keypress', e => {
+                        if (e.keyCode == 13) {
+                            e.preventDefault();
+                        }
+                    }))
+                });
+            </script>
+
+        <script>history.replaceState(null, location.pathname)</script>
+
     </asp:Content>
