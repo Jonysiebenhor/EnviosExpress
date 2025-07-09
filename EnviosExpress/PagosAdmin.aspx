@@ -544,7 +544,7 @@ a: <asp:TextBox ID="txtfecha6" runat="server" Width="100px" TextMode="Date"></as
             </asp:GridView>
                
           <br />
-</asp:Panel>
+                    </asp:Panel>
                                        <%-- Panel oculto con detalle de este mensajero --%>
 <asp:Panel
     ID="pnlDetalleMensajeros"
