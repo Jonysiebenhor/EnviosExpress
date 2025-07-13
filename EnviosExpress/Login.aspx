@@ -21,7 +21,7 @@
              
             <asp:TextBox ID="txtdpi" runat="server" placeholder="" Width="115px" ></asp:TextBox> 
         <br />
-            <asp:Label ID="estado1"  runat="server">Contraseña</asp:Label>
+            <asp:Label ID="estado1"  runat="server">Contraseña</asp:Label> 
             <br />
         <asp:TextBox ID="txtcontraseña" runat="server" TextMode="Password" placeholder="" Width="115px"></asp:TextBox>
            <br />
