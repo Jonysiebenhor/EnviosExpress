@@ -12,6 +12,9 @@ using static NPOI.SS.Formula.PTG.ArrayPtg;
 using static QRCoder.PayloadGenerator.SwissQrCode;
 using System.Data;
 using System.Data.SqlClient;
+using System.Configuration;
+
+
 
 
 namespace EnviosExpress
@@ -30,12 +33,15 @@ namespace EnviosExpress
 
         //String conexionString = "Data Source=DESKTOP-QTSGBLO;DATABASE=EnviosExpress;Integrated security=true";pasada
         //String conexionString = "Data Source=DESKTOP-KNTJ3BG\\SQLEXPRESS;DATABASE=EnviosExpress;Integrated security=true";
-        String conexionString = "workstation id = EnviosExpress.mssql.somee.com; packet size = 4096; user id = EnviosExpress; pwd=Envios3228@;data source = EnviosExpress.mssql.somee.com;";
+       
         public void conectar()
         {
             try
             {
-                conexion.ConnectionString = conexionString;
+                conexion.ConnectionString =
+            ConfigurationManager
+                .ConnectionStrings["EnviosExpressConnectionString"]
+                .ConnectionString;
                 conexion.Open();
             }
             catch
@@ -52,7 +58,7 @@ namespace EnviosExpress
         {
             try
             {
-                conexion.ConnectionString = conexionString;
+                
                 conexion.Close();
             }
             catch
@@ -60,6 +66,50 @@ namespace EnviosExpress
                 //MessageBox.Show("Error en Conexion");
             }
         }
+
+        public DataTable ObtenerReportePagosPorCliente(string dpi, DateTime desde, DateTime hasta)
+        {
+            var dt = new DataTable();
+            const string sql = @"
+SELECT
+    p.idpaquete                                  AS NoGuia,
+    p.idusuario                                  AS dpi,
+    b.nombre                                     AS Departamento,
+    c.nombre                                     AS Municipio,
+    d.nombre                                     AS Zona,
+    p.monto                                      AS MontoCobrado,
+    p.valorenvio                                 AS ValorEnvio,
+    p.valorvisita                                AS ValorVisita,
+    p.cantidadadepositar                         AS PagoCliente,
+    e.fechahora                                  AS FechaHoraEntrega,
+    CONCAT(m.primerNombre,' ',m.primerApellido)  AS Mensajero
+FROM dbo.estadopaquete e
+INNER JOIN dbo.paquete      p ON e.idpaquete      = p.idpaquete
+LEFT  JOIN dbo.departamento b ON p.iddepartamento = b.iddepartamento
+LEFT  JOIN dbo.municipio    c ON p.idmunicipio    = c.idmunicipio
+LEFT  JOIN dbo.zona         d ON p.idzona         = d.idzona
+LEFT  JOIN dbo.usuario      m ON e.idusuariomns   = m.dpi
+WHERE e.estado    = 'Entregado'
+  AND p.idpago    IS NULL
+  AND p.idusuario = (SELECT dpi FROM usuario WHERE dpi = @dpi)
+  AND CAST(e.fechahora AS date) BETWEEN @desde AND @hasta
+ORDER BY e.fechahora DESC;
+";
+
+            using (var cmd = new SqlCommand(sql, conexion))
+            {
+                cmd.Parameters.AddWithValue("@dpi", dpi);
+                cmd.Parameters.AddWithValue("@desde", desde.Date);
+                cmd.Parameters.AddWithValue("@hasta", hasta.Date);
+                using (var da = new SqlDataAdapter(cmd))
+                    da.Fill(dt);
+            }
+
+            return dt;
+        }
+
+
+
         public DataTable consultaUsuarioloign2(String dpi)
         {
             String query = "Select activo,rol  from usuario where dpi ='" + dpi + "' ";
@@ -810,7 +860,7 @@ namespace EnviosExpress
         }
         public DataTable estadopaquete1(String guia)
         {
-            string query = "SELECT a.idpaquete, b.idpaquete, b.estado from paquete a left join estadopaquete b on a.idpaquete = b.idpaquete  where b.idpaquete = " + guia + "and (  b.estado='Entregado' or  b.estado='Devolucion Entregado')";
+            string query = "SELECT a.idpaquete, b.idpaquete, b.estado from paquete a left join estadopaquete b on a.idpaquete = b.idpaquete  where b.idpaquete = " + guia + "and (  b.estado='Entregado' or  b.estado='Devolución Entregado')";
 
             SqlCommand cmd = new SqlCommand(query, conexion);
             SqlDataAdapter returnVal = new SqlDataAdapter(query, conexion);
@@ -842,16 +892,38 @@ namespace EnviosExpress
             return dt;
 
         }
-        public DataTable pagosclientes1(String fecha1, String fecha2)
+        public DataTable pagosclientes1(string fecha1, string fecha2)
         {
-            String query = "select b.dpi, CONCAT(b.primerNombre, ' ', b.primerApellido) as Cliente,b.nombrenegocio as Negocio, sum(cantidadadepositar) as Monto from paquete c  left join usuario b on c.idusuario=b.dpi left join estadopaquete d on d.idpaquete=c.idpaquete  where c.idpago is null and d.estado = 'entregado' and d.fechahora between '" + fecha1 + " 00:00:00.000" + "' and '" + fecha2 + " 23:59:59.000" + "' group by b.primerNombre,b.primerApellido,b.nombrenegocio,b.dpi;";
+            // Agregamos '' AS descripcion para que exista esa columna
+            string query =
+                "SELECT " +
+                "   b.dpi, " +
+                "   CONCAT(b.primerNombre, ' ', b.primerApellido) AS Cliente, " +
+                "   b.nombrenegocio AS Negocio, " +
+                "   SUM(cantidadadepositar) AS Monto, " +
+                "   '' AS descripcion " +
+                "FROM paquete c " +
+                "LEFT JOIN usuario b ON c.idusuario = b.dpi " +
+                "LEFT JOIN estadopaquete d ON d.idpaquete = c.idpaquete " +
+                "WHERE c.idpago IS NULL " +
+                "  AND d.estado = 'entregado' " +
+                "  AND d.fechahora BETWEEN '" + fecha1 + " 00:00:00.000' " +
+                "                       AND '" + fecha2 + " 23:59:59.000' " +
+                "GROUP BY " +
+                "   b.primerNombre, " +
+                "   b.primerApellido, " +
+                "   b.nombrenegocio, " +
+                "   b.dpi;";
 
-            SqlCommand cmd = new SqlCommand(query, conexion);
-            SqlDataAdapter returnVal = new SqlDataAdapter(query, conexion);
-            DataTable dt = new DataTable();
-            returnVal.Fill(dt);
-            return dt;
+            using (var cmd = new SqlCommand(query, conexion))
+            {
+                var da = new SqlDataAdapter(cmd);
+                var dt = new DataTable();
+                da.Fill(dt);
+                return dt;
+            }
         }
+
         public DataTable pagosclientes2(String dpi, String dpi2, String monto,String refe)
         {
             string query = "INSERT INTO pagos" +
@@ -895,6 +967,7 @@ namespace EnviosExpress
             returnVal.Fill(dt);
             return dt;
         }
+        
         public DataTable pagosclientes5(String dpi1,String dpi2)
         {
             string query = "update estadopaquete set fechahora = GETDATE(),idusuariomns=" + dpi2 + ", estado = 'Liquidado' where fechahora is null and idusuario = " + dpi1 + "";
@@ -905,26 +978,203 @@ namespace EnviosExpress
             returnVal.Fill(dt);
             return dt;
         }
-        public DataTable pagosclientes6(String fecha3, String fecha4)
+        public DataTable pagosclientes6(string fecha3, string fecha4)
         {
-            string query = "Select a.idpago, CONCAT(b.primerNombre, ' ', b.primerApellido) as Cliente, a.fechahora as Fecha,  CONCAT('Q', a.monto) as Monto, a.Estado as Estado,a.descripcion as #Referencia from pagos a left join usuario b on a.idusuario=b.dpi where b.rol= 1 and a.estado='Liquidado' and a.fechahora between '" + fecha3 + " 00:00:00.000" + "' and '" + fecha4 + " 23:59:59.000" + "' order by a.fechahora DESC";
+            string sql = @"
+SELECT
+    a.idpago                AS idpago,
+    CONCAT(u.primerNombre, ' ', u.primerApellido) AS Cliente,
+    CONVERT(varchar(16), a.fechahora, 103)
+      + ' '
+      + CONVERT(varchar(5), a.fechahora, 108)          AS FechaHoraEntrega,
+    'Q' + CAST(a.monto AS varchar(20))                  AS Monto,
+    a.estado                                            AS Estado,
+    a.descripcion                                       AS descripcion   -- aquí
+FROM pagos AS a
+LEFT JOIN usuario AS u ON a.idusuario = u.dpi
+WHERE u.rol = 1
+  AND a.estado = 'Liquidado'
+  AND a.fechahora BETWEEN @fecha3 AND @fecha4
+ORDER BY a.fechahora DESC;
+";
 
-            SqlCommand cmd = new SqlCommand(query, conexion);
-            SqlDataAdapter returnVal = new SqlDataAdapter(query, conexion);
-            DataTable dt = new DataTable();
-            returnVal.Fill(dt);
+            using (var cmd = new SqlCommand(sql, conexion))
+            {
+                cmd.Parameters.AddWithValue("@fecha3", fecha3 + " 00:00:00.000");
+                cmd.Parameters.AddWithValue("@fecha4", fecha4 + " 23:59:59.000");
+                var da = new SqlDataAdapter(cmd);
+                var dt = new DataTable();
+                da.Fill(dt);
+                return dt;
+            }
+        }
+
+        /// <summary>
+        /// Devuelve el detalle completo de los clientes pendientes (por DPI).
+        /// </summary>
+        /// <summary>
+        /// Devuelve el detalle completo de los paquetes entregados pendientes de pago para un cliente dado (por DPI).
+        /// </summary>
+        /// <summary>
+        /// Devuelve el detalle completo de los clientes pendientes (por DPI).
+        /// </summary>
+        public DataTable ObtenerDetallePendientesCliente(string dpi)
+        {
+            const string sql = @"
+SELECT
+    p.idpaquete                             AS NoGuia,
+    d.nombre                                AS Departamento,
+    m.nombre                                AS Municipio,
+    z.nombre                                AS Zona,
+    p.monto                                 AS MontoCobrado,
+    p.valorenvio                            AS ValorEnvio,
+    p.valorvisita                           AS ValorVisita,
+    p.cantidadadepositar                    AS PagoCliente,
+    e.fechahora                             AS FechaHoraEntrega,
+    -- aquí concatenamos el nombre del mensajero
+    CONCAT(u.primerNombre, ' ', u.primerApellido) AS Mensajero
+FROM paquete AS p
+INNER JOIN estadopaquete AS e
+    ON p.idpaquete = e.idpaquete
+LEFT JOIN departamento AS d
+    ON p.iddepartamento = d.iddepartamento
+LEFT JOIN municipio AS m
+    ON p.idmunicipio = m.idmunicipio
+LEFT JOIN zona AS z
+    ON p.idzona = z.idzona
+LEFT JOIN usuario AS u
+    ON e.idusuariomns = u.dpi
+WHERE e.idusuario = @dpi
+  AND e.estado    = 'Entregado'
+  AND p.idpago   IS NULL
+ORDER BY e.fechahora DESC;
+";
+
+            using (var cmd = new SqlCommand(sql, conexion))
+            {
+                cmd.Parameters.AddWithValue("@dpi", dpi);
+                var da = new SqlDataAdapter(cmd);
+                var dt = new DataTable();
+                da.Fill(dt);
+                return dt;
+            }
+        }
+
+
+        /// <summary>
+        /// Devuelve todos los datos de liquidación de un pago específico.
+        /// </summary>
+        public DataTable ObtenerDetalleLiquidacionCliente(string idPago)
+        {
+            string sql = @"
+SELECT
+    a.idpago                             AS idpago,
+    usu.primerNombre + ' ' + usu.primerApellido AS Cliente,    -- <-- nueva columna
+    p.idpaquete                          AS NoGuia,
+    d.nombre                             AS Departamento,
+    c.nombre                             AS Municipio,
+    z.nombre                             AS Zona,
+    p.monto                              AS MontoCobrado,
+    p.valorenvio                         AS ValorEnvio,
+    p.valorvisita                        AS ValorVisita,
+    p.cantidadadepositar                 AS PagoCliente,
+    e.fechahora                          AS FechaHoraEntrega,
+    a.estado                             AS Estado,
+    a.descripcion                        AS descripcion
+FROM pagos AS a
+left JOIN usuario      AS usu ON a.idusuario       = usu.dpi       -- <— aquí traemos al cliente
+left JOIN paquete      AS p   ON a.idpago          = p.idpago
+left JOIN departamento AS d   ON p.iddepartamento  = d.iddepartamento
+left JOIN municipio    AS c   ON p.idmunicipio     = c.idmunicipio
+left JOIN zona         AS z   ON p.idzona          = z.idzona
+left JOIN estadopaquete AS e  ON p.idpaquete       = e.idpaquete
+WHERE a.idpago = @idPago and e.estado='Entregado';
+";
+
+            using (var cmd = new SqlCommand(sql, conexion))
+            {
+                cmd.Parameters.AddWithValue("@idPago", idPago);
+                var da = new SqlDataAdapter(cmd);
+                var dt = new DataTable();
+                da.Fill(dt);
+                return dt;
+            }
+        }
+
+        /// <summary>
+        /// Devuelve todos los datos de detalle de un pago de mensajero específico.
+        /// </summary>
+        public DataTable ObtenerDetalleMensajero(string idPago)
+        {
+            const string sql = @"
+SELECT
+    a.idpago                                 AS IdPago,
+    p.idpaquete                              AS NoGuia,
+    d.nombre                                 AS Departamento,
+    m.nombre                                 AS Municipio,
+    z.nombre                                 AS Zona,
+    p.monto                                  AS MontoCobrado,
+    p.valorenvio                             AS ValorEnvio,
+    p.valorvisita                            AS ValorVisita,
+    p.cantidadadepositar                     AS PagoCliente,
+    e.fechahora                              AS FechaHoraEntrega,
+    a.estado                                 AS Estado,
+    a.descripcion                            AS Referencia,
+    CONCAT(u.primerNombre,' ',u.primerApellido) AS Mensajero
+FROM pagos      AS a
+LEFT JOIN paquete      AS p ON a.idpago      = p.idpagomns
+LEFT JOIN departamento AS d ON p.iddepartamento = d.iddepartamento
+LEFT JOIN municipio    AS m ON p.idmunicipio    = m.idmunicipio
+LEFT JOIN zona         AS z ON p.idzona         = z.idzona
+LEFT JOIN estadopaquete AS e ON p.idpaquete     = e.idpaquete
+LEFT JOIN usuario      AS u ON a.idusuariomns   = u.dpi          -- puedes traer el mensajero directo de pagos
+WHERE a.idpago = @idPago and e.estado='Entregado';
+";
+            var dt = new DataTable();
+            using (var cmd = new SqlCommand(sql, conexion))
+            {
+                cmd.Parameters.AddWithValue("@idPago", idPago);
+                using (var da = new SqlDataAdapter(cmd))
+                    da.Fill(dt);
+            }
             return dt;
         }
-        public DataTable pagosclientes7(String dpi, String fecha1, String fecha2)
-        {
-            string query = "Select a.idpago, CONCAT(b.primerNombre, ' ', b.primerApellido) as Cliente, a.fechahora as Fecha,  CONCAT('Q', a.monto) as Monto, a.Estado as Estado,a.descripcion as #Referencia from pagos a left join usuario b on a.idusuario=b.dpi where b.rol= 1 and a.estado='Liquidado' and a.idusuario=" + dpi  + " and a.fechahora between '" + fecha1 + " 00:00:00.000" + "' and '" + fecha2 + " 23:59:59.000" + "' order by a.fechahora DESC";
 
-            SqlCommand cmd = new SqlCommand(query, conexion);
-            SqlDataAdapter returnVal = new SqlDataAdapter(query, conexion);
-            DataTable dt = new DataTable();
-            returnVal.Fill(dt);
-            return dt;
+
+
+
+
+
+
+
+            public DataTable pagosclientes7(String dpi, String fecha1, String fecha2)
+        {
+            string query =
+              "SELECT  " +
+              "  a.idpago                               AS idpago,    " + // coincida con DataKeyNames
+              "  b.nombrenegocio                        AS Cliente,    " +
+              "  a.fechahora                            AS Fecha, " + // coincida con DataField
+              "  CONCAT('Q', a.monto)    AS Monto,      " + // coincida con DataField
+              "  a.estado                               AS Estado,       " +
+              "  a.descripcion                          AS descripcion       " + // coincida con DataField
+              "FROM pagos AS a                           " +
+              "LEFT JOIN usuario AS b ON a.idusuario=b.dpi " +
+              "WHERE b.rol = 1                          " +
+              "  AND a.estado='Liquidado'               " +
+              "  AND a.idusuario=" + dpi + "             " +
+              "  AND a.fechahora BETWEEN '" + fecha1 + " 00:00:00.000' " +
+              "                       AND '" + fecha2 + " 23:59:59.000' " +
+              "ORDER BY a.fechahora DESC;               ";
+
+            using (var cmd = new SqlCommand(query, conexion))
+            {
+                var da = new SqlDataAdapter(cmd);
+                var dt = new DataTable();
+                da.Fill(dt);
+                return dt;
+            }
         }
+
         public DataTable ultim(String idpaquete1)
         {
             string query = "select*from paquete where idpaquete=" + idpaquete1 + "";
@@ -978,70 +1228,38 @@ namespace EnviosExpress
             return dt;
         }
         /// <summary>
-        /// Devuelve el informe de entregas pendientes de pago entre dos fechas:
-        /// NoGuia, MontoCobrado, PagoCliente, FechaHoraEntrega y Mensajero.
+        /// Devuelve el informe de entregas pendientes de pago en un rango de fechas.
         /// </summary>
         public DataTable ObtenerReportePagos(DateTime fechaDesde, DateTime fechaHasta)
         {
             var dt = new DataTable();
-            string sql = @"
-        SELECT
-            e.idpaquete                                AS NoGuia,
-            p.monto                                    AS MontoCobrado,
-            p.cantidadadepositar                       AS PagoCliente,
-            e.fechahora                                AS FechaHoraEntrega,
-            CONCAT(m.primerNombre,' ',m.primerApellido) AS Mensajero
-        FROM dbo.estadopaquete e
-        INNER JOIN dbo.paquete     p ON e.idpaquete    = p.idpaquete
-        LEFT  JOIN dbo.usuario     m ON e.idusuariomns = m.dpi
-        WHERE e.estado = 'Entregado'
-          AND CAST(e.fechahora AS date) BETWEEN @desde AND @hasta
-          AND NOT EXISTS (
-              -- excluir las que ya tienen pago registrado
-              SELECT 1 FROM dbo.pagos x WHERE x.idpago = e.idpaquete
-          )
-        ORDER BY e.fechahora DESC;
-    ";
-
-            using (var cmd = new SqlCommand(sql, conexion))
-            {
-                cmd.Parameters.AddWithValue("@desde", fechaDesde.Date);
-                cmd.Parameters.AddWithValue("@hasta", fechaHasta.Date);
-                using (var da = new SqlDataAdapter(cmd))
-                    da.Fill(dt);
-            }
-
-            return dt;
-        }
-
-        /// <summary>
-        /// Devuelve el informe de entregas pendientes de pago para un cliente (dpi) en un rango de fechas.
-        /// </summary>
-        public DataTable ObtenerReportePagosCliente(string dpi, DateTime fechaDesde, DateTime fechaHasta)
-        {
-            var dt = new DataTable();
             const string sql = @"
-            SELECT
-                e.idpaquete                                AS NoGuia,
-                p.monto                                    AS MontoCobrado,
-                p.cantidadadepositar                       AS PagoCliente,
-                e.fechahora                                AS FechaHoraEntrega,
-                CONCAT(m.primerNombre,' ',m.primerApellido) AS Mensajero
-            FROM dbo.estadopaquete e
-            JOIN dbo.paquete     p ON e.idpaquete    = p.idpaquete
-            LEFT JOIN dbo.usuario m ON e.idusuariomns = m.dpi
-            WHERE e.estado    = 'Entregado'
-              AND p.idusuario = @dpi
-              AND CAST(e.fechahora AS date) BETWEEN @desde AND @hasta
-              AND NOT EXISTS (
-                  SELECT 1 FROM dbo.pagos x WHERE x.idpago = e.idpaquete
-              )
-            ORDER BY e.fechahora DESC;
-        ";
+SELECT
+    p.idpaquete                                  AS NoGuia,         
+    p.dpi                                  AS dpi,
+    b.nombre                                     AS Departamento,
+    c.nombre                                     AS Municipio,
+    d.nombre                                     AS Zona,
+    p.monto                                      AS MontoCobrado,
+    p.valorenvio                                 AS ValorEnvio,
+    p.valorvisita                                AS ValorVisita,
+    p.cantidadadepositar                         AS PagoCliente,
+    e.fechahora                                  AS FechaHoraEntrega,
+    CONCAT(m.primerNombre,' ',m.primerApellido)  AS Mensajero
+FROM dbo.estadopaquete e
+INNER JOIN dbo.paquete      p ON e.idpaquete      = p.idpaquete
+LEFT  JOIN dbo.departamento b ON p.iddepartamento = b.iddepartamento
+LEFT  JOIN dbo.municipio    c ON p.idmunicipio    = c.idmunicipio
+LEFT  JOIN dbo.zona         d ON p.idzona         = d.idzona
+LEFT  JOIN dbo.usuario      m ON e.idusuariomns   = m.dpi
+WHERE e.estado    = 'Entregado'
+  AND p.idpago    IS NULL
+  AND CAST(e.fechahora AS date) BETWEEN @desde AND @hasta
+ORDER BY e.fechahora DESC;
+";
 
             using (var cmd = new SqlCommand(sql, conexion))
             {
-                cmd.Parameters.AddWithValue("@dpi", dpi);
                 cmd.Parameters.AddWithValue("@desde", fechaDesde.Date);
                 cmd.Parameters.AddWithValue("@hasta", fechaHasta.Date);
                 using (var da = new SqlDataAdapter(cmd))
@@ -1330,7 +1548,7 @@ namespace EnviosExpress
                         "('" + guia + "'," +
                         "GETDATE()," +
                         "'" + dpi + "' ," +
-                        "'Devolucion '+'" + intento + "' )";
+                        "'Devolución '+'" + intento + "' )";
 
             SqlCommand cmd = new SqlCommand(query, conexion);
             SqlDataAdapter returnVal = new SqlDataAdapter(query, conexion);

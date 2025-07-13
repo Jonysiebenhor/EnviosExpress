@@ -5,8 +5,6 @@ VisualStudioVersion = 17.10.35122.118
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EnviosExpress", "EnviosExpress\EnviosExpress.csproj", "{AB710825-5C16-4995-A252-79151ACBA06F}"
 EndProject
-Project("{F184B08F-C81C-45F6-A57F-5ABD9991F28F}") = "Lector Codigo Barras", "..\..\..\..\..\Downloads\Lector Codigo Barras\Lector Codigo Barras\Lector Codigo Barras.vbproj", "{96A21876-219A-4B8D-8D2F-6F15385A92DF}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -17,10 +15,6 @@ Global
 		{AB710825-5C16-4995-A252-79151ACBA06F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{AB710825-5C16-4995-A252-79151ACBA06F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{AB710825-5C16-4995-A252-79151ACBA06F}.Release|Any CPU.Build.0 = Release|Any CPU
-		{96A21876-219A-4B8D-8D2F-6F15385A92DF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{96A21876-219A-4B8D-8D2F-6F15385A92DF}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{96A21876-219A-4B8D-8D2F-6F15385A92DF}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{96A21876-219A-4B8D-8D2F-6F15385A92DF}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
