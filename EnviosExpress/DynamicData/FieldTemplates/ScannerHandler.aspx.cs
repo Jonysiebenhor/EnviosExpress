@@ -369,7 +369,7 @@ namespace EnviosExpress
 
 
 
-        // ✅ CORREGIDO: idusuario ahora se envía como NULL
+        // ✅ CORREGIDO: Ahora detecta correctamente éxitos y errores
         private static List<ResultadoCodigo> RegistrarDevoluciones(List<CodigoQR> codigos, string estadoCompleto, int idUsuarioMns, string quienRecibe = "")
         {
             var resultados = new List<ResultadoCodigo>();
@@ -386,7 +386,6 @@ namespace EnviosExpress
 
             foreach (var item in codigos)
             {
-                // ✅ CAMBIO: idusuario = NULL en lugar de 1L
                 dt.Rows.Add(item.Codigo, item.Fecha, motivo, "-", DBNull.Value, idUsuarioMns);
             }
 
@@ -412,16 +411,29 @@ namespace EnviosExpress
 
                         while (reader.Read())
                         {
-                            resultados.Add(new ResultadoCodigo
+                            string mensaje = reader["mensaje"].ToString();
+                            int codigoPaquete = Convert.ToInt32(reader["idpaquete"]);
+
+                            // ✅ CAMBIO PRINCIPAL: Detectar si es éxito o error
+                            bool esExito = mensaje.ToLower().Contains("registrado como devolución") ||
+                                           mensaje.ToLower().Contains("registrado correctamente") ||
+                                           mensaje.ToLower().Contains("exitosamente") ||
+                                           mensaje.ToLower().Contains("se registró") ||
+                                           mensaje.ToLower().Contains("completado");
+
+                            // ✅ Solo agregar a resultados si es un ERROR
+                            if (!esExito)
                             {
-                                Codigo = Convert.ToInt32(reader["idpaquete"]),
-                                Exito = false,
-                                Mensaje = reader["mensaje"].ToString()
-                            });
+                                resultados.Add(new ResultadoCodigo
+                                {
+                                    Codigo = codigoPaquete,
+                                    Exito = false,
+                                    Mensaje = mensaje
+                                });
+                            }
                         }
                     }
                 }
-
             }
             catch (Exception ex)
             {
@@ -435,6 +447,8 @@ namespace EnviosExpress
 
             return resultados;
         }
+
+
 
         private static void ActualizarPaqueteRecibido(List<CodigoQR> codigos, string quienRecibe)
         {
