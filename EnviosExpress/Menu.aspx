@@ -23,7 +23,8 @@
      <br />
         <br />
     
-   <asp:Button ID="Recoleccion" runat="server" Text="Solicitar Recolección" OnClientClick="window.open('https://wa.me/+50212345678'); return false;" Height="50px" Width="250px" BackColor="White" Font-Bold="False" Font-Size="Large" BorderColor="#CCCCCC" BorderStyle="Outset" />
+      <img src="Imagenes/what.png" style="height:50px;width:50px;"/><asp:Button ID="Recoleccion" runat="server" Text="Solicitar Recolección" OnClientClick="window.open('https://wa.me/+50254156161'); return false;" Height="50px" Width="200px" BackColor="White" Font-Bold="False" Font-Size="Large" BorderColor="#CCCCCC" BorderStyle="Outset" />
+
             <br />
         <br />
       
