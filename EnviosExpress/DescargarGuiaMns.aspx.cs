@@ -18,7 +18,7 @@ using Rectangle = iTextSharp.text.Rectangle;
 
 namespace EnviosExpress
 {
-    public partial class DescargarGuia : System.Web.UI.Page
+    public partial class DescargarGuiaMns : System.Web.UI.Page
     {
         Conectar conectado = new Conectar();
 
@@ -261,52 +261,22 @@ namespace EnviosExpress
 
         protected void regresar_Click(object sender, EventArgs e)
         {
-            String dpi = Session["id"].ToString();
+            String guia = Request.QueryString["guia"].ToString();
             conectado.conectar();
-            DataRow rowss = conectado.consultaUsuarioDPI(dpi).Rows[0];
-            int rol = Convert.ToInt16(Convert.ToInt16(rowss["rol"]));
+            DataRow rowss = conectado.paquete(guia).Rows[0];
+            string dpi = Convert.ToString(Convert.ToString(rowss["idusuario"]));
             conectado.desconectar();
-            if (rol == 1)
-            { 
-            Response.Redirect("GenerarGuia.aspx");
-            }
-            else if (rol == 2)
-            {
-                Response.Redirect("GenerarGuiaMns.aspx");
-            }
-            else if (rol == 3)
-            {
-                Response.Redirect("GenerarGuiaMns.aspx");
-            }
-            else
-            {
-                Response.Redirect("Login.aspx");
-            }
+            Response.Redirect("GenerarGuiaMns.aspx");
         }
 
         protected void btnrecolectar10_Click(object sender, EventArgs e)
         {
-            String dpi = Session["id"].ToString();
+            String guia = Request.QueryString["guia"].ToString();
             conectado.conectar();
-            DataRow rowss = conectado.consultaUsuarioDPI(dpi).Rows[0];
-            int rol = Convert.ToInt16(Convert.ToInt16(rowss["rol"]));
+            DataRow rowss = conectado.paquete(guia).Rows[0];
+            string dpi = Convert.ToString(Convert.ToString(rowss["idusuario"]));
             conectado.desconectar();
-            if (rol == 1)
-            {
-                Response.Redirect("Menu.aspx");
-            }
-            else if (rol == 2)
-            {
-                Response.Redirect("MenuMensajero.aspx");
-            }
-            else if (rol == 3)
-            {
-                Response.Redirect("MenuAdministrador.aspx");
-            }
-            else
-            {
-                Response.Redirect("Login.aspx");
-            }
+            Response.Redirect("MenuMensajero.aspx");
         }
     }
 }

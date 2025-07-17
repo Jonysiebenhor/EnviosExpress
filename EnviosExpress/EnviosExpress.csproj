@@ -380,12 +380,14 @@
     <Content Include="CierreDiario.aspx" />
     <Content Include="ConsultarGuia.aspx" />
     <Content Include="css\Central.css" />
+    <Content Include="DescargarGuiaMns.aspx" />
     <Content Include="DynamicData\FieldTemplates\CuwScannerCode.ascx" />
     <Content Include="DynamicData\FieldTemplates\CuwScannerCode_Edit.ascx" />
     <Content Include="DynamicData\FieldTemplates\ScannerHandler.aspx" />
     <Content Include="fontawesome\css\font-awesome.css" />
     <Content Include="fontawesome\css\font-awesome.min.css" />
     <Content Include="fontawesome\fonts\fontawesome-webfont.svg" />
+    <Content Include="GenerarGuiaMns.aspx" />
     <Content Include="GenerarGuiaMasiva.aspx" />
     <Content Include="html5-qrcode\js\html5-qrcode.min.js" />
     <Content Include="html5-qrcode\js\jsqrcode-combined.min.js" />
@@ -481,6 +483,13 @@
     <Compile Include="ConsultarGuia.aspx.designer.cs">
       <DependentUpon>ConsultarGuia.aspx</DependentUpon>
     </Compile>
+    <Compile Include="DescargarGuiaMns.aspx.cs">
+      <DependentUpon>DescargarGuiaMns.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="DescargarGuiaMns.aspx.designer.cs">
+      <DependentUpon>DescargarGuiaMns.aspx</DependentUpon>
+    </Compile>
     <Compile Include="DynamicData\FieldTemplates\CuwScannerCode.ascx.cs">
       <DependentUpon>CuwScannerCode.ascx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
@@ -498,6 +507,13 @@
     <Compile Include="DynamicData\FieldTemplates\ScannerHandler.aspx.cs">
       <DependentUpon>ScannerHandler.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="GenerarGuiaMns.aspx.cs">
+      <DependentUpon>GenerarGuiaMns.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="GenerarGuiaMns.aspx.designer.cs">
+      <DependentUpon>GenerarGuiaMns.aspx</DependentUpon>
     </Compile>
     <Compile Include="GenerarGuiaMasiva.aspx.cs">
       <DependentUpon>GenerarGuiaMasiva.aspx</DependentUpon>

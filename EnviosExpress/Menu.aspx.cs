@@ -46,11 +46,11 @@ namespace EnviosExpress
             Response.Redirect("GenerarGuia.aspx");
         }
 
-        protected void Recoleccion_Click(object sender, EventArgs e)
+        /*protected void Recoleccion_Click(object sender, EventArgs e)
         {
             //String dpi = Session["id"].ToString();
             Response.Redirect("SoliRecoleccionCliente.aspx");
-        }
+        }*/
 
         protected void Manifiestos_Click(object sender, EventArgs e)
         {

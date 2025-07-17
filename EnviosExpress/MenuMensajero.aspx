@@ -17,6 +17,9 @@
     <asp:Button ID="Consultarguia" runat="server" Text="Consultar Guías" OnClick="Consultarguia_Click" Height="50px" Width="250px" BackColor="White" Font-Bold="False" Font-Size="Large" BorderColor="#CCCCCC" BorderStyle="Outset" />
     <br />
     <br />
+    <asp:Button ID="IngresoGuias" runat="server" Text="Ingreso Guías" OnClick="Ingresoguia_Click" Height="50px" Width="250px" BackColor="White" Font-Bold="False" Font-Size="Large" BorderColor="#CCCCCC" BorderStyle="Outset" />
+    <br />
+    <br />
     <asp:Button ID="Solicitudes" runat="server" Text="Solicitudes" OnClick="Solicitudes_Click" Height="50px" Width="250px" BackColor="White" Font-Bold="False" Font-Size="Large" BorderColor="#CCCCCC" BorderStyle="Outset"  />
     <n />
     <br />

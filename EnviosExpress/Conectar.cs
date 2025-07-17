@@ -280,7 +280,7 @@ ORDER BY e.fechahora DESC;
 
         }
         public DataTable crearguiapaquete
-           (String remitente, String destinatario, String direccion, String telefono, String monto, String peso, String valorenvio, String cantidadadepositar, String departamento, String municipio, String zona, string dpi, String tipo)
+           (String remitente, String destinatario, String direccion, String telefono, String monto, String peso, String valorenvio, String cantidadadepositar, String departamento, String municipio, String zona, String dpi, String tipo)
         {
             string query = "INSERT INTO paquete" +
                         "(" +
@@ -385,6 +385,64 @@ ORDER BY e.fechahora DESC;
             return dt;
 
         }
+        public DataTable crearguiapaquete2
+           (String idpaquete, String remitente, String destinatario, String direccion, String telefono, String monto, String peso, String valorenvio, String cantidadadepositar, String departamento, String municipio, String zona, String dpi, String tipo)
+        {
+            string query = "SET IDENTITY_INSERT paquete on; " +
+                        "INSERT INTO paquete" +
+                        "(" +
+                        "idpaquete," +
+                        "remitente," +
+                        "destinatario," +
+                        "direccion," +
+                        "telefono," +
+                        "fecha," +
+                        "fechahora," +
+                        "monto," +
+                        "peso," +
+                        "valorenvio," +
+                        "cantidadadepositar," +
+                        "valorvisita," +
+                        "iddepartamento," +
+                        "idmunicipio," +
+                        "idzona," +
+                        "idusuario," +
+                        "idtarifa," +
+                        "idmensajero," +
+                        "cierre," +
+                        "pendiente," +
+                        "tipo)" +
+                        "VALUES" +
+                        "('" + idpaquete + "'," +
+                        "'" + remitente + "'," +
+                        "'" + destinatario + "'," +
+                        "'" + direccion + "'," +
+                        "'" + telefono + "'," +
+                        "GETDATE()," +
+                        "GETDATE()," +
+                        "'" + monto + "'," +
+                        "'" + peso + "'," +
+                        "'" + valorenvio + "'," +
+                        "'" + cantidadadepositar + "'," +
+                        "0," +
+                        "'" + departamento + "'," +
+                         "'" + municipio + "'," +
+                          "'" + zona + "'," +
+                          "'" + dpi + "'," +
+                          "  null  ," +
+                        "  null  ," +
+                        "0," +
+                        "1," +
+                        "'" + tipo + "');" +
+                        "SET IDENTITY_INSERT paquete off;";
+
+            SqlCommand cmd = new SqlCommand(query, conexion);
+            SqlDataAdapter returnVal = new SqlDataAdapter(query, conexion);
+            DataTable dt = new DataTable();
+            returnVal.Fill(dt);
+            return dt;
+
+        }
         public DataTable consultarultimopaquete()
         {
             string query = "Select idpaquete, remitente, destinatario, direccion, telefono, monto, iddepartamento, idmunicipio, idzona, peso from paquete where idpaquete =SCOPE_IDENTITY()";
@@ -473,6 +531,7 @@ ORDER BY e.fechahora DESC;
             returnVal.Fill(dt);
             return dt;
         }
+      
         public DataTable ingresardepartamento
            (String monto, String peso)
         {
@@ -1571,7 +1630,7 @@ ORDER BY e.fechahora DESC;
         }
         public DataTable consultaguia2(String guia)
         {
-            String query = "Select *  from paquete where id ='" + guia +  "'";
+            String query = "Select *  from paquete where idpaquete ='" + guia +  "'";
 
             SqlCommand cmd = new SqlCommand(query, conexion);
             SqlDataAdapter returnVal = new SqlDataAdapter(query, conexion);

@@ -30,6 +30,10 @@ namespace EnviosExpress
             Response.Redirect("EditarCuenta.aspx");
         }
 
+        protected void Ingresoguia_Click(object sender, EventArgs e)
+        {
+            Response.Redirect("GenerarGuiaMns.aspx");
+        }
         protected void Consultarguia1_Click(object sender, EventArgs e)
         {
             String dpi = Session["id"].ToString();

@@ -22,6 +22,9 @@
         <asp:Button ID="editarcuenta" runat="server" BackColor="White" BorderColor="#CCCCCC" BorderStyle="Outset" Font-Bold="False" Font-Size="Large" Height="50px" OnClick="editarcuenta_Click" Text="Editar una Cuenta" Width="250px" />
         <br />
         <br />
+        <asp:Button ID="IngresoGuias" runat="server" Text="Ingreso Guías" OnClick="Ingresoguia_Click" Height="50px" Width="250px" BackColor="White" Font-Bold="False" Font-Size="Large" BorderColor="#CCCCCC" BorderStyle="Outset" />
+        <br />
+        <br />
         <asp:Button ID="Consultarguia1" runat="server" BackColor="White" BorderColor="#CCCCCC" BorderStyle="Outset" Font-Bold="False" Font-Size="Large" Height="50px" OnClick="Consultarguia1_Click" Text="Consultar Guías" Width="250px" />
         <br />
         <br />

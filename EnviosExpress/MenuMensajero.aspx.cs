@@ -24,6 +24,11 @@ namespace EnviosExpress
             Response.Redirect("ConsultarGuiaMns.aspx");
         }
 
+        protected void Ingresoguia_Click(object sender, EventArgs e)
+        {
+            Response.Redirect("GenerarGuiaMns.aspx");
+        }
+
         protected void recoleccion_Click(object sender, EventArgs e)
         {
             Response.Redirect("Recoleccion.aspx");
