@@ -4,7 +4,7 @@
 <asp:Content ID="Content3" ContentPlaceHolderID="body" runat="server">
 
 
-        <div class="container text-center" style="background-color:#2d2d30; height: 500px; width:100%;">
+        <div class="container text-center" style="background-color:#2d2d30; height: 80%; width:100%;">
             <asp:Label ID="Label1" runat="server" Text="Menu" Font-Bold="True" Font-Size="XX-Large" ForeColor="White"></asp:Label>
             <br /><br />
            <div class="container text-center""row" style="background-color:#f5f5f5; ">
@@ -18,6 +18,9 @@
             <asp:Button ID="Crearguiamasiva" runat="server" Text="Crear Guías Masivas" OnClick="Crearguiamasiva_Click" Height="50px" Width="250px" BackColor="White" Font-Bold="False" Font-Size="Large" BorderColor="#CCCCCC" BorderStyle="Outset" />
    <br />
     <br />
+        <asp:Button ID="IngresoGuias" runat="server" Text="Ingreso Guías" OnClick="Ingresoguia_Click" Height="50px" Width="250px" BackColor="White" Font-Bold="False" Font-Size="Large" BorderColor="#CCCCCC" BorderStyle="Outset" />
+        <br />
+        <br />
     
     <asp:Button ID="Consultarguia0" runat="server" Text="Consultar Guías" OnClick="Consultarguia_Click" Height="50px" Width="250px" BackColor="White" Font-Bold="False" Font-Size="Large" BorderColor="#CCCCCC" BorderStyle="Outset" />
      <br />

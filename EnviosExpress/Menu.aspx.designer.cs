@@ -42,6 +42,15 @@ namespace EnviosExpress
         protected global::System.Web.UI.WebControls.Button Crearguiamasiva;
 
         /// <summary>
+        /// Control IngresoGuias.
+        /// </summary>
+        /// <remarks>
+        /// Campo generado automáticamente.
+        /// Para modificarlo, mueva la declaración del campo del archivo del diseñador al archivo de código subyacente.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Button IngresoGuias;
+
+        /// <summary>
         /// Control Consultarguia0.
         /// </summary>
         /// <remarks>

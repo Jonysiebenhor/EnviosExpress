@@ -51,6 +51,10 @@ namespace EnviosExpress
             //String dpi = Session["id"].ToString();
             Response.Redirect("SoliRecoleccionCliente.aspx");
         }*/
+        protected void Ingresoguia_Click(object sender, EventArgs e)
+        {
+            Response.Redirect("GenerarGuiaMns.aspx");
+        }
 
         protected void Manifiestos_Click(object sender, EventArgs e)
         {

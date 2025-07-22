@@ -5,11 +5,18 @@
 <asp:Content ID="Content3" ContentPlaceHolderID="body" runat="server">
 
         <div  class="container text-center"  style="background-color:#2d2d30;  width:100%;">
-            <asp:Label ID="Label1" runat="server" Text="Crear Guia" Font-Bold="True" Font-Size="XX-Large" ForeColor="White"></asp:Label>
+            <asp:Label ID="Label1" runat="server" Text="Crear Guías Manuales" Font-Bold="True" Font-Size="XX-Large" ForeColor="White"></asp:Label>
             <br /><br />
          <div class="container text-center" style="   width:65%;  background-image: url('Resources/.jpg');   background-color:ghostwhite;background-repeat :no-repeat;  position:page; z-index: auto;" >
               <p class="centrado">
                         <br />
+                <asp:DropDownList ID="DropDownListdpi" runat="server" OnSelectedIndexChanged="ddldpi_SelectedIndexChanged" AutoPostBack="True" Width="200px" AppendDataBoundItems="True" DataSourceID="SqlDataSource7"  DataTextField="nombrenegocio" DataValueField="dpi" Height="24px">
+                <asp:ListItem Selected="True" Value="0">--Negocio Cliente</asp:ListItem>
+                </asp:DropDownList>                    
+                 <asp:SqlDataSource ID="SqlDataSource7" runat="server" ConnectionString="<%$ ConnectionStrings:EnviosExpressConnectionString %>" SelectCommand="select* from usuario where rol=1;"></asp:SqlDataSource>
+                    <br />
+                    <asp:Label ID="dpi0" runat="server"></asp:Label>
+                    <br />
                 <asp:TextBox ID="txtguia" runat="server" placeholder="Numero de guía" Width="200px" TextMode="Number"></asp:TextBox>
                   <br />
                   <asp:Label ID="Guia0" runat="server"></asp:Label>

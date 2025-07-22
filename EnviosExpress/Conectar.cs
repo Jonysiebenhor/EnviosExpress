@@ -428,7 +428,7 @@ ORDER BY e.fechahora DESC;
                         "'" + departamento + "'," +
                          "'" + municipio + "'," +
                           "'" + zona + "'," +
-                          "'" + dpi + "'," +
+                          "" + dpi + "," +
                           "  null  ," +
                         "  null  ," +
                         "0," +
@@ -1328,6 +1328,26 @@ ORDER BY e.fechahora DESC;
             return dt;
         }
 
+        public DataTable creacionguiamanual(String idpaquete, String dpi2)
+        {
+            string query = "INSERT INTO estadopaquete" +
+                        "(" +
+                        "idpaquete," +
+                        "fechahora," +
+                        "idusuariomns," +
+                        "estado)" +
+                        "VALUES" +
+                        "('" + idpaquete + "'," +
+                        "GETDATE()," +
+                        "'" + dpi2 + "' ," +
+                        "'Guía Manual Creada' )";
+
+            SqlCommand cmd = new SqlCommand(query, conexion);
+            SqlDataAdapter returnVal = new SqlDataAdapter(query, conexion);
+            DataTable dt = new DataTable();
+            returnVal.Fill(dt);
+            return dt;
+        }
 
         public DataTable pendiente(String guia)
         {

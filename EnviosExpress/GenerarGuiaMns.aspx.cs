@@ -22,32 +22,48 @@ namespace EnviosExpress
                     Response.Redirect("/Login.aspx");
                 }
             }
-                /*String dpi = Request.QueryString["id"].ToString();
-                ViewState["dpii"] = dpi;
-                conectado.conectar();
-                DataRow rows = conectado.consultaUsuarioDPI(dpi).Rows[0];
-                String nombre = Convert.ToString(Convert.ToString(rows["primerNombre"]));
-                String apellido = Convert.ToString(Convert.ToString(rows["primerApellido"]));
-                String negocio = Convert.ToString(Convert.ToString(rows["nombrenegocio"]));
-                String sesion = Convert.ToString(Convert.ToString(rows["sesion"]));
-                id.Text = nombre;
-                id2.Text = apellido;
-                id3.Text = negocio;
-
-
-                DataTable sesionn = new DataTable();
-                sesionn = conectado.consultasesion1(dpi, sesion);
-
-                if (sesionn.Rows.Count > 0)
-                {
-                    DataRow rowss = conectado.consultaUsuarioloign2(dpi).Rows[0];
-                }
-                else
-                {
-                    Response.Redirect("Login.aspx");
-                }
-                conectado.desconectar();*/
+            conectado.conectar();
+            String dpi = Session["id"].ToString();
+            DataRow rowdpi = conectado.consultaUsuarioDPI(dpi).Rows[0];
+            int rol = Convert.ToInt16(Convert.ToInt16(rowdpi["rol"]));
+            if (rol == 1)
+            {
+                DropDownListdpi.Visible = false;
             }
+            else if (rol == 2)
+            {
+                DropDownListdpi.Visible = false;
+            }
+            else if (rol == 3)
+            {
+                DropDownListdpi.Visible = true;
+            }
+            /*String dpi = Request.QueryString["id"].ToString();
+            ViewState["dpii"] = dpi;
+            conectado.conectar();
+            DataRow rows = conectado.consultaUsuarioDPI(dpi).Rows[0];
+            String nombre = Convert.ToString(Convert.ToString(rows["primerNombre"]));
+            String apellido = Convert.ToString(Convert.ToString(rows["primerApellido"]));
+            String negocio = Convert.ToString(Convert.ToString(rows["nombrenegocio"]));
+            String sesion = Convert.ToString(Convert.ToString(rows["sesion"]));
+            id.Text = nombre;
+            id2.Text = apellido;
+            id3.Text = negocio;
+
+
+            DataTable sesionn = new DataTable();
+            sesionn = conectado.consultasesion1(dpi, sesion);
+
+            if (sesionn.Rows.Count > 0)
+            {
+                DataRow rowss = conectado.consultaUsuarioloign2(dpi).Rows[0];
+            }
+            else
+            {
+                Response.Redirect("Login.aspx");
+            }*/
+            conectado.desconectar();
+        }
 
         protected void Button3_Click(object sender, EventArgs e)
         {
@@ -88,6 +104,7 @@ namespace EnviosExpress
             Municipio0.Text = "";
             Zona0.Text = "";
             Peso0.Text = "";
+            dpi0.Text = "";
 
             txtguia.BorderColor = Color.Black;
             Tipo0.BorderColor = Color.Black;
@@ -103,6 +120,7 @@ namespace EnviosExpress
             DropDownList4.BorderColor = Color.Black;
             DropDownList5.BorderColor = Color.Black;
             txtmontos.BorderColor = Color.Black;
+            DropDownListdpi.BorderColor = Color.Black;
 
             string idpaquete = txtguia.Text;
             String guia = txtguia.Text;
@@ -116,8 +134,35 @@ namespace EnviosExpress
             string departamento = ddldepartamento.SelectedItem.Value;
             string municipio = ddlmunicipio.SelectedItem.Value;
             string zona = ddlzona.SelectedItem.Value;
-            String dpi = Session["id"].ToString();
+            string dpilista = DropDownListdpi.SelectedItem.Value;
             string valorenvio = montoenvio.Text;
+            
+            //esta consulta se crea para que el dpi se guarde de diferentes maneras en la BD, dependiendo del tipo de rol de usuario
+            String dpi = Session["id"].ToString();
+            String dpi2 = Session["id"].ToString();
+            conectado.conectar();
+            DataRow rowdpi = conectado.consultaUsuarioDPI(dpi).Rows[0];
+            int rol = Convert.ToInt16(Convert.ToInt16(rowdpi["rol"]));
+            if (rol == 1)
+            {
+                dpi= Session["id"].ToString();
+            }
+            else if (rol == 2)
+            {
+                
+                dpi = "null";
+            }
+            else if (rol == 3)
+            {
+                dpi = dpilista;
+                /*if (DropDownListdpi.Text == "--Negocio Cliente")
+                {
+                    DropDownListdpi.BorderColor = Color.Red;
+                    dpi0.Text = "Agregue Nombre Del Remitente";
+                    dpi0.ForeColor = Color.Red;
+                }*/
+
+            }
 
 
 
@@ -203,7 +248,7 @@ namespace EnviosExpress
             }
             else if (tipo == "Pago Contra Entrega" & monto == "")
             {
-                Monto00.Text = "Agrege una cantidad entre Q1 y Q5,000";
+                Monto00.Text = "Agrege una cantidad entre Q1 y Q10,000";
                 Monto00.ForeColor = Color.Red;
                 txtmontos.BorderColor = Color.Red;
             }
@@ -211,31 +256,87 @@ namespace EnviosExpress
             {
                 if (tipo == "Estandar")
                 {
-                    monto = "";
-                    string cantidadadepositar = "-" + valorenvio;
-                    conectado.conectar();
+                    if (rol == 3)
+                    {
+                        if (dpi == "0")
+                        {
+                            DropDownListdpi.BorderColor = Color.Red;
+                            dpi0.Text = "Agregue Nombre Del Remitente";
+                            dpi0.ForeColor = Color.Red;
+                        }
+                        else
+                        {
+                            monto = "";
+                            string cantidadadepositar = "-" + valorenvio;
+                            conectado.conectar();
+                            conectado.crearguiapaquete2(idpaquete, remitente, destinatario, direccion, telefono, monto, peso, valorenvio, cantidadadepositar, departamento, municipio, zona, dpi, tipo);
+                            
+                            DataRow rows = conectado.Guia().Rows[0];
+                            //String guia = Convert.ToString(Convert.ToString(rows["idpaquete"]));
+                            String dpii = Convert.ToString(Convert.ToString(dpi));
+                            //Response.Redirect("DescargarGuia.aspx?id=" + guia+"&dpi="+dpii);
+                            conectado.creacionguiamanual(idpaquete, dpi2);
+                            Response.Redirect("DescargarGuia.aspx?guia=" + guia);
 
-                    conectado.crearguiapaquete2(idpaquete, remitente, destinatario, direccion, telefono, monto, peso, valorenvio, cantidadadepositar, departamento, municipio, zona, dpi, tipo);
+                        }
 
-                    DataRow rows = conectado.Guia().Rows[0];
-                    //String guia = Convert.ToString(Convert.ToString(rows["idpaquete"]));
-                    String dpii = Convert.ToString(Convert.ToString(dpi));
-                    //Response.Redirect("DescargarGuia.aspx?id=" + guia+"&dpi="+dpii);
-                    Response.Redirect("DescargarGuia.aspx?guia=" + guia);
+                    }
+                            else
+                            {
+                                monto = "";
+                                string cantidadadepositar = "-" + valorenvio;
+                                conectado.conectar();
+                                conectado.crearguiapaquete2(idpaquete, remitente, destinatario, direccion, telefono, monto, peso, valorenvio, cantidadadepositar, departamento, municipio, zona, dpi, tipo);
+                              
+                                DataRow rows = conectado.Guia().Rows[0];
+                                //String guia = Convert.ToString(Convert.ToString(rows["idpaquete"]));
+                                String dpii = Convert.ToString(Convert.ToString(dpi));
+                                //Response.Redirect("DescargarGuia.aspx?id=" + guia+"&dpi="+dpii);
+                                conectado.creacionguiamanual(idpaquete, dpi2);
+                                Response.Redirect("DescargarGuia.aspx?guia=" + guia);
+                            }
                 }
                 else if (tipo == "Pagar Solo Envio")
                 {
-                    string cantidadadepositar = "-";
+                    if (rol == 3)
+                    {
+                        if (dpi == "0")
+                        {
+                            DropDownListdpi.BorderColor = Color.Red;
+                            dpi0.Text = "Agregue Nombre Del Remitente";
+                            dpi0.ForeColor = Color.Red;
+                        }
+                        else
+                        {
+                            string cantidadadepositar = "-";
 
-                    monto = montoenvio.Text;
-                    valorenvio = montoenvio.Text;
-                    conectado.conectar();
-                    conectado.crearguiapaquete2(idpaquete, remitente, destinatario, direccion, telefono, monto, peso, valorenvio, cantidadadepositar, departamento, municipio, zona, dpi, tipo);
+                            monto = montoenvio.Text;
+                            valorenvio = montoenvio.Text;
+                            conectado.conectar();
+                            conectado.crearguiapaquete2(idpaquete, remitente, destinatario, direccion, telefono, monto, peso, valorenvio, cantidadadepositar, departamento, municipio, zona, dpi, tipo);
+                            
+                            DataRow rows = conectado.Guia().Rows[0];
+                            //String guia = Convert.ToString(Convert.ToString(rows["idpaquete"]));
+                            String dpii = Convert.ToString(Convert.ToString(dpi));
+                            conectado.creacionguiamanual(idpaquete, dpi2);
+                            Response.Redirect("DescargarGuia.aspx?guia=" + guia);
+                        }
+                    }
+                    else
+                    {
+                        string cantidadadepositar = "-";
 
-                    DataRow rows = conectado.Guia().Rows[0];
-                    //String guia = Convert.ToString(Convert.ToString(rows["idpaquete"]));
-                    String dpii = Convert.ToString(Convert.ToString(dpi));
-                    Response.Redirect("DescargarGuia.aspx?guia=" + guia);
+                        monto = montoenvio.Text;
+                        valorenvio = montoenvio.Text;
+                        conectado.conectar();
+                        conectado.crearguiapaquete2(idpaquete, remitente, destinatario, direccion, telefono, monto, peso, valorenvio, cantidadadepositar, departamento, municipio, zona, dpi, tipo);
+                        
+                        DataRow rows = conectado.Guia().Rows[0];
+                        //String guia = Convert.ToString(Convert.ToString(rows["idpaquete"]));
+                        String dpii = Convert.ToString(Convert.ToString(dpi));
+                        conectado.creacionguiamanual(idpaquete, dpi2);
+                        Response.Redirect("DescargarGuia.aspx?guia=" + guia);
+                    }
                 }
 
                 else
@@ -263,18 +364,47 @@ namespace EnviosExpress
                         }
                         else
                         {
-                            int valorenvioo = int.Parse(valorenvio);
-                            int montooo = int.Parse(monto);
-                            int cantidadadepositarr = montooo - valorenvioo;
-                            string cantidadadepositar = Convert.ToString(cantidadadepositarr);
+                            if (rol == 3)
+                            {
+                                if (dpi == "0")
+                                {
+                                    DropDownListdpi.BorderColor = Color.Red;
+                                    dpi0.Text = "Agregue Nombre Del Remitente";
+                                    dpi0.ForeColor = Color.Red;
+                                }
+                                else
+                                {
+                                    int valorenvioo = int.Parse(valorenvio);
+                                    int montooo = int.Parse(monto);
+                                    int cantidadadepositarr = montooo - valorenvioo;
+                                    string cantidadadepositar = Convert.ToString(cantidadadepositarr);
 
-                            conectado.conectar();
-                            conectado.crearguiapaquete2(idpaquete, remitente, destinatario, direccion, telefono, monto, peso, valorenvio, cantidadadepositar, departamento, municipio, zona, dpi, tipo);
+                                    conectado.conectar();
+                                    conectado.crearguiapaquete2(idpaquete, remitente, destinatario, direccion, telefono, monto, peso, valorenvio, cantidadadepositar, departamento, municipio, zona, dpi, tipo);
+                                    
+                                    DataRow rows = conectado.Guia().Rows[0];
+                                    //String guia = Convert.ToString(Convert.ToString(rows["idpaquete"]));
+                                    conectado.creacionguiamanual(idpaquete, dpi2);
+                                    String dpii = Convert.ToString(Convert.ToString(dpi));
+                                    Response.Redirect("DescargarGuia.aspx?guia=" + guia);
+                                }
+                            }
+                            else
+                            {
+                                int valorenvioo = int.Parse(valorenvio);
+                                int montooo = int.Parse(monto);
+                                int cantidadadepositarr = montooo - valorenvioo;
+                                string cantidadadepositar = Convert.ToString(cantidadadepositarr);
 
-                            DataRow rows = conectado.Guia().Rows[0];
-                            //String guia = Convert.ToString(Convert.ToString(rows["idpaquete"]));
-                            String dpii = Convert.ToString(Convert.ToString(dpi));
-                            Response.Redirect("DescargarGuia.aspx?guia=" + guia);
+                                conectado.conectar();
+                                conectado.crearguiapaquete2(idpaquete, remitente, destinatario, direccion, telefono, monto, peso, valorenvio, cantidadadepositar, departamento, municipio, zona, dpi, tipo);
+                                
+                                DataRow rows = conectado.Guia().Rows[0];
+                                //String guia = Convert.ToString(Convert.ToString(rows["idpaquete"]));
+                                conectado.creacionguiamanual(idpaquete, dpi2);
+                                String dpii = Convert.ToString(Convert.ToString(dpi));
+                                Response.Redirect("DescargarGuia.aspx?guia=" + guia);
+                            }
                         }
                     }
                 }
@@ -447,6 +577,10 @@ namespace EnviosExpress
         protected void ddlzona0_SelectedIndexChanged1(object sender, EventArgs e)
         {
             
+        }
+        protected void ddldpi_SelectedIndexChanged(object sender, EventArgs e)
+        {
+
         }
     }
 }
